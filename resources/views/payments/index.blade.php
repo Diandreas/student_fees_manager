@@ -26,7 +26,7 @@
                                 {{ $payment->student->fullName }}<br>
                                 <small class="text-muted">{{ $payment->student->field->name }}</small>
                             </td>
-                            <td>${{ number_format($payment->amount, 2) }}</td>
+                            <td>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
                             <td>{{ $payment->description }}</td>
                             <td>
                                 <a href="{{ route('payments.print', $payment) }}" class="btn btn-sm btn-secondary">Print</a>

@@ -21,7 +21,7 @@
                     <tr>
                         <td>{{ $field->name }}</td>
                         <td>{{ $field->campus->name }}</td>
-                        <td>${{ number_format($field->fees, 2) }}</td>
+                        <td>{{ number_format($field->fees, 0, ',', ' ') }} FCFA</td>
                         <td>
                             <a href="{{ route('fields.edit', $field) }}" class="btn btn-sm btn-primary">Edit</a>
                             <form action="{{ route('fields.destroy', $field) }}" method="POST" class="d-inline">

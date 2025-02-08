@@ -30,16 +30,10 @@ class StudentController extends Controller
             'phone' => 'nullable|string|max:45',
             'parent_tel' => 'nullable|string',
             'field_id' => 'required|exists:fields,id',
-            'username' => 'required|string|max:16|unique:users',
-            'password' => 'required|min:6'
+//            'username' => 'required|string|max:16|unique:users',
+//            'password' => 'required|min:6'
         ]);
 
-        // Create user account
-        $user = User::create([
-            'username' => $validated['username'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password'])
-        ]);
 
         // Create student record
         $student = new Student([
@@ -51,7 +45,7 @@ class StudentController extends Controller
             'field_id' => $validated['field_id']
         ]);
 
-        $student->user()->associate($user);
+        $student->user_id = auth()->id();
         $student->save();
 
         return redirect()->route('students.index')

@@ -27,7 +27,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/statistics', [DashboardController::class, 'getStatistics'])->name('dashboard.statistics');
 
-
+    Route::get('/payments/student-remaining/{student}', [PaymentController::class, 'getStudentRemainingAmount'])
+        ->name('payments.student-remaining');
     // Campus management
     Route::resource('campuses', CampusController::class);
 
