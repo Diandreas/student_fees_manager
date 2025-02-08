@@ -35,7 +35,8 @@
                                     $paidAmount = $student->payments->sum('amount');
                                     $outstanding = $totalFees - $paidAmount;
                                 @endphp
-                                ${{ number_format($outstanding, 2) }}
+
+                                {{ number_format($outstanding, 0, ',', ' ') }} FCFA
                             </td>
                             <td>
                                 <a href="{{ route('students.show', $student) }}" class="btn btn-sm btn-info">View</a>

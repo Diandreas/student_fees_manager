@@ -5,21 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Payment;
 use App\Models\Field;
+use App\Models\Campus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    // Constante pour la conversion
+    const CURRENCY_SYMBOL = 'FCFA';
+
     public function index()
     {
-        // Get basic statistics
+        // Statistiques de base
         $totalStudents = Student::count();
         $totalPayments = Payment::sum('amount');
         $totalFields = Field::count();
+        $totalCampuses = Campus::count();
 
-        // Calculate outstanding fees
-        $outstandingFees = DB::table('students')
+        // Calcul des statistiques de paiement par étudiant
+        $studentPaymentStats = DB::table('students')
             ->join('fields', 'students.field_id', '=', 'fields.id')
             ->leftJoin('payments', 'students.id', '=', 'payments.student_id')
             ->select(
@@ -28,75 +33,163 @@ class DashboardController extends Controller
                 DB::raw('COALESCE(SUM(payments.amount), 0) as paid_amount')
             )
             ->groupBy('students.id', 'fields.fees')
-            ->get()
-            ->sum(function ($student) {
-                return max(0, $student->total_fees - $student->paid_amount);
-            });
+            ->get();
 
-        // Get recent payments
-        $recentPayments = Payment::with(['student', 'student.field'])
+        // Calcul des différentes statistiques
+        $paymentStatus = [
+            'fully_paid' => 0,
+            'partial_paid' => 0,
+            'no_payment' => 0
+        ];
+
+        $outstandingFees = 0;
+        $totalExpectedFees = 0;
+
+        foreach ($studentPaymentStats as $stat) {
+            $totalExpectedFees += $stat->total_fees;
+            $remaining = $stat->total_fees - $stat->paid_amount;
+            $outstandingFees += max(0, $remaining);
+
+            if ($stat->paid_amount >= $stat->total_fees) {
+                $paymentStatus['fully_paid']++;
+            } elseif ($stat->paid_amount > 0) {
+                $paymentStatus['partial_paid']++;
+            } else {
+                $paymentStatus['no_payment']++;
+            }
+        }
+
+        // Calcul du taux de recouvrement
+        $recoveryRate = $totalExpectedFees > 0
+            ? round(($totalPayments / $totalExpectedFees) * 100, 2)
+            : 0;
+
+        // Paiements par campus
+        $paymentsByCampus = DB::table('payments')
+            ->join('students', 'payments.student_id', '=', 'students.id')
+            ->join('fields', 'students.field_id', '=', 'fields.id')
+            ->join('campuses', 'fields.campus_id', '=', 'campuses.id') // 'campus' -> 'campuses'
+            ->select('campuses.name', DB::raw('SUM(payments.amount) as total')) // 'campus' -> 'campuses'
+            ->groupBy('campuses.name') // 'campus' -> 'campuses'
+            ->get();
+
+        // Statistiques mensuelles
+        $monthlyStats = $this->getMonthlyStats();
+
+        // Paiements récents avec détails
+        $recentPayments = Payment::with(['student', 'student.field', 'student.field.campus'])
             ->orderBy('payment_date', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Statistiques quotidiennes
+        $todayStats = $this->getTodayStats();
+
+        // Filières les plus populaires
+        $popularFields = Field::withCount('students')
+            ->orderBy('students_count', 'desc')
             ->limit(5)
             ->get();
 
-        // Get monthly payment statistics for the current year using SQLite compatible syntax
-        $monthlyPayments = Payment::selectRaw("strftime('%m', payment_date) as month, SUM(amount) as total")
-            ->whereRaw("strftime('%Y', payment_date) = ?", [Carbon::now()->year])
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->pluck('total', 'month')
-            ->toArray();
-
-        // Format monthly data for chart
-        $monthlyLabels = [];
-        $monthlyData = [];
-        for ($i = 1; $i <= 12; $i++) {
-            // Format month number to match SQLite's 2-digit format (01, 02, etc.)
-            $monthKey = str_pad($i, 2, '0', STR_PAD_LEFT);
-            $monthlyLabels[] = Carbon::create()->month($i)->format('M');
-            $monthlyData[] = $monthlyPayments[$monthKey] ?? 0;
-        }
-
-        // Get payment status distribution
-        $paymentStatus = DB::table('students')
-            ->join('fields', 'students.field_id', '=', 'fields.id')
-            ->leftJoin('payments', 'students.id', '=', 'payments.student_id')
-            ->select(
-                'students.id',
-                'fields.fees as total_fees',
-                DB::raw('COALESCE(SUM(payments.amount), 0) as paid_amount')
-            )
-            ->groupBy('students.id', 'fields.fees')
-            ->get()
-            ->groupBy(function ($student) {
-                if ($student->paid_amount >= $student->total_fees) return 'Paid';
-                if ($student->paid_amount > 0) return 'Partial';
-                return 'Unpaid';
-            })
-            ->map->count();
+        // Préparer les données pour les graphiques
+        $chartData = [
+            'paymentStatus' => [
+                'labels' => ['Payé intégralement', 'Partiellement payé', 'Aucun paiement'],
+                'data' => [
+                    $paymentStatus['fully_paid'],
+                    $paymentStatus['partial_paid'],
+                    $paymentStatus['no_payment']
+                ]
+            ],
+            'monthly' => $monthlyStats,
+            'campusData' => [
+                'labels' => $paymentsByCampus->pluck('name'),
+                'data' => $paymentsByCampus->pluck('total')
+            ]
+        ];
 
         return view('dashboard', compact(
             'totalStudents',
             'totalPayments',
             'totalFields',
+            'totalCampuses',
             'outstandingFees',
+            'recoveryRate',
+            'paymentStatus',
             'recentPayments',
-            'monthlyLabels',
-            'monthlyData',
-            'paymentStatus'
+            'todayStats',
+            'popularFields',
+            'chartData'
         ));
+    }
+
+    private function getMonthlyStats()
+    {
+        $startDate = Carbon::now()->startOfYear();
+        $endDate = Carbon::now();
+
+        return Payment::selectRaw("
+                strftime('%m', payment_date) as month,
+                COUNT(*) as count,
+                SUM(amount) as total,
+                AVG(amount) as average
+            ")
+            ->whereBetween('payment_date', [$startDate, $endDate])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                $month = Carbon::createFromFormat('m', $item->month)->format('M');
+                return [
+                    'month' => $month,
+                    'count' => $item->count,
+                    'total' => $item->total,
+                    'average' => round($item->average, 2)
+                ];
+            });
+    }
+
+    private function getTodayStats()
+    {
+        $today = Carbon::today();
+
+        return [
+            'payments' => Payment::whereDate('payment_date', $today)->sum('amount'),
+            'new_students' => Student::whereDate('created_at', $today)->count(),
+            'payment_count' => Payment::whereDate('payment_date', $today)->count(),
+            'average_payment' => Payment::whereDate('payment_date', $today)->avg('amount') ?? 0
+        ];
     }
 
     public function getStatistics()
     {
         $today = Carbon::today();
+        $lastWeek = Carbon::now()->subWeek();
+
+        // Tendances hebdomadaires
+        $weeklyTrend = Payment::whereBetween('payment_date', [$lastWeek, $today])
+            ->selectRaw('DATE(payment_date) as date, SUM(amount) as total')
+            ->groupBy('date')
+            ->get();
+
+        // Répartition par montant
+        $paymentRanges = [
+            '0-50000' => [0, 50000],
+            '50000-100000' => [50000, 100000],
+            '100000+' => [100000, PHP_FLOAT_MAX]
+        ];
+
+        $paymentDistribution = [];
+        foreach ($paymentRanges as $label => $range) {
+            $paymentDistribution[$label] = Payment::whereBetween('amount', $range)->count();
+        }
 
         return response()->json([
-            'today_payments' => Payment::whereRaw("date(payment_date) = ?", [$today->format('Y-m-d')])->sum('amount'),
-            'today_students' => Student::whereRaw("date(created_at) = ?", [$today->format('Y-m-d')])->count(),
-            'recent_activities' => Payment::with('student')
-                ->whereRaw("date(payment_date) = ?", [$today->format('Y-m-d')])
+            'today_stats' => $this->getTodayStats(),
+            'weekly_trend' => $weeklyTrend,
+            'payment_distribution' => $paymentDistribution,
+            'recent_activities' => Payment::with(['student', 'student.field'])
+                ->whereDate('payment_date', $today)
                 ->latest()
                 ->limit(5)
                 ->get()
