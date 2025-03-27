@@ -1,52 +1,130 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h5 class="font-medium text-gray-700 text-lg">Ajouter une filière</h5>
-        </div>
-        <div class="p-6">
-            <form action="{{ route('fields.store') }}" method="POST">
-                @csrf
-                <div class="mb-4">
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('name') border-red-500 @enderror" 
-                        id="name" name="name" value="{{ old('name') }}" required>
-                    @error('name')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div class="mb-4">
-                    <label for="campus_id" class="block text-sm font-medium text-gray-700 mb-1">Campus</label>
-                    <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('campus_id') border-red-500 @enderror" 
-                        id="campus_id" name="campus_id" required>
-                        <option value="">Sélectionner un campus</option>
-                        @foreach($campuses as $campus)
-                            <option value="{{ $campus->id }}" {{ old('campus_id') == $campus->id ? 'selected' : '' }}>
-                                {{ $campus->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('campus_id')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div class="mb-4">
-                    <label for="fees" class="block text-sm font-medium text-gray-700 mb-1">Frais de scolarité</label>
-                    <div class="flex items-center">
-                        <input type="number" step="0.01" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('fees') border-red-500 @enderror" 
-                            id="fees" name="fees" value="{{ old('fees') }}">
-                        <span class="ml-2 text-gray-500">FCFA</span>
-                    </div>
-                    @error('fees')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <a href="{{ route('fields.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Annuler</a>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition">Enregistrer</button>
-                </div>
-            </form>
+<div class="container mx-auto px-4">
+    <div class="mb-6">
+        <div class="card">
+            <div class="card-body flex justify-between items-center">
+                <h1 class="text-xl font-bold text-primary-600">
+                    <i class="fas fa-graduation-cap mr-2"></i>Ajouter une nouvelle filière
+                </h1>
+                <a href="{{ route('fields.index') }}" class="flex items-center text-gray-600 hover:text-primary-600">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour à la liste
+                </a>
+            </div>
         </div>
     </div>
+
+    <div class="mb-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="font-bold text-primary-600">Informations de la filière</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('fields.store') }}" method="POST">
+                    @csrf
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-2 md:col-span-1">
+                            <div class="mb-4">
+                                <label for="name" class="form-label">Nom de la filière <span class="text-red-500">*</span></label>
+                                <input type="text" class="form-input @error('name') border-red-500 @enderror" 
+                                       id="name" name="name" value="{{ old('name') }}" required>
+                                @error('name')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-2 md:col-span-1">
+                            <div class="mb-4">
+                                <label for="campus_id" class="form-label">Campus <span class="text-red-500">*</span></label>
+                                <select class="form-select @error('campus_id') border-red-500 @enderror" 
+                                        id="campus_id" name="campus_id" required>
+                                    <option value="">Sélectionner un campus</option>
+                                    @foreach($campuses as $campus)
+                                    <option value="{{ $campus->id }}" {{ old('campus_id') == $campus->id ? 'selected' : '' }}>
+                                        {{ $campus->name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @error('campus_id')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <div class="mb-4">
+                                <label for="education_level_id" class="form-label">Niveau d'études</label>
+                                <select class="form-select @error('education_level_id') border-red-500 @enderror" 
+                                        id="education_level_id" name="education_level_id">
+                                    <option value="">Sélectionner un niveau</option>
+                                    @foreach($educationLevels as $level)
+                                    <option value="{{ $level->id }}" {{ old('education_level_id') == $level->id ? 'selected' : '' }}>
+                                        {{ $level->name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @error('education_level_id')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <div class="mb-4">
+                                <label for="fees" class="form-label">Frais de scolarité (FCFA) <span class="text-red-500">*</span></label>
+                                <input type="number" class="form-input @error('fees') border-red-500 @enderror" 
+                                       id="fees" name="fees" value="{{ old('fees') }}" required min="0" step="1000">
+                                @error('fees')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <div class="mb-4">
+                                <label for="duration" class="form-label">Durée (années) <span class="text-red-500">*</span></label>
+                                <input type="number" class="form-input @error('duration') border-red-500 @enderror" 
+                                       id="duration" name="duration" value="{{ old('duration', 3) }}" required min="1" max="10">
+                                @error('duration')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <div class="mb-4">
+                                <label for="max_installments" class="form-label">Nombre maximal de versements <span class="text-red-500">*</span></label>
+                                <input type="number" class="form-input @error('max_installments') border-red-500 @enderror" 
+                                       id="max_installments" name="max_installments" value="{{ old('max_installments', 3) }}" required min="1" max="12">
+                                @error('max_installments')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-span-2">
+                            <div class="mb-4">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-textarea @error('description') border-red-500 @enderror" 
+                                          id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                                @error('description')
+                                <div class="text-red-500 mt-1 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i>Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

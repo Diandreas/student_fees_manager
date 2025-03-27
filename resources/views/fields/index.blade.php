@@ -1,231 +1,228 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body d-flex justify-content-between align-items-center p-4">
-                    <h1 class="h3 fw-bold text-primary-custom mb-0">
-                        <i class="fas fa-graduation-cap me-2"></i>Gestion des filières
-                    </h1>
-                    <a href="{{ route('fields.create') }}" class="btn btn-primary-custom">
-                        <i class="fas fa-plus me-2"></i>Ajouter une filière
-                    </a>
-                </div>
+<div class="container mx-auto px-4">
+    <div class="mb-6">
+        <div class="card">
+            <div class="card-body flex justify-between items-center">
+                <h1 class="text-xl font-bold text-primary-600">
+                    <i class="fas fa-graduation-cap mr-2"></i>Gestion des filières
+                </h1>
+                <a href="{{ route('fields.create') }}" class="btn-primary">
+                    <i class="fas fa-plus mr-2"></i>Ajouter une filière
+                </a>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h5 class="mb-0 fw-bold text-primary-custom">
-                                Liste des filières
-                            </h5>
-                        </div>
-                        <div class="col-md-6">
-                            <form class="d-flex" action="{{ route('fields.index') }}" method="GET">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" name="search" value="{{ request()->search }}" placeholder="Rechercher une filière..." aria-label="Rechercher">
-                                    <button class="btn btn-primary-custom" type="submit">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                    @if(request()->has('search') && !empty(request()->search))
-                                    <a href="{{ route('fields.index') }}" class="btn btn-secondary-custom">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                    @endif
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-end pe-4 pt-3">
-                    <div class="display-mode-container d-flex align-items-center mb-3 rounded p-1 bg-light">
-                        <button type="button" class="btn btn-sm btn-primary-custom mx-1 d-flex align-items-center justify-content-center mode-button" data-mode="list">
-                            <i class="fas fa-list"></i>
-                            <span class="ms-1 d-none d-sm-inline">Liste</span>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-primary-custom mx-1 d-flex align-items-center justify-content-center mode-button" data-mode="card">
-                            <i class="fas fa-grip-horizontal"></i>
-                            <span class="ms-1 d-none d-sm-inline">Cartes</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card-body">
-                    @if($fields->isEmpty())
-                        <div class="text-center py-5">
-                            <img src="{{ asset('images/empty-state.svg') }}" alt="Aucune filière" class="img-fluid mb-3" style="max-width: 200px;">
-                            <h5>Aucune filière trouvée</h5>
-                            <p class="text-muted">Il n'y a aucune filière à afficher pour le moment.</p>
-                            <a href="{{ route('fields.create') }}" class="btn btn-primary-custom">
-                                <i class="fas fa-plus me-2"></i>Ajouter une filière
+    <div class="mb-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-3 md:space-y-0">
+                    <h5 class="font-bold text-primary-600">
+                        Liste des filières
+                    </h5>
+                    <form class="flex" action="{{ route('fields.index') }}" method="GET">
+                        <div class="flex w-full md:w-auto">
+                            <input type="text" class="form-input rounded-r-none" name="search" value="{{ request()->search }}" placeholder="Rechercher une filière...">
+                            <button class="bg-primary-600 hover:bg-primary-700 text-white px-3 rounded-l-none rounded-r-md" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            @if(request()->has('search') && !empty(request()->search))
+                            <a href="{{ route('fields.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-3 rounded-md ml-1">
+                                <i class="fas fa-times"></i>
                             </a>
+                            @endif
                         </div>
-                    @else
-                        <div id="fieldsContainer" class="mode-list">
-                            <!-- Mode Liste -->
-                            <div class="mode-list-content">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0 table-custom">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th scope="col" class="ps-4">Nom</th>
-                                                <th scope="col">Campus</th>
-                                                <th scope="col">Frais de scolarité</th>
-                                                <th scope="col" class="text-end pe-4">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($fields as $field)
-                                            <tr>
-                                                <td class="ps-4 fw-medium">{{ $field->name }}</td>
-                                                <td>
-                                                    <span class="badge bg-primary-custom bg-opacity-10 text-primary-custom py-2 px-3">
-                                                        {{ $field->campus->name }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="fw-bold">{{ number_format($field->fees, 0, ',', ' ') }} FCFA</span>
-                                                </td>
-                                                <td class="text-end pe-4">
-                                                    <div class="btn-group">
-                                                        <a href="{{ route('fields.show', $field->id) }}" class="btn btn-sm btn-outline-primary" title="Voir les détails">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="{{ route('fields.edit', $field->id) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $field->id }}" title="Supprimer">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </div>
-                                                    
-                                                    <!-- Modal de suppression -->
-                                                    <div class="modal fade" id="deleteModal{{ $field->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="modal-body text-start">
-                                                                    Êtes-vous sûr de vouloir supprimer la filière <strong>{{ $field->name }}</strong> ?
-                                                                    <p class="text-danger mb-0 mt-2"><small>Cette action est irréversible.</small></p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                                    <form action="{{ route('fields.destroy', $field->id) }}" method="POST" class="d-inline">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            @empty
-                                            <tr>
-                                                <td colspan="4" class="text-center py-5">
-                                                    <div class="d-flex flex-column align-items-center">
-                                                        <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
-                                                        <h5>Aucune filière trouvée</h5>
-                                                        <p class="text-muted">
-                                                            @if(request()->has('search') && !empty(request()->search))
-                                                                Aucun résultat pour la recherche "{{ request()->search }}"
-                                                                <br><a href="{{ route('fields.index') }}" class="text-primary-custom">Voir toutes les filières</a>
-                                                            @else
-                                                                Commencez par ajouter une filière
-                                                            @endif
-                                                        </p>
-                                                        @if(!request()->has('search'))
-                                                        <a href="{{ route('fields.create') }}" class="btn btn-primary-custom">
-                                                            <i class="fas fa-plus me-2"></i>Ajouter une filière
-                                                        </a>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            
-                            <!-- Mode Cartes -->
-                            <div class="mode-card-content" style="display: none;">
-                                <div class="row g-3 p-3">
-                                    @foreach($fields as $field)
-                                    <div class="col-md-6 col-lg-4 mb-4 list-item">
-                                        <div class="card border-0 shadow-sm h-100">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                                    <h5 class="card-title mb-0 text-primary-custom">{{ $field->name }}</h5>
-                                                    <span class="badge rounded-pill bg-primary-custom">{{ $field->educationLevel?->name ?? 'N/A' }}</span>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-8">
-                                                        <p class="card-text mb-1"><i class="fas fa-school text-primary-custom me-2"></i>{{ $field->campus?->name ?? 'N/A' }}</p>
-                                                        <p class="card-text mb-1"><i class="fas fa-money-bill-wave text-primary-custom me-2"></i>Frais annuels: {{ number_format($field->annual_fees, 0, ',', ' ') }} FCFA</p>
-                                                        <p class="card-text mb-1"><i class="fas fa-calendar text-primary-custom me-2"></i>Durée: {{ $field->duration }} an(s)</p>
-                                                    </div>
-                                                    <div class="col-md-4 text-center">
-                                                        <div class="bg-primary-custom bg-opacity-10 rounded-circle p-2 mx-auto" style="width: 60px; height: 60px;">
-                                                            <div class="fw-bold text-primary-custom">{{ $field->students_count }}</div>
-                                                            <small class="text-primary-custom">Étudiants</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-end gap-2">
-                                                    <a href="{{ route('fields.show', $field) }}" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fas fa-eye me-1"></i>Voir
+                    </form>
+                </div>
+            </div>
+            
+            <div class="flex justify-end px-4 pt-3">
+                <div class="flex items-center p-1 bg-gray-100 rounded mb-3">
+                    <button type="button" class="px-3 py-1 bg-primary-600 text-white rounded flex items-center justify-center mr-1 mode-button" data-mode="list">
+                        <i class="fas fa-list"></i>
+                        <span class="ml-1 hidden sm:inline">Liste</span>
+                    </button>
+                    <button type="button" class="px-3 py-1 border border-primary-600 text-primary-600 rounded flex items-center justify-center ml-1 mode-button" data-mode="card">
+                        <i class="fas fa-grip-horizontal"></i>
+                        <span class="ml-1 hidden sm:inline">Cartes</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                @if($fields->isEmpty())
+                    <div class="py-12 flex flex-col items-center">
+                        <img src="{{ asset('images/empty-state.svg') }}" alt="Aucune filière" class="w-48 h-auto mb-4">
+                        <h5 class="text-lg font-bold mb-1">Aucune filière trouvée</h5>
+                        <p class="text-gray-500 mb-4">Il n'y a aucune filière à afficher pour le moment.</p>
+                        <a href="{{ route('fields.create') }}" class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Ajouter une filière
+                        </a>
+                    </div>
+                @else
+                    <div id="fieldsContainer" class="mode-list">
+                        <!-- Mode Liste -->
+                        <div class="mode-list-content block">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campus</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frais de scolarité</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        @forelse($fields as $field)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $field->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-3 py-1 bg-primary-100 text-primary-800 rounded-full">
+                                                    {{ $field->campus->name }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap font-bold">
+                                                {{ number_format($field->fees, 0, ',', ' ') }} FCFA
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                                <div class="flex justify-end space-x-1">
+                                                    <a href="{{ route('fields.show', $field->id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('fields.edit', $field) }}" class="btn btn-sm btn-outline-success">
-                                                        <i class="fas fa-edit me-1"></i>Modifier
+                                                    <a href="{{ route('fields.edit', $field->id) }}" class="px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200" title="Modifier">
+                                                        <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="{{ route('fields.report', $field) }}" class="btn btn-sm btn-outline-info">
-                                                        <i class="fas fa-chart-bar me-1"></i>Rapport
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                        onclick="document.getElementById('delete-field-{{ $field->id }}-card').submit()">
-                                                        <i class="fas fa-trash me-1"></i>Supprimer
+                                                    <button type="button" class="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" 
+                                                            onclick="document.getElementById('deleteModal{{ $field->id }}').classList.remove('hidden')" title="Supprimer">
+                                                        <i class="fas fa-trash-alt"></i>
                                                     </button>
-                                                    <form id="delete-field-{{ $field->id }}-card" method="POST" action="{{ route('fields.destroy', $field) }}" class="d-none">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                    </form>
+                                                </div>
+                                                
+                                                <!-- Modal de suppression -->
+                                                <div id="deleteModal{{ $field->id }}" class="hidden fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+                                                    <div class="relative bg-white rounded-lg max-w-md w-full mx-auto p-6">
+                                                        <div class="flex justify-between items-center mb-4">
+                                                            <h5 class="text-lg font-bold">Confirmation de suppression</h5>
+                                                            <button type="button" class="text-gray-400 hover:text-gray-600" 
+                                                                    onclick="document.getElementById('deleteModal{{ $field->id }}').classList.add('hidden')">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="text-left">
+                                                            <p>Êtes-vous sûr de vouloir supprimer la filière <strong>{{ $field->name }}</strong> ?</p>
+                                                            <p class="text-red-600 my-2"><small>Cette action est irréversible.</small></p>
+                                                        </div>
+                                                        <div class="flex justify-end space-x-2 mt-4">
+                                                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                                                    onclick="document.getElementById('deleteModal{{ $field->id }}').classList.add('hidden')">
+                                                                Annuler
+                                                            </button>
+                                                            <form action="{{ route('fields.destroy', $field->id) }}" method="POST" class="inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                                                    Supprimer
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="4" class="px-6 py-12 text-center">
+                                                <div class="flex flex-col items-center">
+                                                    <i class="fas fa-graduation-cap text-5xl text-gray-400 mb-4"></i>
+                                                    <h5 class="text-lg font-bold mb-1">Aucune filière trouvée</h5>
+                                                    <p class="text-gray-500 mb-4">
+                                                        @if(request()->has('search') && !empty(request()->search))
+                                                            Aucun résultat pour la recherche "{{ request()->search }}"
+                                                            <br><a href="{{ route('fields.index') }}" class="text-primary-600 hover:underline">Voir toutes les filières</a>
+                                                        @else
+                                                            Commencez par ajouter une filière
+                                                        @endif
+                                                    </p>
+                                                    @if(!request()->has('search'))
+                                                    <a href="{{ route('fields.create') }}" class="btn-primary">
+                                                        <i class="fas fa-plus mr-2"></i>Ajouter une filière
+                                                    </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mode Cartes -->
+                        <div class="mode-card-content hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-3">
+                                @foreach($fields as $field)
+                                <div class="card hover-lift">
+                                    <div class="card-body">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h5 class="text-lg font-bold text-primary-600">{{ $field->name }}</h5>
+                                            <span class="px-2 py-1 bg-primary-100 text-primary-800 text-xs font-medium rounded-full">{{ $field->educationLevel?->name ?? 'N/A' }}</span>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                                            <div class="col-span-3">
+                                                <p class="mb-1 flex items-center"><i class="fas fa-school text-primary-600 mr-2 w-5"></i>{{ $field->campus?->name ?? 'N/A' }}</p>
+                                                <p class="mb-1 flex items-center"><i class="fas fa-money-bill-wave text-primary-600 mr-2 w-5"></i>{{ number_format($field->annual_fees, 0, ',', ' ') }} FCFA</p>
+                                                <p class="mb-1 flex items-center"><i class="fas fa-calendar text-primary-600 mr-2 w-5"></i>{{ $field->duration }} an(s)</p>
+                                            </div>
+                                            <div class="flex justify-center items-center">
+                                                <div class="w-16 h-16 rounded-full bg-primary-100 flex flex-col items-center justify-center">
+                                                    <div class="font-bold text-primary-600">{{ $field->students_count }}</div>
+                                                    <div class="text-xs text-primary-600">Étudiants</div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="flex justify-end space-x-2">
+                                            <a href="{{ route('fields.show', $field) }}" class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                                <i class="fas fa-eye mr-1"></i>Voir
+                                            </a>
+                                            <a href="{{ route('fields.edit', $field) }}" class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200">
+                                                <i class="fas fa-edit mr-1"></i>Modifier
+                                            </a>
+                                            <a href="{{ route('fields.report', $field) }}" class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                                <i class="fas fa-chart-bar mr-1"></i>Rapport
+                                            </a>
+                                            <button type="button" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" 
+                                                onclick="document.getElementById('delete-field-{{ $field->id }}-card').submit()">
+                                                <i class="fas fa-trash mr-1"></i>Supprimer
+                                            </button>
+                                            <form id="delete-field-{{ $field->id }}-card" method="POST" action="{{ route('fields.destroy', $field) }}" class="hidden">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                        </div>
                                     </div>
-                                    @endforeach
                                 </div>
+                                @endforeach
                             </div>
                         </div>
-                    @endif
-                </div>
-                
-                @if($fields->count() > 0)
-                <div class="card-footer bg-transparent py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 text-muted">Affichage de <span class="fw-medium">{{ $fields->firstItem() ?? 0 }}</span> à <span class="fw-medium">{{ $fields->lastItem() ?? 0 }}</span> sur <span class="fw-medium">{{ $fields->total() }}</span> filières</p>
-                        </div>
-                        <div>
-                            {{ $fields->links('pagination::bootstrap-5') }}
-                        </div>
                     </div>
-                </div>
                 @endif
             </div>
+            
+            @if($fields->count() > 0)
+            <div class="card-footer">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
+                    <div>
+                        <p class="text-gray-500 mb-0">Affichage de <span class="font-medium">{{ $fields->firstItem() ?? 0 }}</span> à <span class="font-medium">{{ $fields->lastItem() ?? 0 }}</span> sur <span class="font-medium">{{ $fields->total() }}</span> filières</p>
+                    </div>
+                    <div class="pagination-container">
+                        {{ $fields->links() }}
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -233,37 +230,28 @@
 @push('styles')
 <style>
     /* Styles pour les différents modes d'affichage */
-    .mode-list-content { display: block; }
-    .mode-card-content { display: none; }
-    
-    /* Quand le mode est activé */
     .mode-list .mode-list-content { display: block; }
     .mode-list .mode-card-content { display: none; }
     
     .mode-card .mode-list-content { display: none; }
     .mode-card .mode-card-content { display: block; }
     
-    /* Style pour les boutons de mode */
-    .display-mode-container .btn {
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
+    /* Style pour la pagination */
+    .pagination-container nav div:first-child {
+        @apply hidden;
     }
     
-    /* Style pour le bouton actif */
-    .display-mode-container .btn-primary-custom {
-        background-color: var(--primary-color);
-        color: white;
+    .pagination-container nav > div:last-child > span,
+    .pagination-container nav > div:last-child a {
+        @apply inline-flex items-center px-4 py-2 mx-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50;
     }
     
-    .display-mode-container .btn-outline-primary-custom {
-        color: var(--primary-color);
-        border: 1px solid var(--primary-color);
-        background-color: transparent;
+    .pagination-container nav > div:last-child > span.text-gray-400 {
+        @apply text-gray-400 bg-gray-100;
     }
     
-    .display-mode-container .btn-outline-primary-custom:hover {
-        background-color: var(--primary-color);
-        color: white;
+    .pagination-container nav > div:last-child > span.text-white {
+        @apply bg-primary-600 text-white border-primary-600;
     }
 </style>
 @endpush
@@ -271,50 +259,52 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Récupérer les éléments
         const container = document.getElementById('fieldsContainer');
-        const modeButtons = document.querySelectorAll('.mode-button');
+        const buttons = document.querySelectorAll('.mode-button');
         
-        // Récupérer le mode sauvegardé si disponible
-        const savedMode = localStorage.getItem('display-mode-fields');
-        if (savedMode) {
-            container.className = 'mode-' + savedMode;
-            
-            // Mettre à jour les boutons
-            modeButtons.forEach(btn => {
-                if (btn.getAttribute('data-mode') === savedMode) {
-                    btn.classList.remove('btn-outline-primary-custom');
-                    btn.classList.add('btn-primary-custom');
-                } else {
-                    btn.classList.remove('btn-primary-custom');
-                    btn.classList.add('btn-outline-primary-custom');
-                }
-            });
-        }
-        
-        // Ajouter les écouteurs d'événements aux boutons
-        modeButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const mode = this.getAttribute('data-mode');
-                
-                // Mettre à jour la classe du conteneur
-                container.className = 'mode-' + mode;
-                
-                // Mettre à jour les styles des boutons
-                modeButtons.forEach(b => {
-                    if (b === this) {
-                        b.classList.remove('btn-outline-primary-custom');
-                        b.classList.add('btn-primary-custom');
-                    } else {
-                        b.classList.remove('btn-primary-custom');
-                        b.classList.add('btn-outline-primary-custom');
-                    }
+        if (container && buttons.length) {
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const mode = this.getAttribute('data-mode');
+                    
+                    // Mettre à jour la classe du conteneur
+                    container.className = `mode-${mode}`;
+                    
+                    // Mettre à jour l'apparence des boutons
+                    buttons.forEach(btn => {
+                        const btnMode = btn.getAttribute('data-mode');
+                        
+                        if (btnMode === mode) {
+                            // Bouton actif
+                            if (mode === 'list') {
+                                btn.className = 'px-3 py-1 bg-primary-600 text-white rounded flex items-center justify-center mr-1 mode-button';
+                            } else {
+                                btn.className = 'px-3 py-1 bg-primary-600 text-white rounded flex items-center justify-center ml-1 mode-button';
+                            }
+                        } else {
+                            // Bouton inactif
+                            if (btnMode === 'list') {
+                                btn.className = 'px-3 py-1 border border-primary-600 text-primary-600 rounded flex items-center justify-center mr-1 mode-button';
+                            } else {
+                                btn.className = 'px-3 py-1 border border-primary-600 text-primary-600 rounded flex items-center justify-center ml-1 mode-button';
+                            }
+                        }
+                    });
+                    
+                    // Enregistrer la préférence dans le stockage local
+                    localStorage.setItem('fieldsViewMode', mode);
                 });
-                
-                // Sauvegarder la préférence
-                localStorage.setItem('display-mode-fields', mode);
             });
-        });
+            
+            // Charger la préférence de mode depuis le stockage local
+            const savedMode = localStorage.getItem('fieldsViewMode');
+            if (savedMode) {
+                const targetButton = document.querySelector(`.mode-button[data-mode="${savedMode}"]`);
+                if (targetButton) {
+                    targetButton.click();
+                }
+            }
+        }
     });
 </script>
 @endpush
