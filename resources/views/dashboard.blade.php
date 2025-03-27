@@ -8,42 +8,210 @@
             height: 300px;
             width: 100%;
         }
+        /* Assurer une meilleure lisibilité des textes sur fond coloré */
+        .text-on-primary {
+            color: white !important;
+        }
+        /* Style pour la progress bar */
+        .progress-thin {
+            height: 8px;
+        }
     </style>
 @endpush
 
 @section('content')
-<div class="container-fluid py-4">
-    @if($currentSchool)
+<div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-lg" style="border-left: 4px solid {{ $currentSchool->theme_color }} !important;">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="me-4">
-                            @if($currentSchool->logo)
-                                <img src="{{ asset('storage/' . $currentSchool->logo) }}" alt="{{ $currentSchool->name }}" class="img-fluid" style="max-height: 60px;">
-                            @else
-                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px; background-color: {{ $currentSchool->theme_color }};">
-                                    <span class="h3 mb-0">{{ substr($currentSchool->name, 0, 1) }}</span>
+                    <h1 class="h3 fw-bold text-primary-custom mb-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>Tableau de Bord
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-primary-custom">
+                            <i class="fas fa-user-graduate fa-2x"></i>
+                        </div>
+                        <div class="bg-primary-custom bg-opacity-10 rounded-circle p-2">
+                            <div class="fw-bold text-white">{{ isset($studentsCount) ? $studentsCount : 0 }}</div>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold">Étudiants</h5>
+                    <p class="card-text text-muted">Total d'étudiants inscrits</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <a href="{{ route('students.index') }}" class="text-decoration-none stretched-link text-primary-custom fw-medium">
+                        <i class="fas fa-arrow-right me-1"></i> Voir tous les étudiants
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-success">
+                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-2">
+                            <div class="fw-bold text-white">{{ isset($paymentsCount) ? $paymentsCount : 0 }}</div>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold">Paiements</h5>
+                    <p class="card-text text-muted">Total des paiements reçus</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <a href="{{ route('payments.index') }}" class="text-decoration-none stretched-link text-success fw-medium">
+                        <i class="fas fa-arrow-right me-1"></i> Gérer les paiements
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-info">
+                            <i class="fas fa-school fa-2x"></i>
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded-circle p-2">
+                            <div class="fw-bold text-white">{{ isset($campusesCount) ? $campusesCount : 0 }}</div>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold">Campus</h5>
+                    <p class="card-text text-muted">Nombre de campus gérés</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <a href="{{ route('campuses.index') }}" class="text-decoration-none stretched-link text-info fw-medium">
+                        <i class="fas fa-arrow-right me-1"></i> Voir les campus
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-warning">
+                            <i class="fas fa-graduation-cap fa-2x"></i>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-2">
+                            <div class="fw-bold text-white">{{ isset($fieldsCount) ? $fieldsCount : 0 }}</div>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-bold">Filières</h5>
+                    <p class="card-text text-muted">Total des filières proposées</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <a href="{{ route('fields.index') }}" class="text-decoration-none stretched-link text-warning fw-medium">
+                        <i class="fas fa-arrow-right me-1"></i> Gérer les filières
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques de recouvrement -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-pie me-2 text-primary-custom"></i>État des paiements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="paymentStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Payé intégralement</h6>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ $paymentStatus['fully_paid'] }} étudiants</span>
+                                    <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['fully_paid'] / $totalStudents) * 100, 1) : 0 }}%</span>
                                 </div>
-                            @endif
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalStudents > 0 ? ($paymentStatus['fully_paid'] / $totalStudents) * 100 : 0 }}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Partiellement payé</h6>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ $paymentStatus['partial_paid'] }} étudiants</span>
+                                    <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['partial_paid'] / $totalStudents) * 100, 1) : 0 }}%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $totalStudents > 0 ? ($paymentStatus['partial_paid'] / $totalStudents) * 100 : 0 }}%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold">Aucun paiement</h6>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ $paymentStatus['no_payment'] }} étudiants</span>
+                                    <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['no_payment'] / $totalStudents) * 100, 1) : 0 }}%</span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalStudents > 0 ? ($paymentStatus['no_payment'] / $totalStudents) * 100 : 0 }}%"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="mb-0 fw-bold">{{ $currentSchool->name }}</h4>
-                            <p class="text-muted mb-0">{{ $currentSchool->subscription_plan == 'basic' ? 'Plan basique' : ($currentSchool->subscription_plan == 'premium' ? 'Plan premium' : 'Plan entreprise') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-percentage me-2 text-primary-custom"></i>Taux de recouvrement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 text-center">
+                            <div class="position-relative d-inline-block">
+                                <canvas id="recoveryRateChart" width="200" height="200"></canvas>
+                                <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                    <h2 class="mb-0 fw-bold">{{ number_format($recoveryRate, 1) }}%</h2>
+                                    <p class="mb-0 small">Recouvrement</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ms-auto">
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                    <li><a class="dropdown-item" href="{{ route('schools.show', $currentSchool) }}"><i class="fas fa-info-circle me-2"></i> Détails</a></li>
-                                    @can('update', $currentSchool)
-                                    <li><a class="dropdown-item" href="{{ route('schools.edit', $currentSchool) }}"><i class="fas fa-edit me-2"></i> Modifier</a></li>
-                                    @endcan
-                                    <li><a class="dropdown-item" href="{{ route('schools.index') }}"><i class="fas fa-exchange-alt me-2"></i> Changer d'école</a></li>
-                                </ul>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fw-bold">Montant total attendu</h6>
+                                    <span class="badge bg-primary-custom text-on-primary">{{ number_format($totalExpectedFees, 0, ',', ' ') }} FCFA</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fw-bold">Montant recouvré</h6>
+                                    <span class="badge bg-success text-on-primary">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold">Reste à recouvrer</h6>
+                                    <span class="badge bg-danger text-on-primary">{{ number_format($outstandingFees, 0, ',', ' ') }} FCFA</span>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ $recoveryRate }}%" aria-valuenow="{{ $recoveryRate }}" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                     </div>
@@ -51,338 +219,122 @@
             </div>
         </div>
     </div>
-    @endif
 
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100 rounded-lg">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <div class="rounded-circle bg-primary-light p-3 text-center">
-                                <i class="fas fa-user-graduate text-primary fa-2x"></i>
-                            </div>
-                        </div>
-                        <div class="col-9">
-                            <h5 class="mb-1 text-muted">Étudiants</h5>
-                            <h2 class="mb-0 fw-bold">{{ $totalStudents }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer py-2 bg-light">
-                    <a href="{{ route('students.index') }}" class="text-decoration-none d-flex justify-content-between align-items-center">
-                        <small class="text-primary">Voir tous les étudiants</small>
-                        <i class="fas fa-chevron-right small text-primary"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100 rounded-lg">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <div class="rounded-circle bg-success-light p-3 text-center">
-                                <i class="fas fa-money-bill-wave text-success fa-2x"></i>
-                            </div>
-                        </div>
-                        <div class="col-9">
-                            <h5 class="mb-1 text-muted">Paiements</h5>
-                            <h2 class="mb-0 fw-bold">{{ number_format($totalPayments, 0, ',', ' ') }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer py-2 bg-light">
-                    <a href="{{ route('payments.index') }}" class="text-decoration-none d-flex justify-content-between align-items-center">
-                        <small class="text-success">Voir tous les paiements</small>
-                        <i class="fas fa-chevron-right small text-success"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100 rounded-lg">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <div class="rounded-circle bg-warning-light p-3 text-center">
-                                <i class="fas fa-exclamation-triangle text-warning fa-2x"></i>
-                            </div>
-                        </div>
-                        <div class="col-9">
-                            <h5 class="mb-1 text-muted">Non-payés</h5>
-                            <h2 class="mb-0 fw-bold">{{ number_format($outstandingFees, 0, ',', ' ') }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer py-2 bg-light">
-                    <div class="text-decoration-none d-flex justify-content-between align-items-center">
-                        <small class="text-warning">Taux: {{ $recoveryRate }}%</small>
-                        <div class="progress" style="width: 60%; height: 6px;">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $recoveryRate }}%" aria-valuenow="{{ $recoveryRate }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100 rounded-lg">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <div class="rounded-circle bg-info-light p-3 text-center">
-                                <i class="fas fa-school text-info fa-2x"></i>
-                            </div>
-                        </div>
-                        <div class="col-9">
-                            <h5 class="mb-1 text-muted">Campus</h5>
-                            <h2 class="mb-0 fw-bold">{{ $totalCampuses }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer py-2 bg-light">
-                    <a href="{{ route('campuses.index') }}" class="text-decoration-none d-flex justify-content-between align-items-center">
-                        <small class="text-info">Voir tous les campus</small>
-                        <i class="fas fa-chevron-right small text-info"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm h-100 rounded-lg">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h5 class="mb-0 fw-bold">Statistiques des paiements</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton2">
-                            <li><a class="dropdown-item" href="{{ route('reports.payments') }}"><i class="fas fa-chart-line me-2"></i> Rapports détaillés</a></li>
-                            <li><a class="dropdown-item" href="{{ route('reports.payments.pdf') }}"><i class="fas fa-file-pdf me-2"></i> Exporter en PDF</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body py-2 px-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <small class="text-muted d-block">Payé intégralement</small>
-                                                <span class="fw-bold">{{ $paymentStatus['fully_paid'] }} étudiants</span>
-                                            </div>
-                                            <div class="rounded-circle bg-success" style="width: 10px; height: 10px;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body py-2 px-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <small class="text-muted d-block">Partiellement payé</small>
-                                                <span class="fw-bold">{{ $paymentStatus['partial_paid'] }} étudiants</span>
-                                            </div>
-                                            <div class="rounded-circle bg-warning" style="width: 10px; height: 10px;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body py-2 px-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <small class="text-muted d-block">Aucun paiement</small>
-                                                <span class="fw-bold">{{ $paymentStatus['no_payment'] }} étudiants</span>
-                                            </div>
-                                            <div class="rounded-circle bg-danger" style="width: 10px; height: 10px;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="height: 250px;">
-                        <canvas id="paymentStatusChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm h-100 rounded-lg">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h5 class="mb-0 fw-bold">Évolution mensuelle des paiements</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton3">
-                            <li><a class="dropdown-item" href="{{ route('reports.payments') }}"><i class="fas fa-chart-line me-2"></i> Rapports détaillés</a></li>
-                            <li><a class="dropdown-item" href="{{ route('dashboard.statistics') }}"><i class="fas fa-download me-2"></i> Télécharger les données</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div style="height: 300px;">
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-xl-8 mb-4">
-            <div class="card border-0 shadow-sm rounded-lg">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h5 class="mb-0 fw-bold">Paiements récents</h5>
-                    <a href="{{ route('payments.index') }}" class="btn btn-sm btn-primary">
-                        Voir tout <i class="fas fa-chevron-right ms-1"></i>
-                    </a>
+    <div class="row g-4">
+        <!-- Derniers paiements -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-money-check-alt me-2 text-primary-custom"></i>Derniers paiements
+                    </h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0">
+                        <table class="table table-hover mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0">Étudiant</th>
-                                    <th class="border-0">Filière</th>
-                                    <th class="border-0">Montant</th>
-                                    <th class="border-0">Date</th>
-                                    <th class="border-0">Actions</th>
+                                    <th scope="col">#Référence</th>
+                                    <th scope="col">Étudiant</th>
+                                    <th scope="col">Montant</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">État</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($recentPayments as $payment)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                                                <span class="text-primary">{{ substr($payment->student->full_name ?? 'U', 0, 1) }}</span>
-                                            </div>
-                                            <div class="ms-3">
-                                                <p class="fw-bold mb-0">{{ $payment->student->full_name ?? 'Inconnu' }}</p>
-                                                <p class="text-muted mb-0 small">ID: {{ $payment->student->student_id ?? 'N/A' }}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{{ $payment->student->field->name ?? 'N/A' }}</td>
-                                    <td>
-                                        <span class="fw-bold">{{ number_format($payment->amount, 0, ',', ' ') }} {{ DashboardController::CURRENCY_SYMBOL }}</span>
-                                    </td>
-                                    <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
-                                    <td>
-                                        <a href="{{ route('payments.show', $payment) }}" class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('payments.print', $payment) }}" class="btn btn-sm btn-outline-secondary" target="_blank">
-                                            <i class="fas fa-print"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-3">Aucun paiement récent</td>
-                                </tr>
-                                @endforelse
+                                @if(isset($recentPayments) && count($recentPayments) > 0)
+                                    @foreach($recentPayments as $payment)
+                                    <tr>
+                                        <th scope="row">{{ $payment->reference_no }}</th>
+                                        <td>{{ $payment->student->fullName }}</td>
+                                        <td>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
+                                        <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
+                                        <td>
+                                            <span class="badge bg-success text-on-primary">Confirmé</span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">Aucun paiement récent trouvé</td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
                 </div>
+                <div class="card-footer bg-transparent border-0 text-end py-3">
+                    <a href="{{ route('payments.index') }}" class="btn btn-sm btn-outline-primary">
+                        Voir tous les paiements <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="col-xl-4 mb-4">
-            <div class="card border-0 shadow-sm rounded-lg h-100">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h5 class="mb-0 fw-bold">Filières populaires</h5>
-                    <a href="{{ route('fields.index') }}" class="btn btn-sm btn-primary">
-                        Voir tout <i class="fas fa-chevron-right ms-1"></i>
-                    </a>
+        <!-- Activités récentes -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-history me-2 text-primary-custom"></i>Activités récentes
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @if(isset($recentActivities) && count($recentActivities) > 0)
+                            @foreach($recentActivities as $activity)
+                            <div class="list-group-item border-0 py-3">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-primary-custom bg-opacity-10 text-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="fas {{ $activity->icon }}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <p class="mb-1 fw-medium">{{ $activity->message }}</p>
+                                        <small class="text-muted">{{ $activity->created_at->diffForHumans() }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        @else
+                            <div class="list-group-item border-0 py-4 text-center">
+                                Aucune activité récente trouvée
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et statistiques -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-bar me-2 text-primary-custom"></i>Répartition des étudiants par filière
+                    </h5>
                 </div>
                 <div class="card-body">
-                    @if($popularFields->count() > 0)
-                        @foreach($popularFields as $field)
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <div>
-                                    <span class="fw-bold">{{ $field->name }}</span>
-                                    <small class="text-muted">{{ $field->campus->name ?? 'N/A' }}</small>
-                                </div>
-                                <span class="badge bg-primary">{{ $field->students_count }} étudiants</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar" role="progressbar" style="width: {{ $totalStudents > 0 ? ($field->students_count / $totalStudents) * 100 : 0 }}%;" aria-valuenow="{{ $field->students_count }}" aria-valuemin="0" aria-valuemax="{{ $totalStudents }}"></div>
-                            </div>
-                        </div>
-                        @endforeach
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                            <p>Aucune filière trouvée</p>
-                        </div>
-                    @endif
-                </div>
-
-                <div class="card-footer bg-white p-0 mt-auto">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-top">
-                        <h5 class="mb-0 fw-bold">Fonctionnalités</h5>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="studentsByFieldChart"></canvas>
                     </div>
-                    <div class="list-group list-group-flush">
-                        @if($currentSchool && $currentSchool->has_online_payments)
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-credit-card text-success me-2"></i> Paiements en ligne
-                                </div>
-                                <span class="badge bg-success">Activé</span>
-                            </div>
-                        </a>
-                        @endif
-                        
-                        @if($currentSchool && $currentSchool->has_sms_notifications)
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-sms text-success me-2"></i> Notifications SMS
-                                </div>
-                                <span class="badge bg-success">Activé</span>
-                            </div>
-                        </a>
-                        @endif
-                        
-                        @if($currentSchool && $currentSchool->has_parent_portal)
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-users text-success me-2"></i> Portail parents
-                                </div>
-                                <span class="badge bg-success">Activé</span>
-                            </div>
-                        </a>
-                        @endif
-                        
-                        @if($currentSchool && ($currentSchool->subscription_plan == 'basic'))
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-rocket text-primary me-2"></i> Passer au plan premium
-                                </div>
-                                <i class="fas fa-chevron-right text-muted"></i>
-                            </div>
-                        </a>
-                        @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-line me-2 text-primary-custom"></i>Évolution des paiements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="paymentsChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -390,109 +342,131 @@
     </div>
 </div>
 
-<style>
-.bg-primary-light {
-    background-color: rgba(13, 110, 253, 0.1);
-}
-.bg-success-light {
-    background-color: rgba(25, 135, 84, 0.1);
-}
-.bg-warning-light {
-    background-color: rgba(255, 193, 7, 0.1);
-}
-.bg-info-light {
-    background-color: rgba(13, 202, 240, 0.1);
-}
-</style>
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<!-- Script pour les graphiques -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Graphique statut de paiement
-    var ctxPayment = document.getElementById('paymentStatusChart').getContext('2d');
-    var paymentStatusChart = new Chart(ctxPayment, {
-        type: 'doughnut',
-        data: {
-            labels: ['Payé intégralement', 'Partiellement payé', 'Aucun paiement'],
-            datasets: [{
-                data: [
-                    {{ $paymentStatus['fully_paid'] }},
-                    {{ $paymentStatus['partial_paid'] }},
-                    {{ $paymentStatus['no_payment'] }}
-                ],
-                backgroundColor: [
-                    'rgba(25, 135, 84, 0.8)',
-                    'rgba(255, 193, 7, 0.8)',
-                    'rgba(220, 53, 69, 0.8)'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique de répartition des étudiants par filière
+        var ctxFields = document.getElementById('studentsByFieldChart').getContext('2d');
+        var studentsByFieldChart = new Chart(ctxFields, {
+            type: 'doughnut',
+            data: {
+                labels: ['Informatique', 'Gestion', 'Droit', 'Communication', 'Médecine'],
+                datasets: [{
+                    data: [45, 25, 20, 15, 30],
+                    backgroundColor: [
+                        '#0d47a1', // Bleu présidentiel
+                        '#1976d2',
+                        '#2196f3',
+                        '#42a5f5',
+                        '#90caf9'
+                    ],
+                    borderWidth: 0
+                }]
             },
-            cutout: '70%'
-        }
-    });
-
-    // Graphique mensuel
-    var ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
-    var monthlyChart = new Chart(ctxMonthly, {
-        type: 'line',
-        data: {
-            labels: {!! json_encode($chartData['monthly']['labels']) !!},
-            datasets: [{
-                label: 'Montant des paiements',
-                data: {!! json_encode($chartData['monthly']['data']) !!},
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                borderColor: 'rgba(13, 110, 253, 1)',
-                borderWidth: 2,
-                pointBackgroundColor: 'rgba(13, 110, 253, 1)',
-                pointRadius: 4,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " FCFA";
-                        }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
                     }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + 
-                                context.raw.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' FCFA';
-                        }
-                    }
-                },
-                legend: {
-                    display: false
                 }
             }
-        }
+        });
+
+        // Graphique d'évolution des paiements
+        var ctxPayments = document.getElementById('paymentsChart').getContext('2d');
+        var paymentsChart = new Chart(ctxPayments, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin'],
+                datasets: [{
+                    label: 'Paiements (en millions FCFA)',
+                    data: [12, 19, 15, 17, 22, 25],
+                    backgroundColor: 'rgba(13, 71, 161, 0.1)',
+                    borderColor: '#0d47a1',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Nouveau graphique pour le statut des paiements
+        var ctxPaymentStatus = document.getElementById('paymentStatusChart').getContext('2d');
+        var paymentStatusChart = new Chart(ctxPaymentStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Payé intégralement', 'Partiellement payé', 'Aucun paiement'],
+                datasets: [{
+                    data: [
+                        {{ $paymentStatus['fully_paid'] }},
+                        {{ $paymentStatus['partial_paid'] }},
+                        {{ $paymentStatus['no_payment'] }}
+                    ],
+                    backgroundColor: [
+                        '#28a745', // vert pour payé intégralement
+                        '#ffc107', // jaune pour partiellement payé
+                        '#dc3545'  // rouge pour aucun paiement
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // Graphique pour le taux de recouvrement
+        var ctxRecoveryRate = document.getElementById('recoveryRateChart').getContext('2d');
+        var recoveryRateChart = new Chart(ctxRecoveryRate, {
+            type: 'doughnut',
+            data: {
+                labels: ['Recouvré', 'Restant'],
+                datasets: [{
+                    data: [
+                        {{ $recoveryRate }},
+                        {{ 100 - $recoveryRate }}
+                    ],
+                    backgroundColor: [
+                        '#28a745', // vert pour recouvré
+                        '#dc3545'  // rouge pour restant
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '80%'
+            }
+        });
     });
-});
 </script>
-@endpush
 @endsection
 

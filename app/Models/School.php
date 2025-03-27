@@ -28,19 +28,33 @@ class School extends Model
         'is_active',
         'has_online_payments',
         'has_sms_notifications',
+        'has_email_notifications',
         'has_parent_portal',
         'preferences',
+        'report_settings',
+        'notification_settings',
+        'notification_templates',
         'subscription_plan',
         'subscription_expires_at',
+        'email',
+        'phone',
+        'font_family',
+        'card_style',
+        'button_style',
+        'layout',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'has_online_payments' => 'boolean',
         'has_sms_notifications' => 'boolean',
+        'has_email_notifications' => 'boolean',
         'has_parent_portal' => 'boolean',
         'terminology' => 'array',
         'preferences' => 'array',
+        'report_settings' => 'array',
+        'notification_settings' => 'array',
+        'notification_templates' => 'array',
         'subscription_expires_at' => 'datetime',
     ];
 
@@ -50,6 +64,14 @@ class School extends Model
     public function campuses()
     {
         return $this->hasMany(Campus::class);
+    }
+
+    /**
+     * Get all education levels for the school
+     */
+    public function educationLevels()
+    {
+        return $this->hasMany(EducationLevel::class);
     }
 
     /**
@@ -119,6 +141,32 @@ class School extends Model
             'parents' => 'Parents',
             'fee' => 'Frais',
             'fees' => 'Frais',
+            // Statuts de paiement
+            'fully_paid' => 'Payé intégralement',
+            'partially_paid' => 'Partiellement payé',
+            'no_payment' => 'Aucun paiement',
+            'paid' => 'Payé',
+            'partial' => 'Partiel',
+            'unpaid' => 'Non payé',
+            // Autres termes
+            'status' => 'État',
+            'remaining' => 'Reste à payer',
+            'paid_amount' => 'Montant payé',
+            'report' => 'Rapport',
+            'receipt' => 'Reçu',
+            'dashboard' => 'Tableau de bord',
+            'statistics' => 'Statistiques',
+            'profile' => 'Profil',
+            'settings' => 'Paramètres',
+            'administration' => 'Administration',
+            'summary' => 'Résumé',
+            'details' => 'Détails',
+            'academic_year' => 'Année académique',
+            'semester' => 'Semestre',
+            'enrollment' => 'Inscription',
+            'registration' => 'Enregistrement',
+            'document' => 'Document',
+            'documents' => 'Documents',
         ];
         
         if ($this->terminology && isset($this->terminology[$key])) {
@@ -126,5 +174,29 @@ class School extends Model
         }
         
         return $default ?? ($terms[$key] ?? ucfirst($key));
+    }
+
+    /**
+     * Get all widgets for the school
+     */
+    public function widgets()
+    {
+        return $this->hasMany(SchoolWidget::class);
+    }
+
+    /**
+     * Get active widgets for the school
+     */
+    public function activeWidgets()
+    {
+        return $this->widgets()->where('is_active', true)->orderBy('position');
+    }
+
+    /**
+     * Get all documents templates for the school
+     */
+    public function documents()
+    {
+        return $this->hasMany(SchoolDocument::class);
     }
 }

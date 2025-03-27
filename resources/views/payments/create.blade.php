@@ -10,23 +10,62 @@
             <form action="{{ route('payments.store') }}" method="POST" id="paymentForm">
                 @csrf
                 <div class="mb-3">
-                    <label for="student_id" class="form-label">Student</label>
-                    <select class="form-control @error('student_id') is-invalid @enderror"
-                            id="student_id" name="student_id" required>
-                        <option value="">Select Student</option>
+                    <label for="student_id" class="form-label">Étudiant</label>
+                    <select id="student_id" name="student_id" class="form-select @error('student_id') is-invalid @enderror" required>
+                        <option value="">Sélectionner un étudiant</option>
                         @foreach($students as $student)
-                            <option value="{{ $student->id }}"
-                                    data-remaining="{{ $student->remainingAmount }}"
-                                {{ old('student_id') == $student->id ? 'selected' : '' }}>
-                                {{ $student->fullName }}
-                                ({{ $student->field->name }} - Remaining: {{ number_format($student->remainingAmount, 3) }}FCFA)
+                            <option value="{{ $student->id }}" data-remaining="{{ $student->remainingAmount }}" 
+                                {{ (old('student_id') == $student->id || (isset($selectedStudent) && $selectedStudent->id == $student->id)) ? 'selected' : '' }}>
+                                {{ $student->full_name }} ({{ $student->field->name }})
                             </option>
                         @endforeach
                     </select>
                     @error('student_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+
+                @if(isset($selectedStudent))
+                <div class="card mb-3 student-info-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Informations de paiement</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Étudiant:</strong> {{ $selectedStudent->full_name }}</p>
+                                <p><strong>Filière:</strong> {{ $selectedStudent->field->name }}</p>
+                                <p><strong>Campus:</strong> {{ $selectedStudent->field->campus->name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Frais totaux:</strong> {{ number_format($selectedStudent->field->fees, 0, ',', ' ') }} FCFA</p>
+                                <p><strong>Déjà payé:</strong> {{ number_format($selectedStudent->payments->sum('amount'), 0, ',', ' ') }} FCFA</p>
+                                <p class="{{ $selectedStudent->remainingAmount > 0 ? 'text-warning' : 'text-success' }}">
+                                    <strong>Reste à payer:</strong> {{ number_format($selectedStudent->remainingAmount, 0, ',', ' ') }} FCFA
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="card mb-3 student-info-card d-none">
+                    <div class="card-body">
+                        <h5 class="card-title">Informations de paiement</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Étudiant:</strong> <span id="student-name"></span></p>
+                                <p><strong>Filière:</strong> <span id="student-field"></span></p>
+                                <p><strong>Campus:</strong> <span id="student-campus"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Frais totaux:</strong> <span id="student-fees"></span> FCFA</p>
+                                <p><strong>Déjà payé:</strong> <span id="student-paid"></span> FCFA</p>
+                                <p id="remaining-amount-text">
+                                    <strong>Reste à payer:</strong> <span id="student-remaining"></span> FCFA
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <div id="paymentInfo" class="alert alert-info mb-3" style="display: none;">
                     <h6>Payment Information:</h6>
@@ -72,36 +111,77 @@
 
     @push('scripts')
         <script>
-            document.getElementById('student_id').addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const remainingAmount = selectedOption.dataset.remaining;
-                const amountInput = document.getElementById('amount');
-                const paymentInfo = document.getElementById('paymentInfo');
-
-                if (this.value) {
-                    // Mise à jour des informations de paiement via AJAX
-                    fetch(`/payments/student-remaining/${this.value}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById('totalFees').textContent = `$${data.totalFees.toFixed(2)}`;
-                            document.getElementById('paidAmount').textContent = `$${data.totalPaid.toFixed(2)}`;
-                            document.getElementById('remainingAmount').textContent = `$${data.remainingAmount.toFixed(2)}`;
-                            paymentInfo.style.display = 'block';
-
-                            // Mettre à jour le max de l'input amount
-                            amountInput.max = data.remainingAmount;
-                        });
-                } else {
-                    paymentInfo.style.display = 'none';
+            document.addEventListener('DOMContentLoaded', function() {
+                const studentSelect = document.getElementById('student_id');
+                const studentInfoCard = document.querySelector('.student-info-card');
+                
+                // Fonction pour formater des nombres avec des séparateurs
+                function formatNumber(number) {
+                    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
                 }
-            });
-
-            document.getElementById('amount').addEventListener('input', function() {
-                const max = parseFloat(this.max);
-                const value = parseFloat(this.value);
-
-                if (value > max) {
-                    this.value = max;
+                
+                // Fonction pour mettre à jour l'affichage du montant maximum
+                function updateAmountMax(remainingAmount) {
+                    const amountInput = document.getElementById('amount');
+                    if (amountInput) {
+                        amountInput.setAttribute('max', remainingAmount);
+                        
+                        // Si le montant actuel est supérieur au restant, le mettre à jour
+                        if (parseFloat(amountInput.value) > remainingAmount) {
+                            amountInput.value = remainingAmount;
+                        }
+                    }
+                }
+                
+                // Handler pour le changement d'étudiant
+                studentSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    
+                    if (this.value) {
+                        // Récupérer les informations de paiement de l'étudiant
+                        fetch(`{{ url('/payments/student-remaining') }}/${this.value}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Afficher la carte d'information
+                                document.querySelector('.student-info-card').classList.remove('d-none');
+                                
+                                // Mettre à jour les informations
+                                document.getElementById('student-name').textContent = data.student.full_name;
+                                document.getElementById('student-field').textContent = data.student.field.name;
+                                document.getElementById('student-campus').textContent = data.student.field.campus.name;
+                                document.getElementById('student-fees').textContent = formatNumber(data.totalFees);
+                                document.getElementById('student-paid').textContent = formatNumber(data.totalPaid);
+                                document.getElementById('student-remaining').textContent = formatNumber(data.remainingAmount);
+                                
+                                // Mettre à jour la classe pour la couleur du texte
+                                const remainingText = document.getElementById('remaining-amount-text');
+                                if (data.remainingAmount > 0) {
+                                    remainingText.className = 'text-warning';
+                                } else {
+                                    remainingText.className = 'text-success';
+                                }
+                                
+                                // Mettre à jour le montant maximum
+                                updateAmountMax(data.remainingAmount);
+                                
+                                // Afficher le message d'information de paiement
+                                const paymentInfo = document.getElementById('paymentInfo');
+                                paymentInfo.innerHTML = `Reste à payer : ${formatNumber(data.remainingAmount)} FCFA`;
+                                paymentInfo.style.display = 'block';
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    } else {
+                        // Masquer la carte d'information
+                        document.querySelector('.student-info-card').classList.add('d-none');
+                        document.getElementById('paymentInfo').style.display = 'none';
+                    }
+                });
+                
+                // Exécuter le changement si un étudiant est déjà sélectionné
+                if (studentSelect.value) {
+                    studentSelect.dispatchEvent(new Event('change'));
                 }
             });
         </script>

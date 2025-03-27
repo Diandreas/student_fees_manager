@@ -6,9 +6,26 @@ use Illuminate\Http\Request;
 
 class CampusController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $campuses = Campus::withCount('fields')->paginate(10);
+        $query = Campus::withCount('fields');
+        
+        // Recherche par nom ou description
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+        
+        $campuses = $query->paginate(10);
+        
+        // Conserver les paramètres de recherche dans la pagination
+        if ($request->has('search')) {
+            $campuses->appends(['search' => $request->search]);
+        }
+        
         return view('campuses.index', compact('campuses'));
     }
 
@@ -51,5 +68,24 @@ class CampusController extends Controller
         $campus->delete();
         return redirect()->route('campuses.index')
             ->with('success', 'Campus deleted successfully');
+    }
+
+    /**
+     * Affiche les détails d'un campus avec toutes ses filières
+     *
+     * @param  \App\Models\Campus  $campus
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Campus $campus)
+    {
+        // Charger les filières avec le comptage d'étudiants pour chacune
+        $campus->load(['fields' => function($query) {
+            $query->withCount('students');
+        }]);
+        
+        // Regrouper les filières par type/niveau pour gérer les doublons
+        $groupedFields = $campus->fields->groupBy('name');
+        
+        return view('campuses.show', compact('campus', 'groupedFields'));
     }
 }

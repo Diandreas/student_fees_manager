@@ -15,23 +15,44 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'avatar',
+        'phone',
+        'job_title',
+        'address',
+        'bio',
+        'language',
+        'theme',
+        'email_notifications',
+        'browser_notifications',
         'is_superadmin',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * The attributes that should be hidden for arrays.
      *
-     * @var list<string>
+     * @var array
      */
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'email_notifications' => 'boolean',
+        'browser_notifications' => 'boolean',
+        'password' => 'hashed',
     ];
 
     /**
@@ -80,5 +101,28 @@ class User extends Authenticatable
     {
         $relation = $this->schools()->where('school_id', $school->id)->first();
         return $relation ? $relation->pivot->role : null;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un administrateur
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin' || $this->isSchoolAdmin();
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est un administrateur d'au moins une école
+     *
+     * @return bool
+     */
+    public function isSchoolAdmin(): bool
+    {
+        return $this->belongsToMany(School::class, 'school_admins')
+            ->withPivot('role')
+            ->where('role', 'admin')
+            ->exists();
     }
 }

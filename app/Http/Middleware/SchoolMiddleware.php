@@ -31,6 +31,7 @@ class SchoolMiddleware
                 $school = School::first();
                 if ($school) {
                     session(['current_school_id' => $school->id]);
+                    session(['current_school' => $school]);
                 } else {
                     // Rediriger vers la création d'école s'il n'y en a aucune
                     return redirect()->route('schools.create')
@@ -46,8 +47,11 @@ class SchoolMiddleware
                     
                 if ($school) {
                     session(['current_school_id' => $school->id]);
+                    // Convertir l'objet StdClass en modèle School
+                    $schoolModel = School::find($school->id);
+                    session(['current_school' => $schoolModel]);
                 } else {
-                    return redirect()->route('home')
+                    return redirect()->route('schools.select')
                         ->with('error', 'Vous n\'êtes pas associé à une école');
                 }
             }
@@ -55,6 +59,15 @@ class SchoolMiddleware
             // Vérifier que l'utilisateur a accès à l'école sélectionnée
             $schoolId = session('current_school_id');
             $school = School::find($schoolId);
+            
+            if (!$school) {
+                session()->forget('current_school_id');
+                session()->forget('current_school');
+                return redirect()->route('schools.select')
+                    ->with('error', 'L\'école sélectionnée n\'existe plus');
+            }
+            
+            session(['current_school' => $school]);
             
             if (!$user->is_superadmin) {
                 // Vérifier si l'utilisateur est admin de cette école
@@ -66,7 +79,8 @@ class SchoolMiddleware
                 if (!$exists) {
                     // Si pas accès, on reset la session et on redirige
                     session()->forget('current_school_id');
-                    return redirect()->route('home')
+                    session()->forget('current_school');
+                    return redirect()->route('schools.select')
                         ->with('error', 'Vous n\'avez pas accès à cette école');
                 }
             }

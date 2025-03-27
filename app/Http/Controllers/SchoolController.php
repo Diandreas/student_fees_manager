@@ -194,6 +194,7 @@ class SchoolController extends Controller
         
         // Stocker l'école actuelle dans la session
         session(['current_school_id' => $school->id]);
+        session(['current_school' => $school]);
         
         return redirect()->route('dashboard')
             ->with('success', 'Vous êtes maintenant connecté à l\'école ' . $school->name);
@@ -256,5 +257,35 @@ class SchoolController extends Controller
         
         return redirect()->route('schools.admins', $school)
             ->with('success', 'Administrateur supprimé avec succès');
+    }
+
+    /**
+     * Affiche la liste des écoles disponibles pour sélection
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function select()
+    {
+        $user = Auth::user();
+        
+        // Si c'est un super admin, afficher toutes les écoles
+        if ($user->is_superadmin) {
+            $schools = School::all();
+        } else {
+            // Sinon, uniquement celles où il est administrateur
+            $schools = $user->schools;
+        }
+        
+        // Si une seule école est disponible, la sélectionner automatiquement
+        if ($schools->count() == 1) {
+            $school = $schools->first();
+            session(['current_school_id' => $school->id]);
+            session(['current_school' => $school]);
+            
+            return redirect()->route('dashboard')
+                ->with('info', 'École ' . $school->name . ' sélectionnée automatiquement.');
+        }
+        
+        return view('schools.select', compact('schools'));
     }
 }

@@ -2,17 +2,29 @@
 
 @section('content')
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h5 class="font-medium text-gray-700 text-lg">Rapport sur les frais des étudiants</h5>
+        <div class="px-6 py-4 border-b border-gray-200 d-flex justify-content-between align-items-center">
+            <h5 class="font-medium text-gray-700 text-lg">
+                Rapport sur les frais des {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}
+            </h5>
+            
+            @if(session('current_school') && session('current_school')->logo)
+                <div class="logo-container">
+                    <img src="{{ asset('storage/' . session('current_school')->logo) }}" 
+                         alt="{{ session('current_school')->name }}" 
+                         class="school-logo-report">
+                </div>
+            @endif
         </div>
         <div class="p-6">
             <form action="{{ route('reports.students') }}" method="GET" class="mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label for="field_id" class="block text-sm font-medium text-gray-700 mb-1">Filière</label>
+                        <label for="field_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ session('current_school') ? session('current_school')->term('field') : 'Filière' }}
+                        </label>
                         <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
                             id="field_id" name="field_id">
-                            <option value="">Toutes les filières</option>
+                            <option value="">Toutes les {{ session('current_school') ? strtolower(session('current_school')->term('fields')) : 'filières' }}</option>
                             @foreach($fields as $field)
                                 <option value="{{ $field->id }}" {{ request('field_id') == $field->id ? 'selected' : '' }}>
                                     {{ $field->name }}
@@ -25,9 +37,9 @@
                         <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
                             id="status" name="status">
                             <option value="">Tous les états</option>
-                            <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Payé intégralement</option>
-                            <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>Payé partiellement</option>
-                            <option value="unpaid" {{ request('status') == 'unpaid' ? 'selected' : '' }}>Non payé</option>
+                            <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>{{ session('current_school') ? session('current_school')->term('fully_paid', 'Payé intégralement') : 'Payé intégralement' }}</option>
+                            <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>{{ session('current_school') ? session('current_school')->term('partially_paid', 'Payé partiellement') : 'Payé partiellement' }}</option>
+                            <option value="unpaid" {{ request('status') == 'unpaid' ? 'selected' : '' }}>{{ session('current_school') ? session('current_school')->term('no_payment', 'Non payé') : 'Non payé' }}</option>
                         </select>
                     </div>
                     <div class="flex items-end">
@@ -54,12 +66,24 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiant</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filière</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frais totaux</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant payé</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reste à payer</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">État</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ session('current_school') ? session('current_school')->term('student') : 'Étudiant' }}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ session('current_school') ? session('current_school')->term('field') : 'Filière' }}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ session('current_school') ? session('current_school')->term('fee', 'Frais totaux') : 'Frais totaux' }}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ session('current_school') ? session('current_school')->term('paid_amount', 'Montant payé') : 'Montant payé' }}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ session('current_school') ? session('current_school')->term('remaining', 'Reste à payer') : 'Reste à payer' }}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ session('current_school') ? session('current_school')->term('status', 'État') : 'État' }}
+                        </th>
                     </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -68,9 +92,17 @@
                             $totalFees = $student->field->fees;
                             $paidAmount = $student->payments->sum('amount');
                             $outstanding = $totalFees - $paidAmount;
-                            $status = $outstanding <= 0 ? 'Payé' : ($paidAmount > 0 ? 'Partiel' : 'Non payé');
-                            $statusClass = $status === 'Payé' ? 'bg-primary-100 text-primary-800' :
-                                         ($status === 'Partiel' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                            
+                            if ($outstanding <= 0) {
+                                $status = session('current_school') ? session('current_school')->term('paid', 'Payé') : 'Payé';
+                            } elseif ($paidAmount > 0) {
+                                $status = session('current_school') ? session('current_school')->term('partial', 'Partiel') : 'Partiel';
+                            } else {
+                                $status = session('current_school') ? session('current_school')->term('unpaid', 'Non payé') : 'Non payé';
+                            }
+                            
+                            $statusClass = $outstanding <= 0 ? 'bg-primary-100 text-primary-800' :
+                                         ($paidAmount > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
                         @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">{{ $student->fullName }}</td>
@@ -91,3 +123,16 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+<style>
+    .school-logo-report {
+        height: 60px;
+        width: auto;
+    }
+    
+    .logo-container {
+        text-align: right;
+    }
+</style>
+@endpush
