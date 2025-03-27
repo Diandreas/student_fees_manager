@@ -127,9 +127,15 @@ class DashboardController extends Controller
     {
         $startDate = Carbon::now()->startOfYear();
         $endDate = Carbon::now();
+        $connection = DB::connection()->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+
+        // Définir la syntaxe SQL en fonction du type de base de données
+        $monthExtractSql = $connection === 'sqlite' 
+            ? "strftime('%m', payment_date)"
+            : "MONTH(payment_date)";
 
         return Payment::selectRaw("
-                strftime('%m', payment_date) as month,
+                {$monthExtractSql} as month,
                 COUNT(*) as count,
                 SUM(amount) as total,
                 AVG(amount) as average
