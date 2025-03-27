@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolAdminController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Auth\SchoolRegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,11 @@ Route::view('/', 'welcome');
 
 // Routes d'authentification
 Auth::routes();
-Route::get('/home', HomeController::class.'@index')->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+// Routes d'inscription des écoles
+Route::get('/register/school', [SchoolRegisterController::class, 'showRegistrationForm'])->name('school.register');
+Route::post('/register/school', [SchoolRegisterController::class, 'register']);
 
 // Routes qui ne nécessitent que l'authentification
 Route::middleware('auth')->group(function () {
