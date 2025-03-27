@@ -13,7 +13,14 @@ class FieldController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Field::with('campus');
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour voir les filières.');
+        }
+        
+        $query = Field::with('campus')->where('school_id', $school->id);
         
         // Recherche par nom ou campus
         if ($request->has('search') && !empty($request->search)) {
@@ -44,11 +51,21 @@ class FieldController extends Controller
 
     public function store(Request $request)
     {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour créer une filière.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'campus_id' => 'required|exists:campuses,id',
             'fees' => 'nullable|numeric|min:0'
         ]);
+        
+        // Ajouter l'ID de l'école actuelle
+        $validated['school_id'] = $school->id;
 
         Field::create($validated);
         return redirect()->route('fields.index')

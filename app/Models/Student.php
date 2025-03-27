@@ -12,7 +12,7 @@ class Student extends Model
         'parent_tel', 'field_id', 'user_id', 'photo',
         'parent_name', 'parent_email', 'parent_profession', 
         'parent_address', 'emergency_contact_name',
-        'emergency_contact_tel', 'relationship'
+        'emergency_contact_tel', 'relationship', 'school_id'
     ];
 
     /**
@@ -47,5 +47,13 @@ class Student extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+    
+    /**
+     * Get the school that this student belongs to
+     */
+    public function school()
+    {
+        return $this->belongsTo(School::class);
     }
 }

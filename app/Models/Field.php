@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Field extends Model
 {
-    protected $fillable = ['name', 'campus_id', 'education_level_id', 'fees'];
+    protected $fillable = ['name', 'campus_id', 'education_level_id', 'fees', 'school_id'];
 
     public function campus()
     {
@@ -24,5 +24,13 @@ class Field extends Model
     public function students()
     {
         return $this->hasMany(Student::class);
+    }
+    
+    /**
+     * Get the school that this field belongs to
+     */
+    public function school()
+    {
+        return $this->belongsTo(School::class);
     }
 }

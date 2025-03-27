@@ -91,6 +91,7 @@ class PaymentController extends Controller
         $payment->description = $validated['description'];
         $payment->payment_date = $validated['payment_date'];
         $payment->receipt_number = $receipt_number;
+        $payment->school_id = $school->id;
         $payment->save();
 
         return redirect()->route('payments.index')
@@ -157,23 +158,16 @@ class PaymentController extends Controller
             return redirect()->route('schools.select')->with('error', 'Veuillez sélectionner une école');
         }
 
-        // Obtenir les campus de l'école actuelle
-        $campusIds = $school->campuses()->pluck('id')->toArray();
-        
-        // Obtenir les filières associées à ces campus
-        $fieldIds = Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
-        
-        // Obtenir les étudiants associés à ces filières
-        $students = Student::whereIn('field_id', $fieldIds)->get();
-        
+        // Filtrer directement par l'école actuelle
         $payments = Payment::with(['student.field.campus'])
-                        ->whereHas('student.field.campus', function($query) use ($school) {
-                            $query->where('school_id', $school->id);
-                        })
+                        ->where('school_id', $school->id)
                         ->latest('payment_date')
                         ->get();
 
         $totalAmount = $payments->sum('amount');
+        
+        // Récupérer tous les étudiants de l'école actuelle
+        $students = Student::where('school_id', $school->id)->get();
         
         $studentTotals = [];
         foreach ($students as $student) {

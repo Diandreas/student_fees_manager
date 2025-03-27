@@ -1,115 +1,162 @@
-<nav class="navbar navbar-expand-md navbar-custom shadow-sm">
-    <div class="container">
-        @if(session('current_school'))
-            <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
-                @if(session('current_school')->logo)
-                    <img src="{{ asset('storage/' . session('current_school')->logo) }}" alt="{{ session('current_school')->name }}" class="me-2" style="height: 32px;">
+<nav class="bg-primary-600 text-white shadow-md">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <a href="{{ url('/') }}" class="flex items-center">
+                @if(session('current_school') && session('current_school')->logo)
+                    <img src="{{ asset('storage/' . session('current_school')->logo) }}" alt="{{ session('current_school')->name }}" class="h-8 w-auto mr-2">
                 @else
-                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                        <span class="fw-bold" style="color: {{ session('current_school')->theme_color ?? '#1a56db' }};">
-                            {{ substr(session('current_school')->name, 0, 1) }}
-                        </span>
-                    </div>
+                    <i class="fas fa-graduation-cap mr-2"></i>
                 @endif
-                <span class="text-white">{{ session('current_school')->name }}</span>
+                <span class="font-bold text-lg">{{ session('current_school') ? session('current_school')->name : config('app.name', 'Student Fees Manager') }}</span>
             </a>
-        @else
-            <a class="navbar-brand text-white" href="{{ url('/') }}">
-                {{ config('app.name', 'School Manager') }}
-            </a>
-        @endif
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-            <span class="navbar-toggler-icon"></span>
-        </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <!-- Left Side Of Navbar -->
-            <ul class="navbar-nav me-auto">
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-1">
                 @auth
-                    @if(session('current_school'))
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('dashboard') }}">
-                                {{ session('current_school')->term('dashboard', 'Tableau de bord') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('students.index') }}">
-                                {{ session('current_school')->term('students', 'Étudiants') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('payments.index') }}">
-                                {{ session('current_school')->term('payments', 'Paiements') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('reports.index') }}">
-                                {{ session('current_school')->term('reports', 'Rapports') }}
-                            </a>
-                        </li>
-                    @endif
+                    <a href="{{ route('dashboard') }}" class="px-3 py-2 rounded-md hover:bg-primary-700 {{ request()->routeIs('dashboard') ? 'bg-primary-700' : '' }}">
+                        <i class="fas fa-tachometer-alt mr-1"></i>{{ $term('dashboard') }}
+                    </a>
+                    <a href="{{ route('campuses.index') }}" class="px-3 py-2 rounded-md hover:bg-primary-700 {{ request()->routeIs('campuses.*') ? 'bg-primary-700' : '' }}">
+                        <i class="fas fa-school mr-1"></i>{{ $term('campuses') }}
+                    </a>
+                    <a href="{{ route('fields.index') }}" class="px-3 py-2 rounded-md hover:bg-primary-700 {{ request()->routeIs('fields.*') ? 'bg-primary-700' : '' }}">
+                        <i class="fas fa-graduation-cap mr-1"></i>{{ $term('fields') }}
+                    </a>
+                    <a href="{{ route('students.index') }}" class="px-3 py-2 rounded-md hover:bg-primary-700 {{ request()->routeIs('students.*') ? 'bg-primary-700' : '' }}">
+                        <i class="fas fa-user-graduate mr-1"></i>{{ $term('students') }}
+                    </a>
+                    <a href="{{ route('payments.index') }}" class="px-3 py-2 rounded-md hover:bg-primary-700 {{ request()->routeIs('payments.*') ? 'bg-primary-700' : '' }}">
+                        <i class="fas fa-money-bill-wave mr-1"></i>{{ $term('payments') }}
+                    </a>
+                    <a href="{{ route('reports.index') }}" class="px-3 py-2 rounded-md hover:bg-primary-700 {{ request()->routeIs('reports.*') ? 'bg-primary-700' : '' }}">
+                        <i class="fas fa-chart-line mr-1"></i>{{ $term('reports') }}
+                    </a>
                 @endauth
-            </ul>
+            </div>
 
-            <!-- Right Side Of Navbar -->
-            <ul class="navbar-nav ms-auto">
-                <!-- Authentication Links -->
-                @guest
-                    @if (Route::has('login'))
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('login') }}">{{ __('Connexion') }}</a>
-                        </li>
-                    @endif
-
-                    @if (Route::has('register'))
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('register') }}">{{ __('Inscription') }}</a>
-                        </li>
-                    @endif
-                @else
-                    @if(session('current_school'))
-                        <li class="nav-item dropdown">
-                            <a id="schoolDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                <i class="fas fa-school me-1"></i> {{ session('current_school')->name }}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="schoolDropdown">
-                                <a class="dropdown-item" href="{{ route('schools.select') }}">
-                                    <i class="fas fa-exchange-alt me-1"></i> Changer d'école
-                                </a>
-                                <a class="dropdown-item" href="{{ route('school.settings') }}">
-                                    <i class="fas fa-cog me-1"></i> Paramètres de l'école
+            <!-- User Menu -->
+            <div class="hidden md:flex items-center">
+                @auth
+                    <!-- School Selector -->
+                    @if(auth()->user()->isAdmin())
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center px-3 py-2 text-white hover:bg-primary-700 rounded-md mr-2">
+                                <i class="fas fa-building mr-1"></i>
+                                <span class="mr-1">{{ session('current_school') ? session('current_school')->name : 'Choisir une école' }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 text-gray-700 z-10">
+                                <div class="px-4 py-2 text-xs text-gray-500">Écoles disponibles</div>
+                                <div class="border-t border-gray-100"></div>
+                                
+                                @forelse (auth()->user()->schools as $school)
+                                    <a href="{{ route('schools.switch', ['school' => $school->id]) }}" class="block px-4 py-2 hover:bg-gray-100 {{ session('current_school_id') == $school->id ? 'bg-gray-50' : '' }}">
+                                        <div class="flex items-center">
+                                            @if($school->logo)
+                                                <img src="{{ asset('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="w-5 h-5 mr-2 object-contain">
+                                            @else
+                                                <i class="fas fa-school mr-2 text-gray-400"></i>
+                                            @endif
+                                            <span>{{ $school->name }}</span>
+                                            @if(session('current_school_id') == $school->id)
+                                                <i class="fas fa-check ml-auto text-green-500"></i>
+                                            @endif
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="px-4 py-2 text-sm text-gray-500">Aucune école disponible</div>
+                                @endforelse
+                                
+                                <div class="border-t border-gray-100"></div>
+                                <a href="{{ route('schools.index') }}" class="block px-4 py-2 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i>Gérer les écoles
                                 </a>
                             </div>
-                        </li>
+                        </div>
                     @endif
-                    
-                    <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            <i class="fas fa-user-circle me-1"></i> {{ Auth::user()->name }}
-                        </a>
-
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                <i class="fas fa-user me-1"></i> Mon profil
+                
+                    <!-- User Menu -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center px-3 py-2 text-white hover:bg-primary-700 rounded-md">
+                            <i class="fas fa-user-circle mr-1"></i>
+                            <span class="mr-1">{{ Auth::user()->name }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 text-gray-700 z-10">
+                            <a href="{{ route('profile.index') }}" class="block px-4 py-2 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i>{{ __('Mon profil') }}
                             </a>
-                            <a class="dropdown-item" href="{{ route('settings.index') }}">
-                                <i class="fas fa-cogs me-1"></i> Paramètres
+                            <a href="{{ route('settings.index') }}" class="block px-4 py-2 hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2"></i>{{ __('Paramètres') }}
                             </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ route('logout') }}"
-                               onclick="event.preventDefault();
-                                             document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt me-1"></i> {{ __('Déconnexion') }}
-                            </a>
-
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            <div class="border-t border-gray-100"></div>
+                            <form method="POST" action="{{ route('logout') }}">
                                 @csrf
+                                <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>{{ __('Déconnexion') }}
+                                </button>
                             </form>
                         </div>
-                    </li>
-                @endguest
-            </ul>
+                    </div>
+                @endauth
+            </div>
+            
+            <!-- Mobile menu button -->
+            <div class="md:hidden flex items-center">
+                <button id="mobile-menu-button" class="text-white hover:bg-primary-700 p-2 rounded-md">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
     </div>
-</nav> 
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-primary-700 pb-2">
+        @auth
+            <a href="{{ route('dashboard') }}" class="block px-4 py-2 hover:bg-primary-600 {{ request()->routeIs('dashboard') ? 'bg-primary-600' : '' }}">
+                <i class="fas fa-tachometer-alt mr-1"></i>{{ $term('dashboard') }}
+            </a>
+            <a href="{{ route('campuses.index') }}" class="block px-4 py-2 hover:bg-primary-600 {{ request()->routeIs('campuses.*') ? 'bg-primary-600' : '' }}">
+                <i class="fas fa-school mr-1"></i>{{ $term('campuses') }}
+            </a>
+            <a href="{{ route('fields.index') }}" class="block px-4 py-2 hover:bg-primary-600 {{ request()->routeIs('fields.*') ? 'bg-primary-600' : '' }}">
+                <i class="fas fa-graduation-cap mr-1"></i>{{ $term('fields') }}
+            </a>
+            <a href="{{ route('students.index') }}" class="block px-4 py-2 hover:bg-primary-600 {{ request()->routeIs('students.*') ? 'bg-primary-600' : '' }}">
+                <i class="fas fa-user-graduate mr-1"></i>{{ $term('students') }}
+            </a>
+            <a href="{{ route('payments.index') }}" class="block px-4 py-2 hover:bg-primary-600 {{ request()->routeIs('payments.*') ? 'bg-primary-600' : '' }}">
+                <i class="fas fa-money-bill-wave mr-1"></i>{{ $term('payments') }}
+            </a>
+            <a href="{{ route('reports.index') }}" class="block px-4 py-2 hover:bg-primary-600 {{ request()->routeIs('reports.*') ? 'bg-primary-600' : '' }}">
+                <i class="fas fa-chart-line mr-1"></i>{{ $term('reports') }}
+            </a>
+            <div class="border-t border-primary-500 my-2"></div>
+            <a href="{{ route('profile.index') }}" class="block px-4 py-2 hover:bg-primary-600">
+                <i class="fas fa-user mr-1"></i>{{ __('Mon profil') }}
+            </a>
+            <a href="{{ route('settings.index') }}" class="block px-4 py-2 hover:bg-primary-600">
+                <i class="fas fa-cog mr-1"></i>{{ __('Paramètres') }}
+            </a>
+            <form method="POST" action="{{ route('logout') }}" class="block px-4 py-2">
+                @csrf
+                <button type="submit" class="w-full text-left hover:bg-primary-600">
+                    <i class="fas fa-sign-out-alt mr-1"></i>{{ __('Déconnexion') }}
+                </button>
+            </form>
+        @endauth
+    </div>
+</nav>
+
+<script>
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+    });
+</script> 

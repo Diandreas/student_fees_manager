@@ -22,14 +22,9 @@ class StudentController extends Controller
                 ->with('error', 'Veuillez sélectionner une école pour accéder aux étudiants.');
         }
         
-        // Obtenir les campus de l'école actuelle
-        $campusIds = $school->campuses()->pluck('id')->toArray();
-        
-        // Obtenir les filières de ces campus
-        $fieldIds = Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
-        
+        // Filtrer directement par l'école actuelle
         $query = Student::with(['field.campus', 'payments'])
-                        ->whereIn('field_id', $fieldIds);
+                        ->where('school_id', $school->id);
         
         // Recherche par nom, email, téléphone ou filière
         if ($request->has('search') && !empty($request->search)) {
@@ -131,6 +126,7 @@ class StudentController extends Controller
             'phone' => $validated['phone'] ?? null,
             'field_id' => $validated['field_id'],
             'photo' => $photoFileName,
+            'school_id' => $school->id,
             
             // Informations des parents
             'parent_name' => $validated['parent_name'] ?? null,

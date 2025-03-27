@@ -20,156 +20,141 @@
 @endpush
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h1 class="h3 fw-bold text-primary-custom mb-0">
-                        <i class="fas fa-tachometer-alt me-2"></i>Tableau de Bord
-                    </h1>
-                </div>
+<div class="container mx-auto px-4">
+    <div class="mb-6">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="text-2xl font-bold text-primary-600">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Tableau de Bord
+                </h1>
             </div>
         </div>
     </div>
 
     <!-- Statistiques générales -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="text-primary-custom">
-                            <i class="fas fa-user-graduate fa-2x"></i>
-                        </div>
-                        <div class="bg-primary-custom bg-opacity-10 rounded-circle p-2">
-                            <div class="fw-bold text-white">{{ isset($studentsCount) ? $studentsCount : 0 }}</div>
-                        </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <!-- Étudiants -->
+        <div class="card hover-lift">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="text-primary-600">
+                        <i class="fas fa-user-graduate text-3xl"></i>
                     </div>
-                    <h5 class="card-title fw-bold">Étudiants</h5>
-                    <p class="card-text text-muted">Total d'étudiants inscrits</p>
+                    <div class="bg-primary-100 rounded-full p-3 w-12 h-12 flex items-center justify-center">
+                        <div class="font-bold text-primary-600">{{ isset($studentsCount) ? $studentsCount : 0 }}</div>
+                    </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 py-3">
-                    <a href="{{ route('students.index') }}" class="text-decoration-none stretched-link text-primary-custom fw-medium">
-                        <i class="fas fa-arrow-right me-1"></i> Voir tous les étudiants
-                    </a>
-                </div>
+                <h5 class="text-lg font-bold mb-1">Étudiants</h5>
+                <p class="text-gray-500 mb-3">Total d'étudiants inscrits</p>
+                <a href="{{ route('students.index') }}" class="text-primary-600 font-medium hover:underline inline-flex items-center">
+                    <i class="fas fa-arrow-right mr-1"></i> Voir tous les étudiants
+                </a>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="text-success">
-                            <i class="fas fa-money-bill-wave fa-2x"></i>
-                        </div>
-                        <div class="bg-success bg-opacity-10 rounded-circle p-2">
-                            <div class="fw-bold text-white">{{ isset($paymentsCount) ? $paymentsCount : 0 }}</div>
-                        </div>
+        <!-- Paiements -->
+        <div class="card hover-lift">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="text-success">
+                        <i class="fas fa-money-bill-wave text-3xl"></i>
                     </div>
-                    <h5 class="card-title fw-bold">Paiements</h5>
-                    <p class="card-text text-muted">Total des paiements reçus</p>
+                    <div class="bg-green-100 rounded-full p-3 w-12 h-12 flex items-center justify-center">
+                        <div class="font-bold text-green-600">{{ isset($paymentsCount) ? $paymentsCount : 0 }}</div>
+                    </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 py-3">
-                    <a href="{{ route('payments.index') }}" class="text-decoration-none stretched-link text-success fw-medium">
-                        <i class="fas fa-arrow-right me-1"></i> Gérer les paiements
-                    </a>
-                </div>
+                <h5 class="text-lg font-bold mb-1">Paiements</h5>
+                <p class="text-gray-500 mb-3">Total des paiements reçus</p>
+                <a href="{{ route('payments.index') }}" class="text-green-600 font-medium hover:underline inline-flex items-center">
+                    <i class="fas fa-arrow-right mr-1"></i> Gérer les paiements
+                </a>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="text-info">
-                            <i class="fas fa-school fa-2x"></i>
-                        </div>
-                        <div class="bg-info bg-opacity-10 rounded-circle p-2">
-                            <div class="fw-bold text-white">{{ isset($campusesCount) ? $campusesCount : 0 }}</div>
-                        </div>
+        <!-- Campus -->
+        <div class="card hover-lift">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="text-blue-500">
+                        <i class="fas fa-school text-3xl"></i>
                     </div>
-                    <h5 class="card-title fw-bold">Campus</h5>
-                    <p class="card-text text-muted">Nombre de campus gérés</p>
+                    <div class="bg-blue-100 rounded-full p-3 w-12 h-12 flex items-center justify-center">
+                        <div class="font-bold text-blue-600">{{ isset($campusesCount) ? $campusesCount : 0 }}</div>
+                    </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 py-3">
-                    <a href="{{ route('campuses.index') }}" class="text-decoration-none stretched-link text-info fw-medium">
-                        <i class="fas fa-arrow-right me-1"></i> Voir les campus
-                    </a>
-                </div>
+                <h5 class="text-lg font-bold mb-1">Campus</h5>
+                <p class="text-gray-500 mb-3">Nombre de campus gérés</p>
+                <a href="{{ route('campuses.index') }}" class="text-blue-600 font-medium hover:underline inline-flex items-center">
+                    <i class="fas fa-arrow-right mr-1"></i> Voir les campus
+                </a>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="text-warning">
-                            <i class="fas fa-graduation-cap fa-2x"></i>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 rounded-circle p-2">
-                            <div class="fw-bold text-white">{{ isset($fieldsCount) ? $fieldsCount : 0 }}</div>
-                        </div>
+        <!-- Filières -->
+        <div class="card hover-lift">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="text-yellow-500">
+                        <i class="fas fa-graduation-cap text-3xl"></i>
                     </div>
-                    <h5 class="card-title fw-bold">Filières</h5>
-                    <p class="card-text text-muted">Total des filières proposées</p>
+                    <div class="bg-yellow-100 rounded-full p-3 w-12 h-12 flex items-center justify-center">
+                        <div class="font-bold text-yellow-600">{{ isset($fieldsCount) ? $fieldsCount : 0 }}</div>
+                    </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 py-3">
-                    <a href="{{ route('fields.index') }}" class="text-decoration-none stretched-link text-warning fw-medium">
-                        <i class="fas fa-arrow-right me-1"></i> Gérer les filières
-                    </a>
-                </div>
+                <h5 class="text-lg font-bold mb-1">Filières</h5>
+                <p class="text-gray-500 mb-3">Total des filières proposées</p>
+                <a href="{{ route('fields.index') }}" class="text-yellow-600 font-medium hover:underline inline-flex items-center">
+                    <i class="fas fa-arrow-right mr-1"></i> Gérer les filières
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Statistiques de recouvrement -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-chart-pie me-2 text-primary-custom"></i>État des paiements
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="chart-container" style="height: 200px;">
-                                <canvas id="paymentStatusChart"></canvas>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- État des paiements -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="font-bold flex items-center">
+                    <i class="fas fa-chart-pie mr-2 text-primary-600"></i>État des paiements
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="paymentStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="mb-4">
+                            <h6 class="font-bold mb-2">Payé intégralement</h6>
+                            <div class="flex justify-between mb-1">
+                                <span>{{ $paymentStatus['fully_paid'] }} étudiants</span>
+                                <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['fully_paid'] / $totalStudents) * 100, 1) : 0 }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ $totalStudents > 0 ? ($paymentStatus['fully_paid'] / $totalStudents) * 100 : 0 }}%"></div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Payé intégralement</h6>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>{{ $paymentStatus['fully_paid'] }} étudiants</span>
-                                    <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['fully_paid'] / $totalStudents) * 100, 1) : 0 }}%</span>
-                                </div>
-                                <div class="progress progress-thin">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalStudents > 0 ? ($paymentStatus['fully_paid'] / $totalStudents) * 100 : 0 }}%"></div>
-                                </div>
+                        <div class="mb-4">
+                            <h6 class="font-bold mb-2">Partiellement payé</h6>
+                            <div class="flex justify-between mb-1">
+                                <span>{{ $paymentStatus['partial_paid'] }} étudiants</span>
+                                <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['partial_paid'] / $totalStudents) * 100, 1) : 0 }}%</span>
                             </div>
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Partiellement payé</h6>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>{{ $paymentStatus['partial_paid'] }} étudiants</span>
-                                    <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['partial_paid'] / $totalStudents) * 100, 1) : 0 }}%</span>
-                                </div>
-                                <div class="progress progress-thin">
-                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $totalStudents > 0 ? ($paymentStatus['partial_paid'] / $totalStudents) * 100 : 0 }}%"></div>
-                                </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-yellow-500 h-2 rounded-full" style="width: {{ $totalStudents > 0 ? ($paymentStatus['partial_paid'] / $totalStudents) * 100 : 0 }}%"></div>
                             </div>
-                            <div>
-                                <h6 class="fw-bold">Aucun paiement</h6>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>{{ $paymentStatus['no_payment'] }} étudiants</span>
-                                    <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['no_payment'] / $totalStudents) * 100, 1) : 0 }}%</span>
-                                </div>
-                                <div class="progress progress-thin">
-                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalStudents > 0 ? ($paymentStatus['no_payment'] / $totalStudents) * 100 : 0 }}%"></div>
-                                </div>
+                        </div>
+                        <div>
+                            <h6 class="font-bold mb-2">Aucun paiement</h6>
+                            <div class="flex justify-between mb-1">
+                                <span>{{ $paymentStatus['no_payment'] }} étudiants</span>
+                                <span>{{ $totalStudents > 0 ? number_format(($paymentStatus['no_payment'] / $totalStudents) * 100, 1) : 0 }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: {{ $totalStudents > 0 ? ($paymentStatus['no_payment'] / $totalStudents) * 100 : 0 }}%"></div>
                             </div>
                         </div>
                     </div>
@@ -177,41 +162,42 @@
             </div>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-percentage me-2 text-primary-custom"></i>Taux de recouvrement
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-6 text-center">
-                            <div class="position-relative d-inline-block">
-                                <canvas id="recoveryRateChart" width="200" height="200"></canvas>
-                                <div class="position-absolute top-50 start-50 translate-middle text-center">
-                                    <h2 class="mb-0 fw-bold">{{ number_format($recoveryRate, 1) }}%</h2>
-                                    <p class="mb-0 small">Recouvrement</p>
-                                </div>
+        <!-- Taux de recouvrement -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="font-bold flex items-center">
+                    <i class="fas fa-percentage mr-2 text-primary-600"></i>Taux de recouvrement
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="text-center">
+                        <div class="relative inline-block">
+                            <canvas id="recoveryRateChart" width="200" height="200"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <h2 class="text-2xl font-bold mb-0">{{ number_format($recoveryRate, 1) }}%</h2>
+                                <p class="text-sm">Recouvrement</p>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="mb-0 fw-bold">Montant total attendu</h6>
-                                    <span class="badge bg-primary-custom text-on-primary">{{ number_format($totalExpectedFees, 0, ',', ' ') }} FCFA</span>
+                    </div>
+                    <div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h6 class="font-bold">Montant total attendu</h6>
+                                    <span class="badge bg-primary-100 text-primary-800">{{ number_format($totalExpectedFees, 0, ',', ' ') }} FCFA</span>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="mb-0 fw-bold">Montant recouvré</h6>
-                                    <span class="badge bg-success text-on-primary">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA</span>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h6 class="font-bold">Montant recouvré</h6>
+                                    <span class="badge bg-green-100 text-green-800">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA</span>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold">Reste à recouvrer</h6>
-                                    <span class="badge bg-danger text-on-primary">{{ number_format($outstandingFees, 0, ',', ' ') }} FCFA</span>
+                                <div class="flex justify-between items-center mb-3">
+                                    <h6 class="font-bold">Reste à recouvrer</h6>
+                                    <span class="badge bg-red-100 text-red-800">{{ number_format($outstandingFees, 0, ',', ' ') }} FCFA</span>
                                 </div>
                             </div>
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ $recoveryRate }}%" aria-valuenow="{{ $recoveryRate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="w-full bg-gray-200 rounded-full h-5">
+                                <div class="bg-green-500 h-5 rounded-full" style="width: {{ $recoveryRate }}%"></div>
                             </div>
                         </div>
                     </div>
@@ -220,48 +206,47 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <!-- Derniers paiements et activité récente -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Derniers paiements -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-money-check-alt me-2 text-primary-custom"></i>Derniers paiements
+        <div class="lg:col-span-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="font-bold flex items-center">
+                        <i class="fas fa-money-check-alt mr-2 text-primary-600"></i>Derniers paiements
                     </h5>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th scope="col">#Référence</th>
-                                    <th scope="col">Étudiant</th>
-                                    <th scope="col">Montant</th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">État</th>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#Référence</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiant</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">État</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if(isset($recentPayments) && count($recentPayments) > 0)
+                                @foreach($recentPayments as $payment)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $payment->reference_no }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $payment->student->fullName }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $payment->payment_date->format('d/m/Y') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Confirmé</span>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @if(isset($recentPayments) && count($recentPayments) > 0)
-                                    @foreach($recentPayments as $payment)
-                                    <tr>
-                                        <th scope="row">{{ $payment->reference_no }}</th>
-                                        <td>{{ $payment->student->fullName }}</td>
-                                        <td>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
-                                        <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
-                                        <td>
-                                            <span class="badge bg-success text-on-primary">Confirmé</span>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                @else
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">Aucun paiement récent trouvé</td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">Aucun paiement récent trouvé</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
                 <div class="card-footer bg-transparent border-0 text-end py-3">
                     <a href="{{ route('payments.index') }}" class="btn btn-sm btn-outline-primary">
@@ -272,14 +257,14 @@
         </div>
 
         <!-- Activités récentes -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-history me-2 text-primary-custom"></i>Activités récentes
+        <div class="lg:col-span-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="font-bold flex items-center">
+                        <i class="fas fa-history mr-2 text-primary-600"></i>Activités récentes
                     </h5>
                 </div>
-                <div class="card-body p-0">
+                <div class="overflow-x-auto">
                     <div class="list-group list-group-flush">
                         @if(isset($recentActivities) && count($recentActivities) > 0)
                             @foreach($recentActivities as $activity)
