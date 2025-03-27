@@ -8,121 +8,82 @@
             height: 300px;
             width: 100%;
         }
-
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            margin-bottom: 1rem;
-        }
-
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-        }
-
-        .progress {
-            background-color: #e9ecef;
-        }
-
-        .progress-bar {
-            background-color: #0d6efd;
-        }
-
-        .table th {
-            font-weight: 500;
-            border-top: none;
-        }
-
-        .opacity-50 {
-            opacity: 0.5;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
     </style>
 @endpush
 
 @section('content')
-    <div class="container-fluid">
-        <div class="row mb-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card bg-primary text-white h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-3">Total Étudiants</h6>
-                                <h2 class="mb-0">{{ $totalStudents }}</h2>
-                            </div>
-                            <i class="fas fa-users fa-2x opacity-50"></i>
-                        </div>
+    <div class="w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-primary-600 text-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h6 class="text-sm font-medium mb-2">Total Étudiants</h6>
+                        <h2 class="text-2xl font-bold">{{ $totalStudents }}</h2>
                     </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card bg-success text-white h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-3">Total Paiements</h6>
-                                <h2 class="mb-0">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA</h2>
-                            </div>
-                            <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
-                        </div>
+            <div class="bg-secondary-600 text-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h6 class="text-sm font-medium mb-2">Total Paiements</h6>
+                        <h2 class="text-2xl font-bold">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA</h2>
                     </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card bg-warning text-white h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-3">Frais non payés</h6>
-                                <h2 class="mb-0">{{ number_format($outstandingFees, 0, ',', ' ') }} FCFA</h2>
-                            </div>
-                            <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
-                        </div>
+            <div class="bg-amber-500 text-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h6 class="text-sm font-medium mb-2">Frais non payés</h6>
+                        <h2 class="text-2xl font-bold">{{ number_format($outstandingFees, 0, ',', ' ') }} FCFA</h2>
                     </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card bg-info text-white h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="card-title mb-3">Taux de recouvrement</h6>
-                                <h2 class="mb-0">{{ $recoveryRate }}%</h2>
-                            </div>
-                            <i class="fas fa-chart-line fa-2x opacity-50"></i>
-                        </div>
+            <div class="bg-accent text-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h6 class="text-sm font-medium mb-2">Taux de recouvrement</h6>
+                        <h2 class="text-2xl font-bold">{{ $recoveryRate }}%</h2>
                     </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
                 </div>
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">État des paiements</h5>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+            <div class="md:col-span-4">
+                <div class="bg-white rounded-lg shadow-md h-full">
+                    <div class="border-b border-gray-200 px-4 py-3">
+                        <h5 class="font-medium text-gray-700">État des paiements</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-4">
                         <div class="chart-container">
                             <canvas id="paymentStatusChart"></canvas>
                         </div>
-                        <div class="mt-4">
-                            <div class="d-flex justify-content-between border-bottom py-2">
-                                <span>En règle</span>
+                        <div class="mt-4 space-y-2">
+                            <div class="flex justify-between border-b border-gray-200 py-2">
+                                <span class="text-gray-600">En règle</span>
                                 <strong>{{ $paymentStatus['fully_paid'] }} étudiants</strong>
                             </div>
-                            <div class="d-flex justify-content-between border-bottom py-2">
-                                <span>Paiement partiel</span>
+                            <div class="flex justify-between border-b border-gray-200 py-2">
+                                <span class="text-gray-600">Paiement partiel</span>
                                 <strong>{{ $paymentStatus['partial_paid'] }} étudiants</strong>
                             </div>
-                            <div class="d-flex justify-content-between py-2">
-                                <span>Sans paiement</span>
+                            <div class="flex justify-between py-2">
+                                <span class="text-gray-600">Sans paiement</span>
                                 <strong>{{ $paymentStatus['no_payment'] }} étudiants</strong>
                             </div>
                         </div>
@@ -130,12 +91,12 @@
                 </div>
             </div>
 
-            <div class="col-md-8">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Évolution mensuelle des paiements</h5>
+            <div class="md:col-span-8">
+                <div class="bg-white rounded-lg shadow-md h-full">
+                    <div class="border-b border-gray-200 px-4 py-3">
+                        <h5 class="font-medium text-gray-700">Évolution mensuelle des paiements</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-4">
                         <div class="chart-container">
                             <canvas id="monthlyPaymentsChart"></canvas>
                         </div>
@@ -144,59 +105,59 @@
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Statistiques du jour</h5>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+            <div class="md:col-span-4">
+                <div class="bg-white rounded-lg shadow-md h-full">
+                    <div class="border-b border-gray-200 px-4 py-3">
+                        <h5 class="font-medium text-gray-700">Statistiques du jour</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span>Paiements aujourd'hui</span>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between border-b border-gray-200 py-2">
+                            <span class="text-gray-600">Paiements aujourd'hui</span>
                             <strong>{{ number_format($todayStats['payments'], 0, ',', ' ') }} FCFA</strong>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span>Nouveaux étudiants</span>
+                        <div class="flex justify-between border-b border-gray-200 py-2">
+                            <span class="text-gray-600">Nouveaux étudiants</span>
                             <strong>{{ $todayStats['new_students'] }}</strong>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span>Nombre de paiements</span>
+                        <div class="flex justify-between border-b border-gray-200 py-2">
+                            <span class="text-gray-600">Nombre de paiements</span>
                             <strong>{{ $todayStats['payment_count'] }}</strong>
                         </div>
-                        <div class="d-flex justify-content-between py-2">
-                            <span>Moyenne des paiements</span>
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-600">Moyenne des paiements</span>
                             <strong>{{ number_format($todayStats['average_payment'], 0, ',', ' ') }} FCFA</strong>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-8">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Paiements récents</h5>
-                        <a href="{{ route('payments.index') }}" class="btn btn-sm btn-primary">Voir tout</a>
+            <div class="md:col-span-8">
+                <div class="bg-white rounded-lg shadow-md h-full">
+                    <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+                        <h5 class="font-medium text-gray-700">Paiements récents</h5>
+                        <a href="{{ route('payments.index') }}" class="px-3 py-1 bg-primary-600 text-white text-sm rounded hover:bg-primary-700 transition">Voir tout</a>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
+                    <div class="p-4">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
                                 <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Étudiant</th>
-                                    <th>Filière</th>
-                                    <th>Montant</th>
-                                    <th>Description</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiant</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filière</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                                 </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($recentPayments as $payment)
-                                    <tr>
-                                        <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
-                                        <td>{{ $payment->student->fullName }}</td>
-                                        <td>{{ $payment->student->field->name }}</td>
-                                        <td>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
-                                        <td>{{ Str::limit($payment->description, 30) }}</td>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $payment->student->fullName }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $payment->student->field->name }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ Str::limit($payment->description, 30) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -211,59 +172,53 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Paiements par campus</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="campusPaymentsChart"></canvas>
-                        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow-md h-full">
+                <div class="border-b border-gray-200 px-4 py-3">
+                    <h5 class="font-medium text-gray-700">Paiements par campus</h5>
+                </div>
+                <div class="p-4">
+                    <div class="chart-container">
+                        <canvas id="campusPaymentsChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Filières les plus populaires</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+            <div class="bg-white rounded-lg shadow-md h-full">
+                <div class="border-b border-gray-200 px-4 py-3">
+                    <h5 class="font-medium text-gray-700">Filières les plus populaires</h5>
+                </div>
+                <div class="p-4">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
                                 <tr>
-                                    <th>Filière</th>
-                                    <th>Étudiants</th>
-                                    <th>Pourcentage</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filière</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiants</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pourcentage</th>
                                 </tr>
-                                </thead>
-                                <tbody>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($popularFields as $field)
-                                    <tr>
-                                        <td>{{ $field->name }}</td>
-                                        <td>{{ $field->students_count }}</td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <span class="me-2">{{ round(($field->students_count / $totalStudents) * 100, 1) }}%</span>
-                                                <div class="progress flex-grow-1" style="height: 5px;">
-                                                    <div class="progress-bar" role="progressbar"
-                                                         style="width: {{ ($field->students_count / $totalStudents) * 100 }}%">
-                                                    </div>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $field->name }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $field->students_count }}</td>
+                                        <td class="px-4 py-2">
+                                            <div class="flex items-center">
+                                                <span class="mr-2">{{ round(($field->students_count / $totalStudents) * 100, 1) }}%</span>
+                                                <div class="flex-grow bg-gray-200 rounded-full h-1.5">
+                                                    <div class="bg-primary-500 h-1.5 rounded-full" style="width: {{ ($field->students_count / $totalStudents) * 100 }}%"></div>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center">Aucune filière trouvée</td>
+                                        <td colspan="3" class="px-4 py-2 text-center text-gray-500">Aucune filière trouvée</td>
                                     </tr>
                                 @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -295,7 +250,7 @@
                     labels: {!! json_encode($chartData['paymentStatus']['labels']) !!},
                     datasets: [{
                         data: {!! json_encode($chartData['paymentStatus']['data']) !!},
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                        backgroundColor: ['#22c55e', '#84cc16', '#ef4444']
                     }]
                 },
                 options: {
@@ -321,8 +276,8 @@
                     datasets: [{
                         label: 'Montant total',
                         data: {!! json_encode($chartData['monthly']->pluck('total')) !!},
-                        borderColor: '#0d6efd',
-                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
                         tension: 0.4,
                         fill: true
                     }]
@@ -350,7 +305,7 @@
                     datasets: [{
                         label: 'Montant total',
                         data: {!! json_encode($chartData['campusData']['data']) !!},
-                        backgroundColor: 'rgba(13, 110, 253, 0.8)'
+                        backgroundColor: 'rgba(22, 163, 74, 0.8)'
                     }]
                 },
                 options: {
