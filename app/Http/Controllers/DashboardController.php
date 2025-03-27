@@ -2,21 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
-use App\Models\Payment;
-use App\Models\Field;
 use App\Models\Campus;
+use App\Models\Field;
+use App\Models\Payment;
+use App\Models\Student;
+use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     // Constante pour la conversion
     const CURRENCY_SYMBOL = 'FCFA';
+    
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('school');
+    }
 
+    /**
+     * Show the application dashboard.
+     */
     public function index()
     {
+        $user = Auth::user();
+        $school = session('currentSchool');
+        
         // Statistiques de base
         $totalStudents = Student::count();
         $totalPayments = Payment::sum('amount');
@@ -68,9 +85,9 @@ class DashboardController extends Controller
         $paymentsByCampus = DB::table('payments')
             ->join('students', 'payments.student_id', '=', 'students.id')
             ->join('fields', 'students.field_id', '=', 'fields.id')
-            ->join('campuses', 'fields.campus_id', '=', 'campuses.id') // 'campus' -> 'campuses'
-            ->select('campuses.name', DB::raw('SUM(payments.amount) as total')) // 'campus' -> 'campuses'
-            ->groupBy('campuses.name') // 'campus' -> 'campuses'
+            ->join('campuses', 'fields.campus_id', '=', 'campuses.id')
+            ->select('campuses.name', DB::raw('SUM(payments.amount) as total'))
+            ->groupBy('campuses.name')
             ->get();
 
         // Statistiques mensuelles
@@ -109,6 +126,8 @@ class DashboardController extends Controller
         ];
 
         return view('dashboard', compact(
+            'user',
+            'school',
             'totalStudents',
             'totalPayments',
             'totalFields',
@@ -123,50 +142,66 @@ class DashboardController extends Controller
         ));
     }
 
+    /**
+     * Get monthly payment statistics for the past 6 months.
+     */
     private function getMonthlyStats()
     {
-        $startDate = Carbon::now()->startOfYear();
-        $endDate = Carbon::now();
-        $connection = DB::connection()->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        $months = collect();
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $months->push([
+                'month' => $date->format('F Y'),
+                'value' => 0
+            ]);
+        }
 
-        // Définir la syntaxe SQL en fonction du type de base de données
-        $monthExtractSql = $connection === 'sqlite' 
-            ? "strftime('%m', payment_date)"
-            : "MONTH(payment_date)";
+        $monthlyPayments = Payment::select(
+            DB::raw('SUM(amount) as total'),
+            DB::raw('MONTH(payment_date) as month'),
+            DB::raw('YEAR(payment_date) as year')
+        )
+            ->whereDate('payment_date', '>=', Carbon::now()->subMonths(6))
+            ->groupBy('year', 'month')
+            ->get();
 
-        return Payment::selectRaw("
-                {$monthExtractSql} as month,
-                COUNT(*) as count,
-                SUM(amount) as total,
-                AVG(amount) as average
-            ")
-            ->whereBetween('payment_date', [$startDate, $endDate])
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(function ($item) {
-                $month = Carbon::createFromFormat('m', $item->month)->format('M');
-                return [
-                    'month' => $month,
-                    'count' => $item->count,
-                    'total' => $item->total,
-                    'average' => round($item->average, 2)
-                ];
+        $monthlyPayments->each(function ($item) use ($months) {
+            $date = Carbon::createFromDate($item->year, $item->month, 1);
+            $key = $months->search(function ($m) use ($date) {
+                return $m['month'] === $date->format('F Y');
             });
-    }
 
-    private function getTodayStats()
-    {
-        $today = Carbon::today();
+            if ($key !== false) {
+                $months[$key]['value'] = (float) $item->total;
+            }
+        });
 
         return [
-            'payments' => Payment::whereDate('payment_date', $today)->sum('amount'),
-            'new_students' => Student::whereDate('created_at', $today)->count(),
-            'payment_count' => Payment::whereDate('payment_date', $today)->count(),
-            'average_payment' => Payment::whereDate('payment_date', $today)->avg('amount') ?? 0
+            'labels' => $months->pluck('month'),
+            'data' => $months->pluck('value')
         ];
     }
 
+    /**
+     * Get today's payment statistics.
+     */
+    private function getTodayStats()
+    {
+        $today = Carbon::today();
+        $todayPayments = Payment::whereDate('payment_date', $today)->sum('amount');
+        $todayStudents = Payment::whereDate('payment_date', $today)
+            ->distinct('student_id')
+            ->count('student_id');
+
+        return [
+            'payments' => $todayPayments,
+            'students' => $todayStudents
+        ];
+    }
+
+    /**
+     * Get API statistics data.
+     */
     public function getStatistics()
     {
         $today = Carbon::today();

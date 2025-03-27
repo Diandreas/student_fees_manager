@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_superadmin',
     ];
 
     /**
@@ -45,8 +46,39 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the student associated with the user.
+     */
     public function student()
     {
         return $this->hasOne(Student::class);
+    }
+
+    /**
+     * Get schools that the user administers.
+     */
+    public function schools()
+    {
+        return $this->belongsToMany(School::class, 'school_admins')
+                    ->withPivot('role', 'permissions')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Check if user is an admin of a school.
+     */
+    public function isAdminOf(School $school)
+    {
+        return $this->schools()->where('school_id', $school->id)->exists();
+    }
+
+    /**
+     * Get the role of the user in a school.
+     */
+    public function roleIn(School $school)
+    {
+        $relation = $this->schools()->where('school_id', $school->id)->first();
+        return $relation ? $relation->pivot->role : null;
     }
 }

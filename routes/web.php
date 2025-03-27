@@ -7,6 +7,9 @@ use App\Http\Controllers\CampusController;
 use App\Http\Controllers\FieldController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\SchoolAdminController;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,32 +17,50 @@ use App\Http\Controllers\PaymentController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Page d'accueil
+Route::view('/', 'welcome');
+
+// Routes d'authentification
+Auth::routes();
+Route::get('/home', HomeController::class.'@index')->name('home');
+
+// Routes qui ne nécessitent que l'authentification
+Route::middleware('auth')->group(function () {
+    // Routes pour la gestion des écoles
+    Route::resource('schools', SchoolController::class);
+    Route::post('schools/{school}/switch', [SchoolController::class, 'switchSchool'])->name('schools.switch');
+    
+    // Routes pour la gestion des administrateurs d'école
+    Route::controller(SchoolAdminController::class)->prefix('schools/{school}/admins')->name('schools.admins.')->group(function () {
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{admin}/edit', 'edit')->name('edit');
+        Route::put('/{admin}', 'update')->name('update');
+        Route::delete('/{admin}', 'destroy')->name('destroy');
+    });
 });
 
-// Authentication routes
-Auth::routes();
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Route::middleware(['auth'])->group(function () {
+// Routes qui nécessitent une école sélectionnée
+Route::middleware(['auth', 'school'])->group(function () {
     // Dashboard routes
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/statistics', [DashboardController::class, 'getStatistics'])->name('dashboard.statistics');
+    Route::controller(DashboardController::class)->group(function () {
+        Route::get('/dashboard', 'index')->name('dashboard');
+        Route::get('/dashboard/statistics', 'getStatistics')->name('dashboard.statistics');
+    });
 
+    // Student remaining amount
     Route::get('/payments/student-remaining/{student}', [PaymentController::class, 'getStudentRemainingAmount'])
         ->name('payments.student-remaining');
-    // Campus management
-    Route::resource('campuses', CampusController::class);
-
-    // Field management
-    Route::resource('fields', FieldController::class);
-
-    // Student management
-    Route::resource('students', StudentController::class);
-
-    // Payment management
-    Route::resource('payments', PaymentController::class);
+    
+    // Resource routes
+    Route::resources([
+        'campuses' => CampusController::class,
+        'fields' => FieldController::class,
+        'students' => StudentController::class,
+        'payments' => PaymentController::class,
+    ]);
+    
+    // Payment receipt
     Route::get('/payments/{payment}/print', [PaymentController::class, 'printReceipt'])
         ->name('payments.print');
 
