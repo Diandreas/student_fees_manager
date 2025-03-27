@@ -1,29 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Add Campus</h5>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h5 class="font-medium text-gray-700 text-lg">Ajouter un campus</h5>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <form action="{{ route('campuses.store') }}" method="POST">
                 @csrf
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                    <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('name') border-red-500 @enderror" 
+                        id="name" name="name" value="{{ old('name') }}" required>
                     @error('name')
-                    <div class="invalid-feedback">{{ $message }}</div>
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description">{{ old('description') }}</textarea>
+                <div class="mb-4">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('description') border-red-500 @enderror" 
+                        id="description" name="description" rows="4">{{ old('description') }}</textarea>
                     @error('description')
-                    <div class="invalid-feedback">{{ $message }}</div>
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-                <button type="submit" class="btn btn-primary">Save Campus</button>
-                <a href="{{ route('campuses.index') }}" class="btn btn-secondary">Cancel</a>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <a href="{{ route('campuses.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Annuler</a>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition">Enregistrer</button>
+                </div>
             </form>
         </div>
     </div>
