@@ -39,7 +39,8 @@
                     <label for="amount" class="form-label">Amount</label>
                     <input type="number" step="0.01"
                            class="form-control @error('amount') is-invalid @enderror"
-                           id="amount" name="amount" value="{{ old('amount') }}" required>
+                           id="amount" name="amount" value="{{ old('amount') }}" 
+                           placeholder="FCFA" required>
                     @error('amount')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -56,16 +57,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control @error('description') is-invalid @enderror"
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('description') border-red-500 @enderror"
                               id="description" name="description" required>{{ old('description') }}</textarea>
                     @error('description')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <button type="submit" class="btn btn-primary">Record Payment</button>
-                <a href="{{ route('payments.index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition">Record Payment</button>
+                <a href="{{ route('payments.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Cancel</a>
             </form>
         </div>
     </div>
