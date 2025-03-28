@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4">
+<div class="container mx-auto px-4 py-6">
     <div class="mb-6">
-        <div class="card">
-            <div class="card-body flex justify-between items-center">
-                <h1 class="text-xl font-bold text-primary-600">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h1 class="text-xl font-bold text-primary-600 flex items-center">
                     <i class="fas fa-user-graduate mr-2"></i>{{ session('current_school') ? session('current_school')->term('students') : 'Gestion des étudiants' }}
                 </h1>
-                <a href="{{ route('students.create') }}" class="btn-primary">
+                <a href="{{ route('students.create') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center whitespace-nowrap">
                     <i class="fas fa-plus mr-2"></i>Ajouter un {{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }}
                 </a>
             </div>
@@ -16,34 +16,35 @@
     </div>
 
     <div class="mb-6">
-        <div class="card">
-            <div class="card-header">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="border-b border-gray-100 p-5">
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-3 md:space-y-0">
-                    <h5 class="font-bold text-primary-600">
-                        Liste des {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-list mr-2"></i>Liste des {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}
                     </h5>
                     <form class="flex" action="{{ route('students.index') }}" method="GET">
-                        <div class="flex w-full md:w-auto">
-                            <input type="text" class="form-input rounded-r-none" name="search" value="{{ request()->search }}" placeholder="Rechercher par nom, email, téléphone ou filière...">
-                            <button class="bg-primary-600 hover:bg-primary-700 text-white px-3 rounded-l-none rounded-r-md" type="submit">
-                                <i class="fas fa-search"></i>
+                        <div class="flex w-full md:w-auto relative">
+                            <input type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 pr-10" 
+                                   name="search" value="{{ request()->search }}" 
+                                   placeholder="Rechercher par nom, email, téléphone ou filière...">
+                            <button class="absolute inset-y-0 right-0 px-3 flex items-center" type="submit">
+                                <i class="fas fa-search text-gray-400"></i>
                             </button>
-                            @if(request()->has('search') && !empty(request()->search))
-                            <a href="{{ route('students.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-3 rounded-md ml-1">
-                                <i class="fas fa-times"></i>
-                            </a>
-                            @endif
                         </div>
+                        @if(request()->has('search') && !empty(request()->search))
+                        <a href="{{ route('students.index') }}" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
+                            <i class="fas fa-times mr-1"></i> Effacer
+                        </a>
+                        @endif
                     </form>
                 </div>
             </div>
             
             <div id="studentsContainer">
-                <!-- Mode Liste uniquement -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
+                        <thead>
+                            <tr class="bg-gray-50">
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#ID</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom complet</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
@@ -56,11 +57,11 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($students as $student)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $student->id }}</td>
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-600">{{ $student->id }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <div class="rounded-full bg-primary-100 flex items-center justify-center mr-3 w-10 h-10 overflow-hidden">
+                                        <div class="rounded-full bg-primary-100 flex items-center justify-center mr-3 w-10 h-10 overflow-hidden shadow-sm">
                                             @if($student->photo)
                                                 <img src="{{ Storage::url('students/' . $student->photo) }}" class="w-full h-full object-cover" alt="{{ $student->fullName }}">
                                             @else
@@ -68,64 +69,69 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <p class="font-bold mb-0">{{ $student->fullName }}</p>
-                                            <p class="text-gray-500 text-sm mb-0">inscrit le {{ $student->created_at->format('d/m/Y') }}</p>
+                                            <p class="font-bold text-gray-800 mb-0">{{ $student->fullName }}</p>
+                                            <p class="text-gray-500 text-xs mb-0">inscrit le {{ $student->created_at->format('d/m/Y') }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $student->email }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $student->phone ?? 'Non spécifié' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $student->email }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $student->phone ?? 'Non spécifié' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($student->parent_name || $student->parent_tel)
-                                        <span class="block font-medium">{{ $student->parent_name ?? 'Parent' }}</span>
-                                        <span class="text-sm text-gray-500">{{ $student->parent_tel ?? 'Aucun numéro' }}</span>
+                                        <span class="block font-medium text-gray-800">{{ $student->parent_name ?? 'Parent' }}</span>
+                                        <span class="text-xs text-gray-500">{{ $student->parent_tel ?? 'Aucun numéro' }}</span>
                                     @else
                                         <span class="text-gray-500">Non spécifié</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="badge-success">
+                                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         {{ $student->field->name ?? 'Non assigné' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $student->field->campus->name ?? 'Non assigné' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $student->field->campus->name ?? 'Non assigné' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <div class="flex justify-end space-x-1">
-                                        <a href="{{ route('students.show', $student->id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">
+                                        <a href="{{ route('students.show', $student->id) }}" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-150" title="Voir les détails">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('students.edit', $student->id) }}" class="px-2 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                                        <a href="{{ route('students.edit', $student->id) }}" class="p-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors duration-150" title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="px-2 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200" 
-                                                onclick="document.getElementById('deleteModal{{ $student->id }}').classList.remove('hidden')">
+                                        <button type="button" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-150" 
+                                                onclick="document.getElementById('deleteModal{{ $student->id }}').classList.remove('hidden')" title="Supprimer">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </div>
                                     
                                     <!-- Modal de suppression -->
                                     <div id="deleteModal{{ $student->id }}" class="hidden fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
-                                        <div class="relative bg-white rounded-lg max-w-md w-full mx-auto p-6">
+                                        <div class="relative bg-white rounded-xl max-w-md w-full mx-auto p-6 shadow-xl">
                                             <div class="flex justify-between items-center mb-4">
-                                                <h5 class="text-lg font-bold">Confirmation de suppression</h5>
-                                                <button type="button" class="text-gray-400 hover:text-gray-600" 
+                                                <h5 class="text-lg font-bold text-gray-800">Confirmation de suppression</h5>
+                                                <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" 
                                                         onclick="document.getElementById('deleteModal{{ $student->id }}').classList.add('hidden')">
-                                                    <i class="fas fa-times"></i>
+                                                    <i class="fas fa-times text-xl"></i>
                                                 </button>
                                             </div>
-                                            <div class="text-left">
-                                                <p>Êtes-vous sûr de vouloir supprimer l'{{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }} <strong>{{ $student->fullName }}</strong> ?</p>
-                                                <p class="text-red-600 my-2"><small>Cette action est irréversible.</small></p>
+                                            <div class="text-left mb-6">
+                                                <div class="flex items-center mb-3 text-gray-700">
+                                                    <div class="rounded-full bg-red-100 text-red-600 p-3 mr-3">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                    </div>
+                                                    <p>Êtes-vous sûr de vouloir supprimer l'{{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }} <strong>{{ $student->fullName }}</strong> ?</p>
+                                                </div>
+                                                <p class="text-red-600 pl-12"><small>Cette action est irréversible.</small></p>
                                             </div>
-                                            <div class="flex justify-end space-x-2 mt-4">
-                                                <button type="button" class="btn-secondary"
+                                            <div class="flex justify-end space-x-2">
+                                                <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors duration-150"
                                                         onclick="document.getElementById('deleteModal{{ $student->id }}').classList.add('hidden')">
                                                     Annuler
                                                 </button>
                                                 <form action="{{ route('students.destroy', $student->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded">
+                                                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-150">
                                                         Supprimer
                                                     </button>
                                                 </form>
@@ -138,18 +144,20 @@
                             <tr>
                                 <td colspan="8" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
-                                        <i class="fas fa-user-graduate text-5xl text-gray-400 mb-4"></i>
-                                        <h5 class="text-lg font-bold mb-1">Aucun {{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }} trouvé</h5>
+                                        <div class="rounded-full bg-gray-100 p-6 mb-4">
+                                            <i class="fas fa-user-graduate text-5xl text-gray-400"></i>
+                                        </div>
+                                        <h5 class="text-lg font-bold mb-1 text-gray-800">Aucun {{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }} trouvé</h5>
                                         <p class="text-gray-500 mb-4">
                                             @if(request()->has('search') && !empty(request()->search))
                                                 Aucun résultat pour la recherche "{{ request()->search }}"
-                                                <br><a href="{{ route('students.index') }}" class="text-primary-600 hover:underline">Voir tous les {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}</a>
+                                                <br><a href="{{ route('students.index') }}" class="text-primary-600 hover:text-primary-700 hover:underline">Voir tous les {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}</a>
                                             @else
                                                 Commencez par ajouter un {{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }}
                                             @endif
                                         </p>
                                         @if(!request()->has('search'))
-                                        <a href="{{ route('students.create') }}" class="btn-primary">
+                                        <a href="{{ route('students.create') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
                                             <i class="fas fa-plus mr-2"></i>Ajouter un {{ session('current_school') ? strtolower(session('current_school')->term('student')) : 'étudiant' }}
                                         </a>
                                         @endif
@@ -163,7 +171,7 @@
             </div>
             
             @if($students->count() > 0)
-            <div class="card-footer">
+            <div class="border-t border-gray-100 p-5">
                 <div class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
                     <div>
                         <p class="text-gray-500 mb-0">Affichage de <span class="font-medium">{{ $students->firstItem() ?? 0 }}</span> à <span class="font-medium">{{ $students->lastItem() ?? 0 }}</span> sur <span class="font-medium">{{ $students->total() }}</span> {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}</p>

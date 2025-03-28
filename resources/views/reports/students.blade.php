@@ -1,138 +1,128 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body d-flex justify-content-between align-items-center p-4">
-                    <h1 class="h3 fw-bold text-primary-custom mb-0">
-                        <i class="fas fa-user-graduate me-2"></i>Rapport des Étudiants
-                    </h1>
-                    <div>
-                        <a href="#" class="btn btn-outline-success me-2" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>Imprimer
-                        </a>
-                        <a href="{{ route('reports.index') }}" class="btn btn-outline-primary-custom">
-                            <i class="fas fa-arrow-left me-2"></i>Retour
-                        </a>
-                    </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h1 class="text-xl font-bold text-primary-600 flex items-center">
+                    <i class="fas fa-user-graduate mr-2"></i>Rapport des Étudiants
+                </h1>
+                <div class="flex flex-wrap gap-2">
+                    <a href="#" class="inline-flex items-center px-3 py-2 border border-green-500 rounded-lg text-green-600 bg-white hover:bg-green-50 font-medium transition-colors duration-150" onclick="window.print()">
+                        <i class="fas fa-print mr-1.5"></i>Imprimer
+                    </a>
+                    <a href="{{ route('reports.index') }}" class="inline-flex items-center px-3 py-2 border border-primary-500 rounded-lg text-primary-600 bg-white hover:bg-primary-50 font-medium transition-colors duration-150">
+                        <i class="fas fa-arrow-left mr-1.5"></i>Retour
+                    </a>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Indicateurs clés -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary border-0 shadow-sm h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col-auto me-3">
-                            <div class="rounded-circle bg-primary-custom bg-opacity-10 p-3">
-                                <i class="fas fa-users fa-2x text-primary-custom"></i>
-                            </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-primary-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="rounded-full bg-primary-100 p-3">
+                            <i class="fas fa-users text-xl text-primary-600"></i>
                         </div>
-                        <div class="col">
-                            <div class="text-muted small mb-1">Total des étudiants</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($totalStudents, 0, ',', ' ') }}</div>
-                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Total des étudiants</div>
+                        <div class="text-lg font-bold text-gray-800">{{ number_format($totalStudents, 0, ',', ' ') }}</div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success border-0 shadow-sm h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col-auto me-3">
-                            <div class="rounded-circle bg-success bg-opacity-10 p-3">
-                                <i class="fas fa-check-circle fa-2x text-success"></i>
-                            </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-green-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="rounded-full bg-green-100 p-3">
+                            <i class="fas fa-check-circle text-xl text-green-600"></i>
                         </div>
-                        <div class="col">
-                            <div class="text-muted small mb-1">Payé intégralement</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($paymentStats['fullyPaid'], 0, ',', ' ') }}</div>
-                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Payé intégralement</div>
+                        <div class="text-lg font-bold text-gray-800">{{ number_format($paymentStats['fullyPaid'], 0, ',', ' ') }}</div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning border-0 shadow-sm h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col-auto me-3">
-                            <div class="rounded-circle bg-warning bg-opacity-10 p-3">
-                                <i class="fas fa-exclamation-circle fa-2x text-warning"></i>
-                            </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-yellow-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="rounded-full bg-yellow-100 p-3">
+                            <i class="fas fa-exclamation-circle text-xl text-yellow-600"></i>
                         </div>
-                        <div class="col">
-                            <div class="text-muted small mb-1">Payé partiellement</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($paymentStats['partiallyPaid'], 0, ',', ' ') }}</div>
-                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Payé partiellement</div>
+                        <div class="text-lg font-bold text-gray-800">{{ number_format($paymentStats['partiallyPaid'], 0, ',', ' ') }}</div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-danger border-0 shadow-sm h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col-auto me-3">
-                            <div class="rounded-circle bg-danger bg-opacity-10 p-3">
-                                <i class="fas fa-times-circle fa-2x text-danger"></i>
-                            </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border-l-4 border-red-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="rounded-full bg-red-100 p-3">
+                            <i class="fas fa-times-circle text-xl text-red-600"></i>
                         </div>
-                        <div class="col">
-                            <div class="text-muted small mb-1">Aucun paiement</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($paymentStats['notPaid'], 0, ',', ' ') }}</div>
-                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Aucun paiement</div>
+                        <div class="text-lg font-bold text-gray-800">{{ number_format($paymentStats['notPaid'], 0, ',', ' ') }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="row mb-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <!-- Graphique des statuts de paiement -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold text-primary-custom">
-                        <i class="fas fa-chart-pie me-2"></i>Statuts de paiement
+        <div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden h-full">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-chart-pie mr-2"></i>Statuts de paiement
                     </h5>
                 </div>
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-center">
-                        <div style="height: 250px; width: 250px;">
+                <div class="p-5">
+                    <div class="flex justify-center">
+                        <div class="h-64 w-64">
                             <canvas id="paymentStatusChart"></canvas>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="d-flex align-items-center">
-                                <span class="badge bg-success rounded-circle p-2 me-2">&nbsp;</span>
-                                Payé intégralement
-                            </span>
-                            <span class="fw-bold">{{ $totalStudents > 0 ? round(($paymentStats['fullyPaid'] / $totalStudents) * 100) : 0 }}%</span>
+                    <div class="mt-6 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                <span class="text-sm text-gray-700">Payé intégralement</span>
+                            </div>
+                            <span class="font-bold text-gray-800">{{ $totalStudents > 0 ? round(($paymentStats['fullyPaid'] / $totalStudents) * 100) : 0 }}%</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="d-flex align-items-center">
-                                <span class="badge bg-warning rounded-circle p-2 me-2">&nbsp;</span>
-                                Payé partiellement
-                            </span>
-                            <span class="fw-bold">{{ $totalStudents > 0 ? round(($paymentStats['partiallyPaid'] / $totalStudents) * 100) : 0 }}%</span>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+                                <span class="text-sm text-gray-700">Payé partiellement</span>
+                            </div>
+                            <span class="font-bold text-gray-800">{{ $totalStudents > 0 ? round(($paymentStats['partiallyPaid'] / $totalStudents) * 100) : 0 }}%</span>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="d-flex align-items-center">
-                                <span class="badge bg-danger rounded-circle p-2 me-2">&nbsp;</span>
-                                Aucun paiement
-                            </span>
-                            <span class="fw-bold">{{ $totalStudents > 0 ? round(($paymentStats['notPaid'] / $totalStudents) * 100) : 0 }}%</span>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                <span class="text-sm text-gray-700">Aucun paiement</span>
+                            </div>
+                            <span class="font-bold text-gray-800">{{ $totalStudents > 0 ? round(($paymentStats['notPaid'] / $totalStudents) * 100) : 0 }}%</span>
                         </div>
                     </div>
                 </div>
@@ -140,52 +130,52 @@
         </div>
         
         <!-- Montants des paiements -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold text-primary-custom">
-                        <i class="fas fa-money-bill-wave me-2"></i>Statut de recouvrement
+        <div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden h-full">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-money-bill-wave mr-2"></i>Statut de recouvrement
                     </h5>
                 </div>
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
-                            <div class="recovery-rate-circle">
-                                <canvas id="recoveryRateChart" width="200" height="200"></canvas>
+                <div class="p-5">
+                    <div class="text-center mb-6">
+                        <div class="relative inline-block">
+                            <div class="w-48 h-48 mx-auto recovery-rate-circle">
+                                <canvas id="recoveryRateChart"></canvas>
                             </div>
-                            <div class="position-absolute top-50 start-50 translate-middle text-center">
-                                <h3 class="mb-0 fw-bold">{{ $recoveryRate }}%</h3>
-                                <p class="mb-0 small text-muted">Recouvrement</p>
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                                <h3 class="text-2xl font-bold text-gray-800">{{ $recoveryRate }}%</h3>
+                                <p class="text-xs text-gray-500">Recouvrement</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="mt-4">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Total attendu</span>
-                                <span class="fw-bold">{{ number_format($paymentStats['totalFees'], 0, ',', ' ') }} FCFA</span>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-500">Total attendu</span>
+                                <span class="font-bold text-gray-800">{{ number_format($paymentStats['totalFees'], 0, ',', ' ') }} FCFA</span>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-primary" style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Total reçu</span>
-                                <span class="fw-bold">{{ number_format($paymentStats['totalPaid'], 0, ',', ' ') }} FCFA</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-success" style="width: {{ $recoveryRate }}%"></div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary-600 h-2 rounded-full" style="width: 100%"></div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Reste à percevoir</span>
-                                <span class="fw-bold">{{ number_format($paymentStats['totalRemaining'], 0, ',', ' ') }} FCFA</span>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-500">Total reçu</span>
+                                <span class="font-bold text-gray-800">{{ number_format($paymentStats['totalPaid'], 0, ',', ' ') }} FCFA</span>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-danger" style="width: {{ 100 - $recoveryRate }}%"></div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ $recoveryRate }}%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-500">Reste à percevoir</span>
+                                <span class="font-bold text-gray-800">{{ number_format($paymentStats['totalRemaining'], 0, ',', ' ') }} FCFA</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: {{ 100 - $recoveryRate }}%"></div>
                             </div>
                         </div>
                     </div>
@@ -194,39 +184,41 @@
         </div>
         
         <!-- Répartition par campus -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold text-primary-custom">
-                        <i class="fas fa-university me-2"></i>Répartition par campus
+        <div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden h-full">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-university mr-2"></i>Répartition par campus
                     </h5>
                 </div>
-                <div class="card-body p-4">
+                <div class="p-5">
                     @if($studentsByCampus->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead class="table-light">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <th>Campus</th>
-                                        <th class="text-end">Nombre</th>
-                                        <th class="text-end">%</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campus</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">%</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($studentsByCampus as $campus)
-                                    <tr>
-                                        <td>{{ $campus->name }}</td>
-                                        <td class="text-end">{{ $campus->count }}</td>
-                                        <td class="text-end">{{ $totalStudents > 0 ? round(($campus->count / $totalStudents) * 100) : 0 }}%</td>
+                                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $campus->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-800">{{ $campus->count }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-800">{{ $totalStudents > 0 ? round(($campus->count / $totalStudents) * 100) : 0 }}%</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-university fa-3x text-muted mb-3"></i>
-                            <p>Aucun campus trouvé</p>
+                        <div class="text-center py-8">
+                            <div class="rounded-full bg-gray-100 p-4 mx-auto w-16 h-16 flex items-center justify-center mb-3">
+                                <i class="fas fa-university text-gray-400 text-xl"></i>
+                            </div>
+                            <p class="text-gray-500">Aucun campus trouvé</p>
                         </div>
                     @endif
                 </div>
@@ -235,52 +227,51 @@
     </div>
     
     <!-- Étudiants par filière -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold text-primary-custom">
-                        <i class="fas fa-graduation-cap me-2"></i>Étudiants par filière
-                    </h5>
-                </div>
-                <div class="card-body p-4">
-                    @if($studentsByField->count() > 0)
-                        <div class="row">
-                            @foreach($studentsByField as $field)
-                            <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 class="mb-0 fw-bold">{{ $field->name }}</h6>
-                                            <span class="badge bg-primary-custom bg-opacity-10 text-white py-2 px-3">
-                                                {{ $field->students_count }} étudiants
-                                            </span>
-                                        </div>
-                                        <p class="text-muted small mb-3">{{ $field->campus->name }}</p>
-                                        <div class="progress" style="height: 8px;">
-                                            <div class="progress-bar bg-primary" style="width: {{ $totalStudents > 0 ? ($field->students_count / $totalStudents) * 100 : 0 }}%"></div>
-                                        </div>
-                                        <div class="d-flex justify-content-between mt-2">
-                                            <small class="text-muted">% du total</small>
-                                            <small class="fw-bold">{{ $totalStudents > 0 ? round(($field->students_count / $totalStudents) * 100, 1) : 0 }}%</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-transparent p-4 border-0">
-                                        <a href="{{ route('fields.show', $field->id) }}" class="btn btn-sm btn-outline-primary-custom w-100">
-                                            <i class="fas fa-eye me-1"></i> Voir les détails
-                                        </a>
-                                    </div>
+    <div class="mb-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="border-b border-gray-100 p-5">
+                <h5 class="font-bold text-primary-600 flex items-center">
+                    <i class="fas fa-graduation-cap mr-2"></i>Étudiants par filière
+                </h5>
+            </div>
+            <div class="p-5">
+                @if($studentsByField->count() > 0)
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        @foreach($studentsByField as $field)
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                            <div class="p-5">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h6 class="font-bold text-gray-800 truncate">{{ $field->name }}</h6>
+                                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                                        {{ $field->students_count }} étudiants
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-500 mb-4">{{ $field->campus->name }}</p>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: {{ $totalStudents > 0 ? ($field->students_count / $totalStudents) * 100 : 0 }}%"></div>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-xs text-gray-500">% du total</span>
+                                    <span class="text-xs font-semibold text-gray-800">{{ $totalStudents > 0 ? round(($field->students_count / $totalStudents) * 100, 1) : 0 }}%</span>
                                 </div>
                             </div>
-                            @endforeach
+                            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100">
+                                <a href="{{ route('fields.show', $field->id) }}" class="inline-flex w-full items-center justify-center px-4 py-2 border border-primary-500 rounded-lg text-primary-600 bg-white hover:bg-primary-50 font-medium transition-colors duration-150">
+                                    <i class="fas fa-eye mr-1.5"></i> Voir les détails
+                                </a>
+                            </div>
                         </div>
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
-                            <p>Aucune filière trouvée</p>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-12">
+                        <div class="rounded-full bg-gray-100 p-6 mx-auto w-20 h-20 flex items-center justify-center mb-4">
+                            <i class="fas fa-graduation-cap text-gray-400 text-3xl"></i>
                         </div>
-                    @endif
-                </div>
+                        <h5 class="text-lg font-bold mb-1 text-gray-800">Aucune filière trouvée</h5>
+                        <p class="text-gray-500">Vous n'avez pas encore créé de filières dans le système</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -303,19 +294,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     {{ $paymentStats['notPaid'] }}
                 ],
                 backgroundColor: [
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545'
+                    '#22c55e', // green-500
+                    '#eab308', // yellow-500
+                    '#ef4444'  // red-500
                 ],
-                borderWidth: 1
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '70%',
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    padding: 10,
+                    cornerRadius: 6,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    }
                 }
             }
         }
@@ -330,14 +331,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     data: [{{ $recoveryRate }}, {{ 100 - $recoveryRate }}],
                     backgroundColor: [
-                        '#4CAF50',
-                        '#f2f2f2'
+                        '#22c55e', // green-500
+                        '#f3f4f6'  // gray-100
                     ],
                     borderWidth: 0
                 }]
             },
             options: {
-                cutout: '75%',
+                cutout: '80%',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -359,8 +360,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .recovery-rate-circle {
     position: relative;
-    width: 200px;
-    height: 200px;
 }
 </style>
 @endpush
