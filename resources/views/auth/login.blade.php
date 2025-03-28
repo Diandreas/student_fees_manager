@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex min-h-screen items-center justify-center bg-gray-50">
-    <div class="w-full max-w-md">
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary-600 py-6">
+<div class="flex min-h-screen items-center justify-center bg-gray-50 py-12">
+    <div class="w-full max-w-lg">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-primary-600 py-6">
                 <h2 class="text-xl font-bold text-center text-white">{{ __('Connexion') }}</h2>
             </div>
 
-            <div class="card-body p-6">
+            <div class="p-6">
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
 
@@ -16,7 +16,6 @@
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Adresse email') }}</label>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
                                class="form-input w-full @error('email') border-red-500 @enderror">
-
                         @error('email')
                             <span class="text-sm text-red-600" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -28,7 +27,6 @@
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Mot de passe') }}</label>
                         <input id="password" type="password" name="password" required autocomplete="current-password"
                                class="form-input w-full @error('password') border-red-500 @enderror">
-
                         @error('password')
                             <span class="text-sm text-red-600" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -36,34 +34,33 @@
                         @enderror
                     </div>
 
-                    <div class="mb-4">
+                    <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center">
-                            <input class="rounded text-primary-600 focus:ring-primary-500" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <label class="ml-2 text-sm text-gray-700" for="remember">
+                            <input type="checkbox" name="remember" id="remember" class="form-checkbox h-4 w-4 text-primary-600"
+                                   {{ old('remember') ? 'checked' : '' }}>
+                            <label for="remember" class="ml-2 block text-sm text-gray-700">
                                 {{ __('Se souvenir de moi') }}
                             </label>
                         </div>
+
+                        @if (Route::has('password.request'))
+                            <a class="text-sm text-primary-600 hover:text-primary-800" href="{{ route('password.request') }}">
+                                {{ __('Mot de passe oublié ?') }}
+                            </a>
+                        @endif
                     </div>
 
                     <div class="flex flex-col space-y-3">
                         <button type="submit" class="btn-primary w-full">
-                            {{ __('Connexion') }}
+                            {{ __('Se connecter') }}
                         </button>
-
-                        @if (Route::has('password.request'))
-                            <a class="text-sm text-center text-primary-600 hover:underline" href="{{ route('password.request') }}">
-                                {{ __('Mot de passe oublié?') }}
-                            </a>
-                        @endif
                         
-                        @if (Route::has('register'))
-                            <div class="text-center mt-4 text-sm text-gray-600">
-                                {{ __('Pas encore de compte?') }} 
-                                <a class="text-primary-600 font-medium hover:underline" href="{{ route('register') }}">
-                                    {{ __('Inscrivez-vous') }}
-                                </a>
-                            </div>
-                        @endif
+                        <div class="text-center mt-4 text-sm text-gray-600">
+                            {{ __('Vous n\'avez pas encore de compte ?') }}
+                            <a class="text-primary-600 font-medium hover:underline" href="{{ route('school.register') }}">
+                                {{ __('Inscrivez votre établissement') }}
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>

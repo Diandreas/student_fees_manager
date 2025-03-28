@@ -33,7 +33,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/dashboard';
+    protected $redirectTo = '/home';
 
     /**
      * Create a new controller instance.
@@ -45,6 +45,11 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
+    public function showRegistrationForm()
+    {
+        return redirect()->route('school.register');
+    }
+
     /**
      * Get a validator for an incoming registration request.
      *
@@ -54,17 +59,9 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            // Informations utilisateur
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            
-            // Informations école
-            'school_name' => ['required', 'string', 'max:255'],
-            'school_email' => ['required', 'string', 'email', 'max:255', 'unique:schools,contact_email'],
-            'school_phone' => ['nullable', 'string', 'max:20'],
-            'school_address' => ['nullable', 'string', 'max:255'],
-            'terms' => ['required', 'accepted'],
         ]);
     }
 
@@ -76,53 +73,11 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        // Commencer une transaction pour s'assurer que tout est créé correctement
-        DB::beginTransaction();
-        
-        try {
-            // Créer l'utilisateur
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-            ]);
-            
-            // Créer l'école associée
-            $school = School::create([
-                'name' => $data['school_name'],
-                'contact_email' => $data['school_email'],
-                'contact_phone' => $data['school_phone'] ?? null,
-                'address' => $data['school_address'] ?? null,
-                'primary_color' => '#0d47a1', // Couleur par défaut
-                'secondary_color' => '#10b981',
-                'theme_color' => '#0d47a1',
-                'header_color' => '#0d47a1',
-                'sidebar_color' => '#ffffff',
-                'text_color' => '#333333',
-                'subdomain' => Str::slug($data['school_name']),
-                'is_active' => true,
-                'subscription_plan' => 'basic',
-            ]);
-            
-            // Associer l'utilisateur comme administrateur de l'école
-            $school->admins()->attach($user->id, [
-                'role' => 'admin',
-                'permissions' => json_encode(['manage_students', 'manage_fees', 'manage_teachers', 'manage_programs', 'manage_reports']),
-            ]);
-            
-            // Enregistrer l'école actuelle dans la session
-            session(['current_school_id' => $school->id]);
-            
-            // Valider la transaction
-            DB::commit();
-            
-            return $user;
-        } catch (\Exception $e) {
-            // En cas d'erreur, annuler la transaction
-            DB::rollBack();
-            
-            throw $e;
-        }
+        return User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
     }
     
     /**

@@ -194,7 +194,7 @@
                     <div>
                         <h6 class="font-bold text-gray-700 mb-3">Historique des paiements</h6>
                         
-                        @if(count($payments) > 0)
+                        @if($student->payments->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead>
@@ -207,7 +207,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($payments as $payment)
+                                    @foreach($student->payments as $payment)
                                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                             {{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}

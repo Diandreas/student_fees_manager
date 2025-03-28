@@ -7,6 +7,7 @@ use App\Models\EducationLevel;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class FieldController extends Controller
@@ -45,8 +46,22 @@ class FieldController extends Controller
 
     public function create()
     {
-        $campuses = Campus::all();
-        return view('fields.create', compact('campuses'));
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour créer une filière.');
+        }
+
+        // Débogage pour vérifier l'école et ses campus
+        \Log::info('École sélectionnée:', ['school_id' => $school->id, 'school_name' => $school->name]);
+        
+        $campuses = Campus::where('school_id', $school->id)->get();
+        \Log::info('Campus trouvés:', ['count' => $campuses->count(), 'campus_list' => $campuses->pluck('name')]);
+        
+        $educationLevels = EducationLevel::where('school_id', $school->id)->orderBy('order')->get();
+        
+        return view('fields.create', compact('campuses', 'educationLevels'));
     }
 
     public function store(Request $request)

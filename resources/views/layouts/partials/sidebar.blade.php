@@ -71,14 +71,14 @@
                 {{ __('Administration') }}
             </div>
             
-            {{-- @if(auth()->user()->isAdmin()) --}}
+            @if(auth()->check() && auth()->user()->isAdmin())
                 <a href="{{ route('schools.index') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('schools.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                     <div class="flex items-center">
                         <i class="fas fa-building w-6"></i>
                         <span>{{ __('Écoles') }}</span>
                     </div>
                 </a>
-            {{-- @endif --}}
+            @endif
             
             <a href="{{ route('profile.index') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('profile.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                 <div class="flex items-center">

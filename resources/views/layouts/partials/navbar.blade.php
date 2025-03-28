@@ -39,7 +39,7 @@
             <div class="hidden md:flex items-center">
                 @auth
                     <!-- School Selector -->
-                    @if(auth()->user()->isAdmin())
+                    @if(auth()->check() && auth()->user()->isAdmin())
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center px-3 py-2 text-white hover:bg-primary-700 rounded-md mr-2">
                                 <i class="fas fa-building mr-1"></i>
