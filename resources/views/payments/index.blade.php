@@ -12,6 +12,101 @@
             </a>
         </div>
         <div class="p-6">
+            <div class="bg-gray-50 rounded-lg shadow-sm mb-6 border border-gray-200">
+                <div class="border-b border-gray-200 px-6 py-4">
+                    <h6 class="text-gray-700 font-medium">Filtrer les paiements</h6>
+                </div>
+                <div class="p-6">
+                    <form action="{{ route('payments.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Date Range -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Période</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <input type="date" name="start_date" 
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
+                                           value="{{ request('start_date') }}">
+                                </div>
+                                <div>
+                                    <input type="date" name="end_date" 
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
+                                           value="{{ request('end_date') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Student Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nom de l'étudiant</label>
+                            <input type="text" name="student" 
+                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
+                                   value="{{ request('student') }}" 
+                                   placeholder="Rechercher un étudiant...">
+                        </div>
+
+                        <!-- Amount Range -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Montant</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" name="min_amount" 
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
+                                       value="{{ request('min_amount') }}" 
+                                       placeholder="Min">
+                                <input type="number" name="max_amount" 
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" 
+                                       value="{{ request('max_amount') }}" 
+                                       placeholder="Max">
+                            </div>
+                        </div>
+
+                        <!-- Field -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filière</label>
+                            <select name="field" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50">
+                                <option value="">Toutes les filières</option>
+                                @foreach($fields as $field)
+                                    <option value="{{ $field->id }}" {{ request('field') == $field->id ? 'selected' : '' }}>
+                                        {{ $field->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Campus -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Campus</label>
+                            <select name="campus" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50">
+                                <option value="">Tous les campus</option>
+                                @foreach($campuses as $campus)
+                                    <option value="{{ $campus->id }}" {{ request('campus') == $campus->id ? 'selected' : '' }}>
+                                        {{ $campus->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-end space-x-3">
+                            <button type="submit" 
+                                    class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors duration-200 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                </svg>
+                                Filtrer
+                            </button>
+                            <a href="{{ route('payments.index') }}" 
+                               class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Réinitialiser
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
