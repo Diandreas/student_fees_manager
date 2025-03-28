@@ -105,6 +105,12 @@ class PaymentController extends Controller
     }
     public function printReceipt(Payment $payment)
     {
-        return view('payments.receipt', compact('payment'));
+        // Calcul du montant restant
+        $student = $payment->student;
+        $totalFees = $student->field->fees;
+        $totalPaid = $student->payments->sum('amount');
+        $remainingAmount = max(0, $totalFees - $totalPaid);
+
+        return view('payments.receipt', compact('payment', 'remainingAmount'));
     }
 }

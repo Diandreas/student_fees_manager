@@ -60,9 +60,22 @@
             border-radius: 5px;
             text-align: right;
         }
-        .total-amount {
-            font-size: 20px;
+        .amount-section .info-grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 15px;
+            align-items: center;
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .amount-section .total-amount {
+            font-size: 18px;
             font-weight: bold;
+            color: #2c3e50;
+        }
+        .amount-section .label {
+            color: #666;
+            font-weight: 600;
         }
         .footer {
             margin-top: 50px;
@@ -108,8 +121,12 @@
     </div>
 
     <div class="amount-section">
-        <div class="label">Total Amount Paid:</div>
-        <div class="total-amount">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</div>
+        <div class="info-grid">
+            <div class="label">Total Amount Paid:</div>
+            <div class="total-amount">{{ number_format($payment->amount, 0, '.', ' ') }} FCFA</div>
+            <div class="label">Total Remaining:</div>
+            <div class="total-amount">{{ number_format($remainingAmount, 0, '.', ' ') }} FCFA</div>
+        </div>
     </div>
 
     <div class="footer">
