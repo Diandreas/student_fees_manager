@@ -44,7 +44,7 @@ class FieldController extends Controller
         return view('fields.index', compact('fields'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $school = session('current_school');
         
@@ -54,14 +54,24 @@ class FieldController extends Controller
         }
 
         // Débogage pour vérifier l'école et ses campus
-        \Log::info('École sélectionnée:', ['school_id' => $school->id, 'school_name' => $school->name]);
+        \Illuminate\Support\Facades\Log::info('École sélectionnée:', ['school_id' => $school->id, 'school_name' => $school->name]);
         
         $campuses = Campus::where('school_id', $school->id)->get();
-        \Log::info('Campus trouvés:', ['count' => $campuses->count(), 'campus_list' => $campuses->pluck('name')]);
+        \Illuminate\Support\Facades\Log::info('Campus trouvés:', ['count' => $campuses->count(), 'campus_list' => $campuses->pluck('name')]);
         
         $educationLevels = EducationLevel::where('school_id', $school->id)->orderBy('order')->get();
         
-        return view('fields.create', compact('campuses', 'educationLevels'));
+        // Récupérer le campus_id depuis la requête s'il existe
+        $selectedCampusId = $request->query('campus_id');
+        $selectedCampus = null;
+        
+        if ($selectedCampusId) {
+            $selectedCampus = Campus::where('id', $selectedCampusId)
+                                  ->where('school_id', $school->id)
+                                  ->first();
+        }
+        
+        return view('fields.create', compact('campuses', 'educationLevels', 'selectedCampus'));
     }
 
     public function store(Request $request)

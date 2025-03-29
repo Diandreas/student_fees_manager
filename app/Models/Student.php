@@ -21,7 +21,7 @@ class Student extends Model
     public function getPhotoUrlAttribute()
     {
         if ($this->photo) {
-            return Storage::url('students/' . $this->photo);
+            return asset('storage/students/' . $this->photo);
         }
         return asset('images/default-student.png');
     }

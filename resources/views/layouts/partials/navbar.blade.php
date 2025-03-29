@@ -39,11 +39,11 @@
             <div class="hidden md:flex items-center">
                 @auth
                     <!-- School Selector -->
-                    @if(auth()->check() && auth()->user()->isAdmin())
+                    @if(session('current_school'))
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center px-3 py-2 text-white hover:bg-primary-700 rounded-md mr-2">
-                                <i class="fas fa-building mr-1"></i>
-                                <span class="mr-1">{{ session('current_school') ? session('current_school')->name : 'Choisir une école' }}</span>
+                                <i class="fas fa-school mr-1"></i>
+                                <span class="mr-1">{{ session('current_school')->name }}</span>
                                 <i class="fas fa-chevron-down text-xs"></i>
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 text-gray-700 z-10">
@@ -69,8 +69,12 @@
                                 @endforelse
                                 
                                 <div class="border-t border-gray-100"></div>
+                                <a href="{{ route('schools.settings', session('current_school')) }}" class="block px-4 py-2 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i>Paramètres de l'école
+                                </a>
                                 <a href="{{ route('schools.index') }}" class="block px-4 py-2 hover:bg-gray-100">
-                                    <i class="fas fa-cog mr-2"></i>Gérer les écoles
+                                    <i class="fas fa-list mr-2"></i>Gérer les écoles
+                                
                                 </a>
                             </div>
                         </div>

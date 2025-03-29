@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     // Routes pour la gestion des écoles
     Route::resource('schools', SchoolController::class);
     Route::post('schools/{school}/switch', [SchoolController::class, 'switchSchool'])->name('schools.switch');
+    Route::get('schools/{school}/settings', [SchoolSettingsController::class, 'index'])->name('schools.settings');
+    Route::put('schools/{school}/settings', [SchoolSettingsController::class, 'updateGeneral'])->name('schools.settings.update');
     
     // Routes pour les paramètres de l'école
     Route::get('/school/settings', [SchoolSettingsController::class, 'index'])->name('school.settings');

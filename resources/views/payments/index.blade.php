@@ -137,8 +137,8 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
                                         <div class="flex justify-end space-x-1">
-                                            <a href="{{ route('payments.show', $payment->id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="Voir">
-                                                <i class="fas fa-eye"></i>
+                                            <a href="{{ route('students.show', $payment->student_id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="Voir l'étudiant">
+                                                <i class="fas fa-user-graduate"></i>
                                             </a>
                                             <a href="{{ route('payments.edit', $payment->id) }}" class="px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200" title="Modifier">
                                                 <i class="fas fa-edit"></i>

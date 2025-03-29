@@ -197,23 +197,9 @@ class PaymentController extends Controller
             return redirect()->route('schools.select')->with('error', 'Veuillez sélectionner une école');
         }
         
-        // Vérifier que le paiement appartient à un étudiant de l'école actuelle
-        if ($payment->student->school_id != $school->id) {
-            return redirect()->route('payments.index')
-                ->with('error', 'Vous n\'avez pas accès à ce paiement');
-        }
-        
-        try {
-            $receipt_number = $payment->receipt_number;
-            $payment->delete();
-
-            return redirect()->route('payments.index')
-                ->with('success', $school->term('payment_deleted', 'Le paiement') . " avec le reçu N° $receipt_number a été supprimé avec succès.");
-
-        } catch (\Exception $e) {
-            return redirect()->route('payments.index')
-                ->with('error', "Une erreur s'est produite lors de la suppression du paiement.");
-        }
+        // Empêcher la suppression des paiements
+        return redirect()->route('payments.index')
+            ->with('error', 'La suppression des paiements n\'est pas autorisée pour maintenir l\'intégrité des données financières.');
     }
 
     /**
@@ -268,16 +254,27 @@ class PaymentController extends Controller
             if ($student->field->campus->school_id != $school->id) {
                 return redirect()->back()->with('error', 'Vous n\'avez pas accès à cet étudiant');
             }
+            
+            $paymentInfo = $this->getStudentPaymentInfo($studentId);
+            $remainingAmount = $paymentInfo['remainingAmount'];
+            
             $filename .= $student->fullName . '_' . date('Y-m-d') . '.xlsx';
-            return Excel::download(new PaymentsExport($studentId), $filename);
+            return Excel::download(new PaymentsExport($studentId, null, $remainingAmount), $filename);
         } else {
             // Récupérer tous les IDs des étudiants de l'école actuelle via la relation filière -> campus -> école
             $campusIds = $school->campuses()->pluck('id')->toArray();
             $fieldIds = Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
             $studentIds = Student::whereIn('field_id', $fieldIds)->pluck('id')->toArray();
             
+            // Préparer les informations sur le reste à payer pour chaque étudiant
+            $remainingAmounts = [];
+            foreach ($studentIds as $stId) {
+                $paymentInfo = $this->getStudentPaymentInfo($stId);
+                $remainingAmounts[$stId] = $paymentInfo['remainingAmount'];
+            }
+            
             $filename .= 'tous_' . date('Y-m-d') . '.xlsx';
-            return Excel::download(new PaymentsExport(null, $studentIds), $filename);
+            return Excel::download(new PaymentsExport(null, $studentIds, $remainingAmounts), $filename);
         }
     }
     
@@ -313,14 +310,17 @@ class PaymentController extends Controller
                 
             $paymentInfo = $this->getStudentPaymentInfo($studentId);
             
-            return view('payments.print-list', [
+            $data = [
                 'student' => $student,
                 'payments' => $payments,
                 'totalFees' => $paymentInfo['totalFees'],
                 'totalPaid' => $paymentInfo['totalPaid'],
                 'remainingAmount' => $paymentInfo['remainingAmount'],
                 'school' => $school
-            ]);
+            ];
+            
+            $pdf = PDF::loadView('payments.print-list', $data);
+            return $pdf->download($student->fullName . '_paiements_' . date('Y-m-d') . '.pdf');
         } else {
             // Récupérer tous les paiements de cette école
             $payments = Payment::with(['student.field.campus'])
@@ -330,10 +330,13 @@ class PaymentController extends Controller
                 ->latest('payment_date')
                 ->get();
                 
-            return view('payments.print-list', [
+            $data = [
                 'payments' => $payments,
                 'school' => $school
-            ]);
+            ];
+            
+            $pdf = PDF::loadView('payments.print-list', $data);
+            return $pdf->download($school->name . '_tous_paiements_' . date('Y-m-d') . '.pdf');
         }
     }
     
@@ -387,11 +390,20 @@ class PaymentController extends Controller
         $studentIds = Student::whereIn('field_id', $fieldIds)->pluck('id')->toArray();
         
         // Statistiques globales pour cette école
-        $totalRevenue = Payment::whereIn('student_id', $studentIds)->sum('amount');
+        $totalPayments = Payment::whereIn('student_id', $studentIds)->sum('amount');
         $recentPayments = Payment::whereIn('student_id', $studentIds)
                                 ->orderBy('payment_date', 'desc')
                                 ->limit(5)
                                 ->get();
+        
+        // Nombre total d'étudiants et paiements
+        $studentsCount = count($studentIds);
+        $paymentsCount = Payment::whereIn('student_id', $studentIds)->count();
+        
+        // Nombre d'étudiants ayant effectué au moins un paiement
+        $studentsWithPayments = Payment::whereIn('student_id', $studentIds)
+                                    ->distinct('student_id')
+                                    ->count('student_id');
         
         // Statistiques mensuelles
         $monthlyPayments = Payment::whereIn('student_id', $studentIds)
@@ -431,13 +443,16 @@ class PaymentController extends Controller
                             ->get();
                             
         return view('reports.payments', compact(
-            'totalRevenue',
+            'totalPayments',
             'recentPayments',
             'monthlyPayments',
             'paymentsByField',
             'paymentsByCampus',
             'allPayments',
-            'school'
+            'school',
+            'studentsCount',
+            'paymentsCount',
+            'studentsWithPayments'
         ));
     }
 

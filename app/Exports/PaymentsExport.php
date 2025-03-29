@@ -18,12 +18,20 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
     protected $studentId = null;
     protected $studentIds = [];
     protected $school = null;
+    protected $remainingAmounts = [];
     
-    public function __construct($studentId = null, $studentIds = [])
+    public function __construct($studentId = null, $studentIds = [], $remainingAmounts = [])
     {
         $this->studentId = $studentId;
         $this->studentIds = $studentIds;
         $this->school = session('current_school');
+        
+        // Si un seul étudiant avec un montant restant
+        if ($studentId && !is_array($remainingAmounts)) {
+            $this->remainingAmounts = [$studentId => $remainingAmounts];
+        } else {
+            $this->remainingAmounts = $remainingAmounts;
+        }
     }
     
     /**
@@ -58,6 +66,9 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
                 $this->school->term('field', 'Filière'),
                 $this->school->term('campus', 'Campus'),
                 $this->school->term('amount', 'Montant'),
+                $this->school->term('total_fees', 'Frais totaux'),
+                $this->school->term('total_paid', 'Montant payé'),
+                $this->school->term('remaining_amount', 'Reste à payer'),
                 $this->school->term('description', 'Description'),
                 $this->school->term('payment_method', 'Méthode de paiement'),
                 $this->school->term('payment_date', 'Date de paiement'),
@@ -74,6 +85,9 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             'Filière',
             'Campus',
             'Montant',
+            'Frais totaux',
+            'Montant payé',
+            'Reste à payer',
             'Description',
             'Méthode de paiement',
             'Date de paiement',
@@ -88,6 +102,13 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
      */
     public function map($payment): array
     {
+        $student = $payment->student;
+        $totalFees = $student->field->fees ?? 0;
+        
+        // Calculer le total payé et le reste à payer
+        $totalPaid = $student->payments->sum('amount');
+        $remainingAmount = $this->remainingAmounts[$payment->student_id] ?? max(0, $totalFees - $totalPaid);
+        
         return [
             $payment->id,
             $payment->receipt_number,
@@ -95,6 +116,9 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $payment->student->field->name ?? 'N/A',
             $payment->student->field->campus->name ?? 'N/A',
             $payment->amount,
+            $totalFees,
+            $totalPaid,
+            $remainingAmount,
             $payment->description,
             $payment->payment_method ?? 'N/A',
             $payment->payment_date ? Carbon::parse($payment->payment_date)->format('d/m/Y') : 'N/A',

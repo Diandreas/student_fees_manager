@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Field;
 use App\Models\User;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
+    protected $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     public function index(Request $request)
     {
         $school = session('current_school');
@@ -113,36 +121,31 @@ class StudentController extends Controller
         // Traitement de la photo si elle est fournie
         $photoFileName = null;
         if ($request->hasFile('photo')) {
-            $photoFile = $request->file('photo');
-            $photoFileName = 'student_' . time() . '_' . Str::random(10) . '.' . $photoFile->getClientOriginalExtension();
-            $photoFile->storeAs('public/students', $photoFileName);
+            $photoFileName = $this->imageService->saveStudentPhoto($request->file('photo'));
+            if (!$photoFileName) {
+                return back()->with('error', 'Erreur lors du stockage de la photo.');
+            }
         }
 
         // Créer l'enregistrement de l'étudiant
-        $student = new Student([
+        $student = Student::create([
             'fullName' => $validated['fullName'],
             'email' => $validated['email'],
             'address' => $validated['address'],
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $validated['phone'],
             'field_id' => $validated['field_id'],
             'photo' => $photoFileName,
+            'parent_name' => $validated['parent_name'],
+            'parent_tel' => $validated['parent_tel'],
+            'parent_email' => $validated['parent_email'],
+            'parent_profession' => $validated['parent_profession'],
+            'parent_address' => $validated['parent_address'],
+            'emergency_contact_name' => $validated['emergency_contact_name'],
+            'emergency_contact_tel' => $validated['emergency_contact_tel'],
+            'relationship' => $validated['relationship'],
             'school_id' => $school->id,
-            
-            // Informations des parents
-            'parent_name' => $validated['parent_name'] ?? null,
-            'parent_tel' => $validated['parent_tel'] ?? null,
-            'parent_email' => $validated['parent_email'] ?? null,
-            'parent_profession' => $validated['parent_profession'] ?? null,
-            'parent_address' => $validated['parent_address'] ?? null,
-            
-            // Contact d'urgence
-            'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
-            'emergency_contact_tel' => $validated['emergency_contact_tel'] ?? null,
-            'relationship' => $validated['relationship'] ?? null,
+            'user_id' => Auth::id()
         ]);
-
-        $student->user_id = Auth::id();
-        $student->save();
 
         $studentTerm = $school->term('student', 'Étudiant');
         
@@ -274,7 +277,6 @@ class StudentController extends Controller
             'field_id' => [
                 'required',
                 'exists:fields,id',
-                // S'assurer que la filière sélectionnée appartient à cette école
                 function ($attribute, $value, $fail) use ($fieldIds) {
                     if (!in_array($value, $fieldIds)) {
                         $fail('La filière sélectionnée n\'appartient pas à l\'école actuelle.');
@@ -300,13 +302,14 @@ class StudentController extends Controller
         if ($request->hasFile('photo')) {
             // Supprimer l'ancienne photo si elle existe
             if ($student->photo) {
-                Storage::delete('public/students/' . $student->photo);
+                $this->imageService->deleteStudentPhoto($student->photo);
             }
             
             // Enregistrer la nouvelle photo
-            $photoFile = $request->file('photo');
-            $photoFileName = 'student_' . time() . '_' . Str::random(10) . '.' . $photoFile->getClientOriginalExtension();
-            $photoFile->storeAs('public/students', $photoFileName);
+            $photoFileName = $this->imageService->saveStudentPhoto($request->file('photo'));
+            if (!$photoFileName) {
+                return back()->with('error', 'Erreur lors du stockage de la photo.');
+            }
             
             // Mettre à jour le nom du fichier photo
             $validated['photo'] = $photoFileName;
@@ -343,7 +346,7 @@ class StudentController extends Controller
         
         // Supprimer la photo de l'étudiant si elle existe
         if ($student->photo) {
-            Storage::delete('public/students/' . $student->photo);
+            $this->imageService->deleteStudentPhoto($student->photo);
         }
         
         // Supprimer l'utilisateur (et l'étudiant en cascade)
