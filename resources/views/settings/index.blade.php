@@ -1,410 +1,429 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">Paramètres de l'application</h2>
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h1 class="text-xl font-bold text-primary-600 flex items-center">
+                    <i class="fas fa-cogs mr-2"></i>Paramètres de l'application
+                </h1>
+                <a href="{{ route('dashboard') }}" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
             </div>
-            <p class="text-muted">Configurez les paramètres généraux de l'application</p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-3 mb-4">
-            <div class="list-group sticky-top" style="top: 80px;">
-                <a href="#appearance" class="list-group-item list-group-item-action active" data-bs-toggle="list">
-                    <i class="fas fa-palette me-2"></i>Apparence
-                </a>
-                <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                    <i class="fas fa-bell me-2"></i>Notifications
-                </a>
-                <a href="#language" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                    <i class="fas fa-language me-2"></i>Langues
-                </a>
-                <a href="#export" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                    <i class="fas fa-file-export me-2"></i>Export & Impression
-                </a>
-                <a href="#advanced" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                    <i class="fas fa-cogs me-2"></i>Paramètres avancés
-                </a>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Menu de navigation -->
+        <div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden sticky top-6">
+                <nav class="flex flex-col">
+                    <a href="#appearance" class="flex items-center gap-3 p-4 border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-medium">
+                        <i class="fas fa-palette w-5 text-center"></i>
+                        <span>Apparence</span>
+                    </a>
+                    <a href="#general" class="flex items-center gap-3 p-4 border-l-4 border-transparent hover:bg-gray-50 hover:border-gray-300">
+                        <i class="fas fa-sliders-h w-5 text-center"></i>
+                        <span>Général</span>
+                    </a>
+                    <a href="#notifications" class="flex items-center gap-3 p-4 border-l-4 border-transparent hover:bg-gray-50 hover:border-gray-300">
+                        <i class="fas fa-bell w-5 text-center"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="#export" class="flex items-center gap-3 p-4 border-l-4 border-transparent hover:bg-gray-50 hover:border-gray-300">
+                        <i class="fas fa-file-export w-5 text-center"></i>
+                        <span>Export & Rapports</span>
+                    </a>
+                    <a href="#advanced" class="flex items-center gap-3 p-4 border-l-4 border-transparent hover:bg-gray-50 hover:border-gray-300">
+                        <i class="fas fa-tools w-5 text-center"></i>
+                        <span>Avancé</span>
+                    </a>
+                </nav>
             </div>
         </div>
 
-        <div class="col-md-9">
-            <div class="tab-content">
-                <!-- Apparence -->
-                <div class="tab-pane fade show active" id="appearance">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold">Apparence</h5>
+        <!-- Contenu des paramètres -->
+        <div class="lg:col-span-3">
+            <!-- Apparence -->
+            <div id="appearance" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-palette mr-2"></i>Apparence
+                    </h5>
+                </div>
+                <div class="p-5">
+                    @if(session('appearance_success'))
+                        <div class="bg-green-50 text-green-800 rounded-lg p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm">{{ session('appearance_success') }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            @if(session('appearance_success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    {{ session('appearance_success') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
+                    @endif
 
-                            <form action="{{ route('settings.appearance') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                @method('PUT')
-                                
-                                <div class="mb-4">
-                                    <label class="form-label">Logo de l'application</label>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: contain;">
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <input type="file" name="logo" id="logo" class="form-control @error('logo') is-invalid @enderror" accept="image/*">
-                                            <div class="form-text">Format recommandé: PNG avec fond transparent. Dimensions: 200x200px</div>
-                                            @error('logo')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
+                    <form action="{{ route('settings.appearance') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Logo de l'application</label>
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0">
+                                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 w-24 object-contain border rounded-md">
+                                </div>
+                                <div class="flex-grow">
+                                    <input type="file" id="logo" name="logo" accept="image/*"
+                                        class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm @error('logo') border-red-500 @enderror">
+                                    @error('logo')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-sm text-gray-500">Format recommandé: PNG avec fond transparent. Dimensions: 200x200px</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label for="app_name" class="block text-sm font-medium text-gray-700 mb-1">Nom de l'application</label>
+                                <input type="text" id="app_name" name="app_name" value="{{ config('app.name') }}"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm @error('app_name') border-red-500 @enderror">
+                                @error('app_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            
+                            <div>
+                                <label for="default_theme" class="block text-sm font-medium text-gray-700 mb-1">Thème par défaut</label>
+                                <select id="default_theme" name="default_theme"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm @error('default_theme') border-red-500 @enderror">
+                                    <option value="light">Clair</option>
+                                    <option value="dark">Sombre</option>
+                                    <option value="auto">Automatique (selon système)</option>
+                                </select>
+                                @error('default_theme')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="mb-6 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fas fa-palette mr-2"></i>Personnaliser les couleurs
+                        </button>
+                        
+                        <div class="mb-6">
+                            <h6 class="font-medium text-gray-700 mb-3">Options d'affichage</h6>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox" id="show_footer" name="show_footer" value="1" checked
+                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="show_footer" class="font-medium text-gray-700">Afficher le pied de page</label>
                                     </div>
                                 </div>
                                 
-                                <div class="mb-4">
-                                    <label class="form-label">Favicon</label>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <img src="{{ asset('favicon.ico') }}" alt="Favicon" class="img-thumbnail" style="width: 48px; height: 48px; object-fit: contain;">
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <input type="file" name="favicon" id="favicon" class="form-control @error('favicon') is-invalid @enderror" accept="image/x-icon,image/png">
-                                            <div class="form-text">Format recommandé: ICO ou PNG. Dimensions: 32x32px ou 16x16px</div>
-                                            @error('favicon')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox" id="show_breadcrumbs" name="show_breadcrumbs" value="1" checked
+                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="show_breadcrumbs" class="font-medium text-gray-700">Afficher le fil d'Ariane</label>
                                     </div>
                                 </div>
                                 
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="app_name" class="form-label">Nom de l'application</label>
-                                        <input type="text" id="app_name" name="app_name" class="form-control @error('app_name') is-invalid @enderror" value="{{ config('app.name') }}">
-                                        @error('app_name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox" id="enable_animations" name="enable_animations" value="1" checked
+                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="enable_animations" class="font-medium text-gray-700">Activer les animations</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Général (section ajoutée) -->
+            <div id="general" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-sliders-h mr-2"></i>Paramètres généraux
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <form action="{{ route('settings.advanced') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label for="date_format" class="block text-sm font-medium text-gray-700 mb-1">Format de date</label>
+                                <select id="date_format" name="date_format"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                    <option value="d/m/Y">JJ/MM/AAAA (31/12/2023)</option>
+                                    <option value="m/d/Y">MM/JJ/AAAA (12/31/2023)</option>
+                                    <option value="Y-m-d">AAAA-MM-JJ (2023-12-31)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">Fuseau horaire</label>
+                                <select id="timezone" name="timezone"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                    <option value="UTC">UTC</option>
+                                    <option value="Africa/Douala">Afrique/Douala</option>
+                                    <option value="Europe/Paris">Europe/Paris</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="currency" class="block text-sm font-medium text-gray-700 mb-1">Devise par défaut</label>
+                            <select id="currency" name="currency"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="XAF">XAF (Franc CFA)</option>
+                                <option value="EUR">EUR (Euro)</option>
+                                <option value="USD">USD (Dollar américain)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div id="notifications" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-bell mr-2"></i>Notifications
+                    </h5>
+                    <p class="text-sm text-gray-500 mt-1">Ces fonctionnalités seront bientôt disponibles</p>
+                </div>
+                <div class="p-5">
+                    <div class="bg-blue-50 text-blue-800 rounded-lg p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm">Cette section sera disponible dans une prochaine mise à jour.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form action="#" method="POST" class="opacity-50">
+                        @csrf
+                        @method('PUT')
+                        
+                        <fieldset disabled>
+                            <div class="mb-6">
+                                <h6 class="font-medium text-gray-700 mb-3">Notifications par e-mail</h6>
+                                <div class="space-y-3">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="email_new_student" name="email_notifications[]" value="new_student" checked
+                                                class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="email_new_student" class="font-medium text-gray-700">Nouvel étudiant inscrit</label>
+                                        </div>
                                     </div>
                                     
-                                    <div class="col-md-6">
-                                        <label for="default_theme" class="form-label">Thème par défaut</label>
-                                        <select id="default_theme" name="default_theme" class="form-select @error('default_theme') is-invalid @enderror">
-                                            <option value="light">Clair</option>
-                                            <option value="dark">Sombre</option>
-                                            <option value="auto">Automatique (selon système)</option>
-                                        </select>
-                                        @error('default_theme')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="email_new_payment" name="email_notifications[]" value="new_payment" checked
+                                                class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="email_new_payment" class="font-medium text-gray-700">Nouveau paiement enregistré</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="email_payment_due" name="email_notifications[]" value="payment_due" checked
+                                                class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="email_payment_due" class="font-medium text-gray-700">Échéance de paiement</label>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label for="email_from" class="block text-sm font-medium text-gray-700 mb-1">Adresse d'expédition</label>
+                                    <input type="email" id="email_from" name="email_from" value="noreply@example.com"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                    <p class="mt-1 text-sm text-gray-500">Adresse e-mail utilisée pour envoyer les notifications</p>
+                                </div>
                                 
-                                <button type="button" class="btn btn-outline-primary mb-4" data-bs-toggle="modal" data-bs-target="#theme-modal">
-                                    <i class="fas fa-palette me-2"></i>Personnaliser les couleurs du thème
+                                <div>
+                                    <label for="email_name" class="block text-sm font-medium text-gray-700 mb-1">Nom d'expédition</label>
+                                    <input type="text" id="email_name" name="email_name" value="Student Fees Manager"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-save mr-2"></i>Enregistrer
                                 </button>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Options d'affichage</label>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="show_footer" name="show_footer" value="1" checked>
-                                        <label class="form-check-label" for="show_footer">Afficher le pied de page</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="show_breadcrumbs" name="show_breadcrumbs" value="1" checked>
-                                        <label class="form-check-label" for="show_breadcrumbs">Afficher le fil d'Ariane (breadcrumbs)</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="enable_animations" name="enable_animations" value="1" checked>
-                                        <label class="form-check-label" for="enable_animations">Activer les animations</label>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary-custom">
-                                        <i class="fas fa-save me-2"></i>Enregistrer les modifications
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
-                
-                <!-- Notifications -->
-                <div class="tab-pane fade" id="notifications">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold">Notifications</h5>
-                        </div>
-                        <div class="card-body">
-                            @if(session('notifications_success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    {{ session('notifications_success') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
+            </div>
 
-                            <form action="{{ route('settings.notifications') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-medium">Notifications par e-mail</label>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="email_new_student" name="email_notifications[]" value="new_student" checked>
-                                        <label class="form-check-label" for="email_new_student">Nouvel étudiant inscrit</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="email_new_payment" name="email_notifications[]" value="new_payment" checked>
-                                        <label class="form-check-label" for="email_new_payment">Nouveau paiement enregistré</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="email_payment_due" name="email_notifications[]" value="payment_due" checked>
-                                        <label class="form-check-label" for="email_payment_due">Échéance de paiement</label>
-                                    </div>
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="email_reports" name="email_notifications[]" value="reports">
-                                        <label class="form-check-label" for="email_reports">Rapports périodiques</label>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="email_from" class="form-label">Adresse d'expédition</label>
-                                    <input type="email" id="email_from" name="email_from" class="form-control @error('email_from') is-invalid @enderror" value="noreply@example.com">
-                                    <div class="form-text">Adresse e-mail utilisée pour envoyer les notifications</div>
-                                    @error('email_from')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="email_name" class="form-label">Nom d'expédition</label>
-                                    <input type="text" id="email_name" name="email_name" class="form-control @error('email_name') is-invalid @enderror" value="Student Fees Manager">
-                                    @error('email_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary-custom">
-                                        <i class="fas fa-save me-2"></i>Enregistrer les paramètres
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+            <!-- Export & Rapports -->
+            <div id="export" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-file-export mr-2"></i>Export & Rapports
+                    </h5>
                 </div>
-                
-                <!-- Langues -->
-                <div class="tab-pane fade" id="language">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold">Langues</h5>
+                <div class="p-5">
+                    <form action="{{ route('settings.export') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="mb-6">
+                            <label for="pdf_paper_size" class="block text-sm font-medium text-gray-700 mb-1">Format de papier PDF</label>
+                            <select id="pdf_paper_size" name="pdf_paper_size"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="a4">A4</option>
+                                <option value="letter">Letter</option>
+                                <option value="legal">Legal</option>
+                            </select>
                         </div>
-                        <div class="card-body">
-                            @if(session('language_success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    {{ session('language_success') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
-
-                            <form action="{{ route('settings.language') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                
-                                <div class="mb-3">
-                                    <label for="default_language" class="form-label">Langue par défaut</label>
-                                    <select id="default_language" name="default_language" class="form-select @error('default_language') is-invalid @enderror">
-                                        <option value="fr" selected>Français</option>
-                                        <option value="en">English</option>
-                                    </select>
-                                    @error('default_language')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Langues disponibles</label>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="lang_fr" name="available_languages[]" value="fr" checked disabled>
-                                        <label class="form-check-label" for="lang_fr">Français</label>
+                        
+                        <div class="mb-6">
+                            <label for="pdf_orientation" class="block text-sm font-medium text-gray-700 mb-1">Orientation PDF</label>
+                            <select id="pdf_orientation" name="pdf_orientation"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Paysage</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h6 class="font-medium text-gray-700 mb-3">Options d'export</h6>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox" id="add_header_footer" name="add_header_footer" value="1" checked
+                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                                     </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="lang_en" name="available_languages[]" value="en" checked>
-                                        <label class="form-check-label" for="lang_en">English</label>
+                                    <div class="ml-3 text-sm">
+                                        <label for="add_header_footer" class="font-medium text-gray-700">Ajouter en-tête et pied de page</label>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary-custom">
-                                        <i class="fas fa-save me-2"></i>Enregistrer les paramètres
-                                    </button>
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox" id="include_logo" name="include_logo" value="1" checked
+                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="include_logo" class="font-medium text-gray-700">Inclure le logo de l'école</label>
+                                    </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                        
+                        <div>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                
-                <!-- Export & Impression -->
-                <div class="tab-pane fade" id="export">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold">Export & Impression</h5>
-                        </div>
-                        <div class="card-body">
-                            @if(session('export_success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    {{ session('export_success') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
+            </div>
 
-                            <form action="{{ route('settings.export') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                
-                                <div class="mb-3">
-                                    <label for="paper_size" class="form-label">Format de papier par défaut</label>
-                                    <select id="paper_size" name="paper_size" class="form-select @error('paper_size') is-invalid @enderror">
-                                        <option value="a4" selected>A4</option>
-                                        <option value="letter">Letter</option>
-                                        <option value="legal">Legal</option>
-                                    </select>
-                                    @error('paper_size')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="export_format" class="form-label">Format d'export par défaut</label>
-                                    <select id="export_format" name="export_format" class="form-select @error('export_format') is-invalid @enderror">
-                                        <option value="xlsx" selected>Excel (.xlsx)</option>
-                                        <option value="csv">CSV (.csv)</option>
-                                        <option value="pdf">PDF (.pdf)</option>
-                                    </select>
-                                    @error('export_format')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="receipt_footer" class="form-label">Pied de page des reçus</label>
-                                    <textarea id="receipt_footer" name="receipt_footer" class="form-control @error('receipt_footer') is-invalid @enderror" rows="3">Merci pour votre paiement. Ce reçu est généré automatiquement et ne nécessite pas de signature.</textarea>
-                                    @error('receipt_footer')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="include_logo" name="include_logo" value="1" checked>
-                                        <label class="form-check-label" for="include_logo">Inclure le logo sur les documents imprimés</label>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary-custom">
-                                        <i class="fas fa-save me-2"></i>Enregistrer les paramètres
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+            <!-- Avancé -->
+            <div id="advanced" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-tools mr-2"></i>Paramètres avancés
+                    </h5>
                 </div>
-                
-                <!-- Paramètres avancés -->
-                <div class="tab-pane fade" id="advanced">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold">Paramètres avancés</h5>
-                        </div>
-                        <div class="card-body">
-                            @if(session('advanced_success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    {{ session('advanced_success') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
-
-                            <form action="{{ route('settings.advanced') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                
-                                <div class="mb-3">
-                                    <label for="items_per_page" class="form-label">Éléments par page</label>
-                                    <select id="items_per_page" name="items_per_page" class="form-select @error('items_per_page') is-invalid @enderror">
-                                        <option value="10" selected>10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                    @error('items_per_page')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="date_format" class="form-label">Format de date</label>
-                                    <select id="date_format" name="date_format" class="form-select @error('date_format') is-invalid @enderror">
-                                        <option value="d/m/Y" selected>DD/MM/YYYY (31/12/2023)</option>
-                                        <option value="Y-m-d">YYYY-MM-DD (2023-12-31)</option>
-                                        <option value="m/d/Y">MM/DD/YYYY (12/31/2023)</option>
-                                    </select>
-                                    @error('date_format')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="currency" class="form-label">Devise</label>
-                                    <select id="currency" name="currency" class="form-select @error('currency') is-invalid @enderror">
-                                        <option value="XOF" selected>Franc CFA (FCFA)</option>
-                                        <option value="EUR">Euro (€)</option>
-                                        <option value="USD">Dollar US ($)</option>
-                                    </select>
-                                    @error('currency')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Cache</label>
-                                    <button type="button" class="btn btn-outline-secondary d-block mb-2">
-                                        <i class="fas fa-broom me-2"></i>Vider le cache
-                                    </button>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Mode maintenance</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="maintenance_mode" name="maintenance_mode" value="1">
-                                        <label class="form-check-label" for="maintenance_mode">Activer le mode maintenance</label>
-                                    </div>
-                                    <div class="form-text">Lorsqu'il est activé, seuls les administrateurs peuvent accéder à l'application.</div>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary-custom">
-                                        <i class="fas fa-save me-2"></i>Enregistrer les paramètres
-                                    </button>
-                                </div>
-                            </form>
+                <div class="p-5">
+                    <div class="bg-yellow-50 text-yellow-800 rounded-lg p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium">Attention</p>
+                                <p class="text-sm">Ces paramètres sont destinés aux utilisateurs avancés. Une modification incorrecte peut affecter le fonctionnement de l'application.</p>
+                            </div>
                         </div>
                     </div>
+
+                    <form action="{{ route('settings.advanced') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="mb-6">
+                            <label for="cache_ttl" class="block text-sm font-medium text-gray-700 mb-1">Durée de vie du cache (minutes)</label>
+                            <input type="number" id="cache_ttl" name="cache_ttl" value="60" min="0"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="pagination_limit" class="block text-sm font-medium text-gray-700 mb-1">Éléments par page</label>
+                            <select id="pagination_limit" name="pagination_limit"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="log_level" class="block text-sm font-medium text-gray-700 mb-1">Niveau de journalisation</label>
+                            <select id="log_level" name="log_level"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="debug">Debug</option>
+                                <option value="info">Info</option>
+                                <option value="warning">Warning</option>
+                                <option value="error">Error</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-@endsection
-
-@push('scripts')
-<script src="{{ asset('js/theme-changer.js') }}"></script>
-@endpush 
+@endsection 

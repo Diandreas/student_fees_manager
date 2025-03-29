@@ -17,4 +17,12 @@ class Campus extends Model
     {
         return $this->belongsTo(School::class);
     }
+    
+    /**
+     * Get all students for this campus through fields
+     */
+    public function students()
+    {
+        return $this->hasManyThrough(Student::class, Field::class);
+    }
 }

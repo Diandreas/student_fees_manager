@@ -102,6 +102,34 @@ class SchoolController extends Controller
         // Stocker l'école actuelle dans la session
         session(['current_school_id' => $school->id]);
         
+        // Calculer directement le nombre d'étudiants
+        $studentsCount = \App\Models\Student::whereHas('field', function($query) use ($school) {
+            $query->whereHas('campus', function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            });
+        })->count();
+        
+        // Calculer directement le nombre de filières
+        $fieldsCount = \App\Models\Field::whereHas('campus', function($query) use ($school) {
+            $query->where('school_id', $school->id);
+        })->count();
+        
+        // Assigner les compteurs à l'école
+        $school->students_count = $studentsCount;
+        $school->fields_count = $fieldsCount;
+        
+        // Charger les campus avec leurs compteurs
+        $school->load(['campuses']);
+        
+        // Calculer le nombre d'étudiants et de filières pour chaque campus
+        foreach ($school->campuses as $campus) {
+            $campus->students_count = \App\Models\Student::whereHas('field', function($query) use ($campus) {
+                $query->where('campus_id', $campus->id);
+            })->count();
+            
+            $campus->fields_count = \App\Models\Field::where('campus_id', $campus->id)->count();
+        }
+        
         return view('schools.show', compact('school'));
     }
 

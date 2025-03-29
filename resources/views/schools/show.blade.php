@@ -6,9 +6,16 @@
         <!-- En-tête -->
         <div class="mb-8">
             <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $school->name }}</h1>
-                    <p class="mt-2 text-sm text-gray-600">{{ $school->address }}</p>
+                <div class="flex items-center">
+                    @if($school->logo)
+                    <div class="mr-4 flex-shrink-0">
+                        <img src="{{ asset('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="h-16 w-16 object-contain rounded-lg shadow-sm">
+                    </div>
+                    @endif
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ $school->name }}</h1>
+                        <p class="mt-2 text-sm text-gray-600">{{ $school->address }}</p>
+                    </div>
                 </div>
                 <div class="flex space-x-4">
                     <a href="{{ route('schools.edit', $school) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
@@ -29,7 +36,7 @@
         </div>
 
         <!-- Statistiques principales -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <!-- Total des étudiants -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
@@ -40,52 +47,37 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Total des étudiants</p>
-                        <p class="text-lg font-semibold text-gray-900">{{ $school->students_count }}</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $school->students_count ?? 0 }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Revenus du mois -->
+            <!-- Total des filières -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-green-100">
                         <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Revenus du mois</p>
-                        <p class="text-lg font-semibold text-gray-900">{{ number_format($school->monthly_revenue, 0, ',', ' ') }} FCFA</p>
+                        <p class="text-sm font-medium text-gray-600">Filières</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $school->fields_count ?? 0 }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Paiements en attente -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-100">
-                        <svg class="h-6 w-6 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Paiements en attente</p>
-                        <p class="text-lg font-semibold text-gray-900">{{ $school->pending_payments_count }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Taux de paiement -->
+            <!-- Total des campus -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100">
                         <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Taux de paiement</p>
-                        <p class="text-lg font-semibold text-gray-900">{{ $school->payment_rate }}%</p>
+                        <p class="text-sm font-medium text-gray-600">Campus</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $school->campuses_count ?? count($school->campuses) }}</p>
                     </div>
                 </div>
             </div>
@@ -104,6 +96,18 @@
                     <div class="sm:col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Téléphone</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $school->phone }}</dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Devise</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $school->currency ?? 'FCFA' }}</dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Statut</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $school->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $school->is_active ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </dd>
                     </div>
                     <div class="sm:col-span-2">
                         <dt class="text-sm font-medium text-gray-500">Adresse</dt>
@@ -130,7 +134,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiants</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filières</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -138,16 +142,26 @@
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $campus->name }}
+                                        <a href="{{ route('campuses.show', $campus) }}" class="text-indigo-600 hover:text-indigo-900">
+                                            {{ $campus->name }}
+                                        </a>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $campus->students_count }}</div>
+                                    <div class="text-sm text-gray-900">
+                                        @php
+                                            $studentCount = $campus->students_count ?? 0;
+                                            if (!$studentCount && $campus->fields) {
+                                                foreach ($campus->fields as $field) {
+                                                    $studentCount += $field->students_count ?? 0;
+                                                }
+                                            }
+                                        @endphp
+                                        {{ $studentCount }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $campus->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $campus->is_active ? 'Actif' : 'Inactif' }}
-                                    </span>
+                                    <div class="text-sm text-gray-900">{{ $campus->fields_count ?? count($campus->fields ?? []) }}</div>
                                 </td>
                             </tr>
                             @endforeach
