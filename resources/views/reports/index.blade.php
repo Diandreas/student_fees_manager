@@ -17,6 +17,35 @@
         </div>
     </div>
 
+    @php
+        $school = session('current_school');
+        
+        // Obtenir les campus de l'école actuelle
+        $campusIds = $school->campuses()->pluck('id')->toArray();
+        
+        // Obtenir les filières de ces campus
+        $fieldIds = \App\Models\Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
+        
+        // Obtenir les étudiants associés à ces filières
+        $studentIds = \App\Models\Student::whereIn('field_id', $fieldIds)->pluck('id')->toArray();
+        
+        // Statistiques filtrées par école
+        $studentsCount = count($studentIds);
+        $totalPayments = \App\Models\Payment::whereIn('student_id', $studentIds)->sum('amount');
+        $campusCount = count($campusIds);
+        $fieldsCount = count($fieldIds);
+        
+        // Calcul des frais totaux et du reste à percevoir
+        $totalFees = \App\Models\Field::whereIn('fields.id', $fieldIds)
+            ->join('students', 'fields.id', '=', 'students.field_id')
+            ->sum('fields.fees');
+        
+        $remainingAmount = max(0, $totalFees - $totalPayments);
+        
+        // Taux de recouvrement en pourcentage
+        $recoveryRate = $totalFees > 0 ? round(($totalPayments / $totalFees) * 100) : 0;
+    @endphp
+
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <!-- Carte Étudiants -->
         <div class="bg-white rounded-xl shadow-sm hover-lift">
@@ -27,7 +56,7 @@
                     </div>
                     <div>
                         <h6 class="text-gray-500 text-xs mb-1">Étudiants</h6>
-                        <h4 class="font-bold text-gray-800 text-xl">{{ \App\Models\Student::count() }}</h4>
+                        <h4 class="font-bold text-gray-800 text-xl">{{ $studentsCount }}</h4>
                     </div>
                 </div>
             </div>
@@ -42,7 +71,7 @@
                     </div>
                     <div>
                         <h6 class="text-gray-500 text-xs mb-1">Paiements</h6>
-                        <h4 class="font-bold text-gray-800 text-xl">{{ number_format(\App\Models\Payment::sum('amount'), 0, ',', ' ') }} FCFA</h4>
+                        <h4 class="font-bold text-gray-800 text-xl">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA</h4>
                     </div>
                 </div>
             </div>
@@ -57,7 +86,7 @@
                     </div>
                     <div>
                         <h6 class="text-gray-500 text-xs mb-1">Campus</h6>
-                        <h4 class="font-bold text-gray-800 text-xl">{{ \App\Models\Campus::count() }}</h4>
+                        <h4 class="font-bold text-gray-800 text-xl">{{ $campusCount }}</h4>
                     </div>
                 </div>
             </div>
@@ -72,7 +101,7 @@
                     </div>
                     <div>
                         <h6 class="text-gray-500 text-xs mb-1">Filières</h6>
-                        <h4 class="font-bold text-gray-800 text-xl">{{ \App\Models\Field::count() }}</h4>
+                        <h4 class="font-bold text-gray-800 text-xl">{{ $fieldsCount }}</h4>
                     </div>
                 </div>
             </div>
@@ -156,7 +185,7 @@
                         </div>
                         <i class="fas fa-chevron-right text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                     </a>
-                    <a href="#" class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors group">
+                    <a href="{{ route('students.index', ['payment_status' => 'not_paid']) }}" class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="rounded-full bg-yellow-100 p-2 mr-3 group-hover:bg-yellow-200 transition-colors">
                                 <i class="fas fa-tags text-yellow-600"></i>
@@ -186,7 +215,7 @@
                             <canvas id="recoveryRateChart"></canvas>
                         </div>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <h3 class="font-bold text-xl">{{ number_format(\App\Models\Payment::sum('amount'), 0, ',', ' ') }}</h3>
+                            <h3 class="font-bold text-xl">{{ number_format($totalPayments, 0, ',', ' ') }}</h3>
                             <p class="text-sm text-gray-500">FCFA perçus</p>
                         </div>
                     </div>
@@ -200,7 +229,7 @@
                             </div>
                             <div>
                                 <h6 class="text-gray-500 text-xs mb-1">Total attendu</h6>
-                                <h5 class="font-bold">{{ number_format(\App\Models\Field::join('students', 'fields.id', '=', 'students.field_id')->sum('fields.fees'), 0, ',', ' ') }}</h5>
+                                <h5 class="font-bold">{{ number_format($totalFees, 0, ',', ' ') }}</h5>
                             </div>
                         </div>
                     </div>
@@ -211,7 +240,7 @@
                             </div>
                             <div>
                                 <h6 class="text-gray-500 text-xs mb-1">Reste à percevoir</h6>
-                                <h5 class="font-bold">{{ number_format(\App\Models\Field::join('students', 'fields.id', '=', 'students.field_id')->sum('fields.fees') - \App\Models\Payment::sum('amount'), 0, ',', ' ') }}</h5>
+                                <h5 class="font-bold">{{ number_format($remainingAmount, 0, ',', ' ') }}</h5>
                             </div>
                         </div>
                     </div>
@@ -231,7 +260,10 @@
                     Analysez les performances de chaque filière en termes d'inscriptions, de paiements et de taux de recouvrement.
                 </p>
                 <div class="space-y-4">
-                    @forelse(\App\Models\Field::limit(5)->get() as $field)
+                    @php
+                        $fields = \App\Models\Field::whereIn('id', $fieldIds)->limit(5)->get();
+                    @endphp
+                    @forelse($fields as $field)
                     <a href="{{ route('fields.report', $field) }}" class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors group">
                         <div class="flex items-center">
                             <div class="rounded-full bg-primary-100 p-2 mr-3 group-hover:bg-primary-200 transition-colors">
@@ -250,14 +282,6 @@
                         <p class="text-gray-500">Aucune filière trouvée</p>
                     </div>
                     @endforelse
-                    
-                    @if(\App\Models\Field::count() > 5)
-                    <div class="text-center mt-6">
-                        <a href="{{ route('fields.index') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
-                            <i class="fas fa-list mr-2"></i>Voir toutes les filières
-                        </a>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -267,43 +291,44 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Taux de recouvrement
-    const totalExpected = {{ \App\Models\Field::join('students', 'fields.id', '=', 'students.field_id')->sum('fields.fees') ?: 1 }};
-    const totalPaid = {{ \App\Models\Payment::sum('amount') ?: 0 }};
-    const recoveryRate = totalExpected > 0 ? (totalPaid / totalExpected) * 100 : 0;
-    
-    // Graphique circulaire du taux de recouvrement
-    const recoveryRateChart = new Chart(
-        document.getElementById('recoveryRateChart'),
-        {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique du taux de recouvrement
+        const ctx = document.getElementById('recoveryRateChart').getContext('2d');
+        
+        new Chart(ctx, {
             type: 'doughnut',
             data: {
+                labels: ['Perçu', 'Reste à percevoir'],
                 datasets: [{
-                    data: [recoveryRate, 100 - recoveryRate],
-                    backgroundColor: [
-                        'rgba(26, 86, 219, 0.8)',
-                        'rgba(242, 242, 242, 0.5)'
-                    ],
-                    borderWidth: 0
+                    data: [{{ $totalPayments }}, {{ $remainingAmount }}],
+                    backgroundColor: ['#4F46E5', '#EF4444'],
+                    borderWidth: 0,
                 }]
             },
             options: {
                 cutout: '75%',
-                responsive: true,
-                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
                     },
                     tooltip: {
-                        enabled: false
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const percentage = {{ $totalFees }} > 0 ? 
+                                    Math.round((value / {{ $totalFees }}) * 100) : 0;
+                                return `${label}: ${value.toLocaleString()} FCFA (${percentage}%)`;
+                            }
+                        }
                     }
+                },
+                animation: {
+                    animateScale: true
                 }
             }
-        }
-    );
-});
+        });
+    });
 </script>
 @endpush
 @endsection 

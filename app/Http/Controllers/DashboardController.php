@@ -73,6 +73,11 @@ class DashboardController extends Controller
             $query->whereIn('field_id', $fieldIds);
         })->sum('amount');
         
+        // Compter le nombre de paiements
+        $paymentsCount = Payment::whereHas('student', function($query) use ($fieldIds) {
+            $query->whereIn('field_id', $fieldIds);
+        })->count();
+        
         $totalFields = Field::whereIn('campus_id', $campusIds)->count();
         $totalCampuses = count($campusIds);
 
@@ -83,7 +88,7 @@ class DashboardController extends Controller
             ->leftJoin('payments', 'students.id', '=', 'payments.student_id')
             ->where('campuses.school_id', $schoolId)
             ->select(
-                'students.id',
+                'students.id as student_id',
                 'fields.fees as total_fees',
                 DB::raw('COALESCE(SUM(payments.amount), 0) as paid_amount')
             )
@@ -190,7 +195,8 @@ class DashboardController extends Controller
             'popularFields',
             'chartData',
             'totalExpectedFees',
-            'studentsCount'
+            'studentsCount',
+            'paymentsCount'
         ));
     }
 

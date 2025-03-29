@@ -147,6 +147,12 @@
         .payment-method p {
             margin: 5px 0;
         }
+        .text-red-600 {
+            color: #dc2626;
+        }
+        .text-green-600 {
+            color: #16a34a;
+        }
         .status-paid {
             position: absolute;
             top: 30%;
@@ -217,6 +223,33 @@
             <div class="row">
                 <div class="label">{{ $school->term('campus', 'Campus') }}:</div>
                 <div class="value">{{ $payment->student->field->campus->name }}</div>
+            </div>
+            
+            @php
+                // Récupérer les informations sur les paiements
+                $paymentController = app('App\Http\Controllers\PaymentController');
+                $paymentInfo = $paymentController->getStudentPaymentInfo($payment->student_id);
+                $totalFees = $paymentInfo['totalFees'];
+                $totalPaid = $paymentInfo['totalPaid'];
+                $remainingAmount = $paymentInfo['remainingAmount'];
+                $paymentPercentage = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
+            @endphp
+            
+            <div class="row">
+                <div class="label">{{ $school->term('total_fees', 'Frais totaux') }}:</div>
+                <div class="value">{{ number_format($totalFees, 0, ',', ' ') }} {{ $school->term('currency', 'FCFA') }}</div>
+            </div>
+            <div class="row">
+                <div class="label">{{ $school->term('total_paid', 'Total payé') }}:</div>
+                <div class="value">{{ number_format($totalPaid, 0, ',', ' ') }} {{ $school->term('currency', 'FCFA') }} ({{ $paymentPercentage }}%)</div>
+            </div>
+            <div class="row">
+                <div class="label">{{ $school->term('remaining_amount', 'Reste à payer') }}:</div>
+                <div class="value">
+                    <strong class="{{ $remainingAmount > 0 ? 'text-red-600' : 'text-green-600' }}">
+                        {{ number_format($remainingAmount, 0, ',', ' ') }} {{ $school->term('currency', 'FCFA') }}
+                    </strong>
+                </div>
             </div>
         </div>
 

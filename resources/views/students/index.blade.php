@@ -22,22 +22,66 @@
                     <h5 class="font-bold text-primary-600 flex items-center">
                         <i class="fas fa-list mr-2"></i>Liste des {{ session('current_school') ? strtolower(session('current_school')->term('students')) : 'étudiants' }}
                     </h5>
-                    <form class="flex" action="{{ route('students.index') }}" method="GET">
-                        <div class="flex w-full md:w-auto relative">
-                            <input type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 pr-10" 
-                                   name="search" value="{{ request()->search }}" 
-                                   placeholder="Rechercher par nom, email, téléphone ou filière...">
-                            <button class="absolute inset-y-0 right-0 px-3 flex items-center" type="submit">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </button>
+                    <div class="flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0">
+                        <div class="flex space-x-2">
+                            <a href="{{ route('students.index') }}" class="inline-flex items-center px-4 py-2 {{ !request()->has('payment_status') ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:opacity-90 transition-colors">
+                                <i class="fas fa-users mr-1"></i> Tous
+                            </a>
+                            <a href="{{ route('students.index', ['payment_status' => 'fully_paid']) }}" class="inline-flex items-center px-4 py-2 {{ request()->payment_status === 'fully_paid' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:opacity-90 transition-colors">
+                                <i class="fas fa-check-circle mr-1"></i> En règle
+                            </a>
+                            <a href="{{ route('students.index', ['payment_status' => 'not_paid']) }}" class="inline-flex items-center px-4 py-2 {{ request()->payment_status === 'not_paid' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:opacity-90 transition-colors">
+                                <i class="fas fa-exclamation-circle mr-1"></i> Pas en règle
+                            </a>
                         </div>
-                        @if(request()->has('search') && !empty(request()->search))
-                        <a href="{{ route('students.index') }}" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
-                            <i class="fas fa-times mr-1"></i> Effacer
-                        </a>
-                        @endif
-                    </form>
+                        <div class="flex">
+                            @if(request()->has('payment_status'))
+                                <a href="{{ route('students.print', ['payment_status' => request()->payment_status]) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-print mr-1"></i> Imprimer cette liste
+                                </a>
+                            @else
+                                <div class="dropdown relative">
+                                    <button class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" id="printDropdown">
+                                        <i class="fas fa-print mr-1"></i> Imprimer
+                                        <i class="fas fa-chevron-down ml-1"></i>
+                                    </button>
+                                    <div class="dropdown-menu hidden absolute right-0 mt-2 py-2 bg-white rounded-lg shadow-lg z-10 min-w-[200px]" id="printMenu">
+                                        <a href="{{ route('students.print') }}" class="block px-4 py-2 hover:bg-gray-100 text-gray-700" target="_blank">
+                                            <i class="fas fa-users mr-1"></i> Tous les étudiants
+                                        </a>
+                                        <a href="{{ route('students.print', ['payment_status' => 'fully_paid']) }}" class="block px-4 py-2 hover:bg-gray-100 text-gray-700" target="_blank">
+                                            <i class="fas fa-check-circle mr-1"></i> Étudiants en règle
+                                        </a>
+                                        <a href="{{ route('students.print', ['payment_status' => 'not_paid']) }}" class="block px-4 py-2 hover:bg-gray-100 text-gray-700" target="_blank">
+                                            <i class="fas fa-exclamation-circle mr-1"></i> Étudiants pas en règle
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="mb-4 px-6 py-3 border-b border-gray-100">
+                <form class="flex flex-wrap gap-2" action="{{ route('students.index') }}" method="GET">
+                    @if(request()->has('payment_status'))
+                        <input type="hidden" name="payment_status" value="{{ request()->payment_status }}">
+                    @endif
+                    <div class="flex-grow md:flex-grow-0 relative">
+                        <input type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 pr-10" 
+                               name="search" value="{{ request()->search }}" 
+                               placeholder="Rechercher par nom, email, téléphone...">
+                        <button class="absolute inset-y-0 right-0 px-3 flex items-center" type="submit">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </button>
+                    </div>
+                    @if(request()->has('search') && !empty(request()->search))
+                    <a href="{{ route('students.index', request()->has('payment_status') ? ['payment_status' => request()->payment_status] : []) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
+                        <i class="fas fa-times mr-1"></i> Effacer
+                    </a>
+                    @endif
+                </form>
             </div>
             
             <div id="studentsContainer">
@@ -205,5 +249,28 @@
         @apply bg-primary-600 text-white border-primary-600;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    // Toggle dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const printDropdown = document.getElementById('printDropdown');
+        const printMenu = document.getElementById('printMenu');
+        
+        if (printDropdown && printMenu) {
+            printDropdown.addEventListener('click', function() {
+                printMenu.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!printDropdown.contains(event.target) && !printMenu.contains(event.target)) {
+                    printMenu.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 @endpush
 @endsection

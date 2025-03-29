@@ -140,23 +140,15 @@
                                             <a href="{{ route('students.show', $payment->student_id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="Voir l'étudiant">
                                                 <i class="fas fa-user-graduate"></i>
                                             </a>
+                                            <a href="{{ route('payments.show', $payment->id) }}" class="px-2 py-1 bg-primary-100 text-primary-700 rounded hover:bg-primary-200" title="Voir le reçu">
+                                                <i class="fas fa-receipt"></i>
+                                            </a>
                                             <a href="{{ route('payments.edit', $payment->id) }}" class="px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200" title="Modifier">
                                                 <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ route('payments.export', $payment->student_id) }}" class="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200" title="Exporter">
-                                                <i class="fas fa-file-excel"></i>
                                             </a>
                                             <a href="{{ route('payments.print', $payment->id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="Imprimer reçu">
                                                 <i class="fas fa-print"></i>
                                             </a>
-                                            <form action="{{ route('payments.destroy', $payment->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" title="Supprimer" 
-                                                    onclick="return confirm('{{ session('current_school')->term('confirm_delete', 'Êtes-vous sûr de vouloir supprimer ce paiement?') }}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>

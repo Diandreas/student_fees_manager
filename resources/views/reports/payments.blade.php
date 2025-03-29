@@ -214,70 +214,63 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Graphique d'évolution des paiements
-    const paymentLabels = @json($labels);
-    const paymentData = @json($data);
-    
-    const ctx = document.getElementById('paymentChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: paymentLabels,
-            datasets: [{
-                label: 'Montant total des paiements',
-                data: paymentData,
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                borderColor: 'rgb(37, 99, 235)',
-                borderWidth: 2,
-                pointBackgroundColor: 'rgb(37, 99, 235)',
-                pointBorderColor: '#fff',
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        boxWidth: 6
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    padding: 10,
-                    cornerRadius: 6,
-                    titleFont: {
-                        size: 14,
-                        weight: 'bold'
-                    }
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Préparation des données pour le graphique d'évolution des paiements
+        const ctx = document.getElementById('paymentChart').getContext('2d');
+        
+        // Création des labels pour les mois (on utilise les données du contrôleur)
+        const months = [];
+        const data = [];
+        
+        @foreach($monthlyPayments as $payment)
+            months.push("{{ $payment->month }}/{{ $payment->year }}");
+            data.push({{ $payment->total }});
+        @endforeach
+        
+        const paymentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Montant des paiements (FCFA)',
+                    data: data,
+                    fill: true,
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4
+                }]
             },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' FCFA';
+                            }
+                        }
                     }
                 },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA';
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.parsed.y;
+                                return label + ': ' + value.toLocaleString() + ' FCFA';
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
-});
 </script>
 @endpush
 @endsection

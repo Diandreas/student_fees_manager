@@ -14,7 +14,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentController extends Controller
 {
-    private function getStudentPaymentInfo($student_id)
+    // Méthode pour obtenir les informations de paiement d'un étudiant
+    public function getStudentPaymentInfo($student_id)
     {
         $student = Student::with(['field', 'payments'])->findOrFail($student_id);
         $totalFees = $student->field->fees;
@@ -150,6 +151,62 @@ class PaymentController extends Controller
         return response()->json($paymentInfo);
     }
 
+    /**
+     * Méthode publique pour obtenir les informations complètes de paiement d'un étudiant
+     * 
+     * @param int $student_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getStudentPaymentInfoApi($student_id)
+    {
+        $paymentInfo = $this->getStudentPaymentInfo($student_id);
+        
+        // Ajouter des informations supplémentaires pour l'API
+        $student = $paymentInfo['student'];
+        $totalFees = $paymentInfo['totalFees'];
+        $totalPaid = $paymentInfo['totalPaid'];
+        $remainingAmount = $paymentInfo['remainingAmount'];
+        
+        // Calcul du pourcentage payé
+        $paymentPercentage = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
+        
+        // Déterminer le statut de paiement
+        $school = session('current_school');
+        $paymentStatus = '';
+        $statusColor = '';
+        
+        if ($remainingAmount == 0) {
+            $paymentStatus = $school ? $school->term('fully_paid', 'Payé intégralement') : 'Payé intégralement';
+            $statusCode = 'fully_paid';
+            $statusColor = 'success';
+        } elseif ($totalPaid > 0) {
+            $paymentStatus = $school ? $school->term('partially_paid', 'Partiellement payé') : 'Partiellement payé';
+            $statusCode = 'partially_paid';
+            $statusColor = 'warning';
+        } else {
+            $paymentStatus = $school ? $school->term('no_payment', 'Aucun paiement') : 'Aucun paiement';
+            $statusCode = 'no_payment';
+            $statusColor = 'danger';
+        }
+        
+        // Récupérer l'historique des paiements
+        $payments = $student->payments()->orderBy('payment_date', 'desc')->get();
+        
+        return response()->json([
+            'student' => $student,
+            'field' => $student->field,
+            'campus' => $student->field->campus,
+            'totalFees' => $totalFees,
+            'totalPaid' => $totalPaid,
+            'remainingAmount' => $remainingAmount,
+            'paymentPercentage' => $paymentPercentage,
+            'paymentStatus' => $paymentStatus,
+            'statusCode' => $statusCode,
+            'statusColor' => $statusColor,
+            'payments' => $payments
+        ]);
+    }
+
     public function index()
     {
         $school = session('current_school');
@@ -199,7 +256,7 @@ class PaymentController extends Controller
         
         // Empêcher la suppression des paiements
         return redirect()->route('payments.index')
-            ->with('error', 'La suppression des paiements n\'est pas autorisée pour maintenir l\'intégrité des données financières.');
+            ->with('error', 'Les paiements ne peuvent pas être supprimés. Cette action a été désactivée pour garantir l\'intégrité des données financières.');
     }
 
     /**

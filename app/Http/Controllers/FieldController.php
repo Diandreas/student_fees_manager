@@ -189,8 +189,6 @@ class FieldController extends Controller
      */
     public function report(Field $field)
     {
-        $this->authorize('view', $field);
-        
         // Charger la filière avec les relations nécessaires
         $field->load(['campus', 'educationLevel', 'students.payments']);
         

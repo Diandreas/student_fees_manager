@@ -106,11 +106,16 @@ Route::middleware(['auth', 'school'])->group(function () {
     
     // Routes pour les étudiants avec route d'exportation
     Route::get('/students/{student}/report', [StudentController::class, 'report'])->name('students.report');
+    Route::get('/students/print', [StudentController::class, 'printList'])->name('students.print');
     Route::resource('students', StudentController::class);
     
     // Routes pour la gestion des paiements
     Route::get('/payments/student-remaining/{student}', [PaymentController::class, 'getStudentRemainingAmount'])
         ->name('payments.student-remaining');
+    
+    // API pour obtenir les informations complètes de paiement d'un étudiant
+    Route::get('/payments/student-info/{student}', [PaymentController::class, 'getStudentPaymentInfoApi'])
+        ->name('payments.student-info');
     
     // Exportation et impression des paiements
     Route::get('/payments/print-list', [PaymentController::class, 'printList'])->name('payments.print-list');

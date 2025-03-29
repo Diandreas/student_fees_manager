@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
 {
@@ -47,11 +49,44 @@ class StudentController extends Controller
             });
         }
         
+        // Filtrer par statut de paiement
+        if ($request->has('payment_status')) {
+            $paymentStatus = $request->payment_status;
+            
+            // Récupérer d'abord tous les étudiants avec leurs filières et paiements
+            $students = $query->with(['field', 'payments'])->get();
+            
+            // Filtrer manuellement les étudiants en fonction de leur statut de paiement
+            $filteredStudentIds = $students->filter(function($student) use ($paymentStatus) {
+                $totalFees = $student->field->fees;
+                $totalPaid = $student->payments->sum('amount');
+                
+                if ($paymentStatus === 'fully_paid') {
+                    // Étudiants qui ont entièrement payé
+                    return $totalPaid >= $totalFees;
+                } elseif ($paymentStatus === 'not_paid') {
+                    // Étudiants qui n'ont pas entièrement payé
+                    return $totalPaid < $totalFees;
+                }
+                
+                return true;
+            })->pluck('id')->toArray();
+            
+            // Appliquer le filtre aux IDs d'étudiants
+            $query = Student::with(['field.campus', 'payments'])
+                     ->where('school_id', $school->id)
+                     ->whereIn('id', $filteredStudentIds);
+        }
+        
         $students = $query->paginate(10);
         
         // Conserver les paramètres de recherche dans la pagination
         if ($request->has('search')) {
             $students->appends(['search' => $request->search]);
+        }
+        
+        if ($request->has('payment_status')) {
+            $students->appends(['payment_status' => $request->payment_status]);
         }
         
         return view('students.index', compact('students'));
@@ -450,5 +485,84 @@ class StudentController extends Controller
             'studentsByCampus',
             'school'
         ));
+    }
+
+    /**
+     * Génère un PDF pour l'impression de la liste des étudiants
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function printList(Request $request)
+    {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour imprimer la liste.');
+        }
+        
+        // Filtrer directement par l'école actuelle
+        $query = Student::with(['field.campus', 'payments'])
+                        ->where('school_id', $school->id);
+        
+        // Filtrer par statut de paiement
+        $title = 'Liste de tous les étudiants';
+        
+        if ($request->has('payment_status')) {
+            $paymentStatus = $request->payment_status;
+            
+            // Récupérer tous les étudiants avec leurs filières et paiements
+            $students = $query->get();
+            
+            // Filtrer manuellement les étudiants en fonction de leur statut de paiement
+            $students = $students->filter(function($student) use ($paymentStatus) {
+                $totalFees = $student->field->fees;
+                $totalPaid = $student->payments->sum('amount');
+                
+                if ($paymentStatus === 'fully_paid') {
+                    // Étudiants qui ont entièrement payé
+                    $title = 'Liste des étudiants en règle';
+                    return $totalPaid >= $totalFees;
+                } elseif ($paymentStatus === 'not_paid') {
+                    // Étudiants qui n'ont pas entièrement payé
+                    $title = 'Liste des étudiants pas en règle';
+                    return $totalPaid < $totalFees;
+                }
+                
+                return true;
+            });
+        } else {
+            $students = $query->get();
+        }
+        
+        // Ajouter des informations de paiement à chaque étudiant
+        foreach ($students as $student) {
+            $totalFees = $student->field->fees;
+            $totalPaid = $student->payments->sum('amount');
+            $student->remaining_amount = max(0, $totalFees - $totalPaid);
+            $student->payment_percentage = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
+            
+            if ($student->remaining_amount == 0) {
+                $student->payment_status = 'fully_paid';
+                $student->payment_status_text = 'Payé intégralement';
+            } elseif ($totalPaid > 0) {
+                $student->payment_status = 'partially_paid';
+                $student->payment_status_text = 'Partiellement payé';
+            } else {
+                $student->payment_status = 'not_paid';
+                $student->payment_status_text = 'Aucun paiement';
+            }
+        }
+        
+        $data = [
+            'students' => $students,
+            'school' => $school,
+            'title' => $title,
+            'generatedAt' => Carbon::now()->format('d/m/Y H:i')
+        ];
+        
+        $pdf = Pdf::loadView('students.print', $data);
+        return $pdf->download($school->name . '_' . Str::slug($title) . '_' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 }

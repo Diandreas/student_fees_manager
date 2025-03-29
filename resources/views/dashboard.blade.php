@@ -60,11 +60,11 @@
                         <i class="fas fa-money-bill-wave text-3xl"></i>
                     </div>
                     <div class="bg-green-100 rounded-full p-3 w-12 h-12 flex items-center justify-center">
-                        <div class="font-bold text-green-600">{{ isset($paymentsCount) ? $paymentsCount : 0 }}</div>
+                        <div class="font-bold text-green-600">{{ $paymentsCount }}</div>
                     </div>
                 </div>
                 <h5 class="text-lg font-bold mb-1">Paiements</h5>
-                <p class="text-gray-500 mb-3">Total des paiements reçus</p>
+                <p class="text-gray-500 mb-3">{{ number_format($totalPayments, 0, ',', ' ') }} FCFA reçus</p>
                 <a href="{{ route('payments.index') }}" class="text-green-600 font-medium hover:underline inline-flex items-center">
                     <i class="fas fa-arrow-right mr-1"></i> Gérer les paiements
                 </a>
@@ -336,15 +336,17 @@
         var studentsByFieldChart = new Chart(ctxFields, {
             type: 'doughnut',
             data: {
-                labels: ['Informatique', 'Gestion', 'Droit', 'Communication', 'Médecine'],
+                labels: {!! json_encode($popularFields->pluck('name')) !!},
                 datasets: [{
-                    data: [45, 25, 20, 15, 30],
+                    data: {!! json_encode($popularFields->pluck('students_count')) !!},
                     backgroundColor: [
                         '#0d47a1', // Bleu présidentiel
                         '#1976d2',
                         '#2196f3',
                         '#42a5f5',
-                        '#90caf9'
+                        '#90caf9',
+                        '#64b5f6',
+                        '#bbdefb'
                     ],
                     borderWidth: 0
                 }]
@@ -365,10 +367,10 @@
         var paymentsChart = new Chart(ctxPayments, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin'],
+                labels: {!! json_encode($chartData['monthly']['labels']) !!},
                 datasets: [{
-                    label: 'Paiements (en millions FCFA)',
-                    data: [12, 19, 15, 17, 22, 25],
+                    label: 'Paiements (en FCFA)',
+                    data: {!! json_encode($chartData['monthly']['data']) !!},
                     backgroundColor: 'rgba(13, 71, 161, 0.1)',
                     borderColor: '#0d47a1',
                     borderWidth: 2,
