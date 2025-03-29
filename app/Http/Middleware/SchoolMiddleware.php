@@ -67,6 +67,7 @@ class SchoolMiddleware
                     ->with('error', 'L\'école sélectionnée n\'existe plus');
             }
             
+            // Assurons-nous que l'école est toujours disponible en session
             session(['current_school' => $school]);
             
             if (!$user->is_superadmin) {
@@ -86,6 +87,13 @@ class SchoolMiddleware
             }
         }
         
+        // Si on arrive ici, on a une école valide en session
+        // Assurons-nous que l'école est toujours chargée avec ses relations
+        if (session('current_school')) {
+            $freshSchool = School::with(['campuses', 'admins'])->find(session('current_school_id'));
+            session(['current_school' => $freshSchool]);
+        }
+
         // Le partage de la variable currentSchool est maintenant géré dans AppServiceProvider
 
         return $next($request);

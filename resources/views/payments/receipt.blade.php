@@ -51,6 +51,11 @@
             color: {{ $school->theme_color }};
             margin: 0 0 5px 0;
         }
+        .school-subtitle {
+            font-size: 14px;
+            color: #6B7280;
+            margin: 0;
+        }
         .school-contact {
             font-size: 12px;
             margin: 0;
@@ -189,10 +194,14 @@
         
         <div class="header">
             <div class="school-info">
-                <h1 class="school-name">{{ $school->name }}</h1>
+                <h1 class="school-name">{{ $school->report_settings['header_title'] ?? $school->name }}</h1>
+                @if(isset($school->report_settings['header_subtitle']) && !empty($school->report_settings['header_subtitle']))
+                    <p class="school-subtitle">{{ $school->report_settings['header_subtitle'] }}</p>
+                @endif
                 <p class="school-contact">
-                    {{ $school->address }}<br>
-                    <i class="fas fa-envelope"></i> {{ $school->contact_email }} | <i class="fas fa-phone"></i> {{ $school->contact_phone }}
+                    {{ $school->report_settings['header_address'] ?? $school->address }}<br>
+                    <i class="fas fa-envelope"></i> {{ $school->report_settings['header_email'] ?? $school->contact_email ?? $school->email }} | 
+                    <i class="fas fa-phone"></i> {{ $school->report_settings['header_phone'] ?? $school->contact_phone ?? $school->phone }}
                 </p>
             </div>
             <div class="logo">
@@ -304,8 +313,11 @@
         </div>
 
         <div class="footer">
-            <p><strong>{{ $school->name }}</strong> &copy; {{ date('Y') }}</p>
-            <p>{{ $school->address }}</p>
+            @if(isset($school->report_settings['header_footer']) && !empty($school->report_settings['header_footer']))
+                <p>{{ $school->report_settings['header_footer'] }}</p>
+            @endif
+            <p>{{ $school->name }} - {{ $school->term('receipt', 'Reçu de Paiement') }} #{{ $payment->receipt_number }}</p>
+            <p>{{ date('d/m/Y H:i') }}</p>
         </div>
     </div>
 

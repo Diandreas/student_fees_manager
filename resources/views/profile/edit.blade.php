@@ -71,29 +71,7 @@
                         </div>
 
                         <!-- Préférences -->
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Préférences</h3>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="language" class="block text-sm font-medium text-gray-700">Langue</label>
-                                    <select name="language" id="language"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <option value="fr" {{ old('language', $user->language) == 'fr' ? 'selected' : '' }}>Français</option>
-                                        <option value="en" {{ old('language', $user->language) == 'en' ? 'selected' : '' }}>English</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label for="timezone" class="block text-sm font-medium text-gray-700">Fuseau horaire</label>
-                                    <select name="timezone" id="timezone"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <option value="UTC" {{ old('timezone', $user->timezone) == 'UTC' ? 'selected' : '' }}>UTC</option>
-                                        <option value="Africa/Douala" {{ old('timezone', $user->timezone) == 'Africa/Douala' ? 'selected' : '' }}>Africa/Douala</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                       
                     </div>
 
                     <div class="flex justify-end">

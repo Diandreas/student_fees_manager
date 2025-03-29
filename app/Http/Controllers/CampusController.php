@@ -126,10 +126,19 @@ class CampusController extends Controller
             return redirect()->route('campuses.index')
                 ->with('error', 'Vous n\'avez pas accès à ce campus.');
         }
+        
+        // Vérifier si le campus a des filières
+        if ($campus->fields()->count() > 0) {
+            $campusTerm = $school->term('campus', 'Campus');
+            $fieldTerm = $school->term('fields', 'Filières');
+            return redirect()->route('campuses.index')
+                ->with('error', 'Impossible de supprimer ce ' . $campusTerm . ' car il contient des ' . $fieldTerm . '. Vous devez d\'abord supprimer toutes les ' . $fieldTerm . ' associées.');
+        }
 
         $campus->delete();
+        $campusTerm = $school->term('campus', 'Campus');
         return redirect()->route('campuses.index')
-            ->with('success', 'Campus supprimé avec succès');
+            ->with('success', $campusTerm . ' supprimé avec succès');
     }
 
     /**

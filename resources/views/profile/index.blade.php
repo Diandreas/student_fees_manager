@@ -28,10 +28,6 @@
                         <i class="fas fa-lock w-5 text-center"></i>
                         <span>Sécurité</span>
                     </a>
-                    <a href="#preferences" class="flex items-center gap-3 p-4 border-l-4 border-transparent hover:bg-gray-50 hover:border-gray-300">
-                        <i class="fas fa-sliders-h w-5 text-center"></i>
-                        <span>Préférences</span>
-                    </a>
                 </nav>
             </div>
         </div>
@@ -127,16 +123,6 @@
                             @enderror
                         </div>
                         
-                        <div class="mb-4">
-                            <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">Biographie</label>
-                            <textarea id="bio" name="bio" rows="3"
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm @error('bio') border-red-500 @enderror">{{ auth()->user()->bio ?? '' }}</textarea>
-                            <p class="mt-1 text-sm text-gray-500">Une brève description de vous-même</p>
-                            @error('bio')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        
                         <div>
                             <button type="submit" class="btn-primary">
                                 <i class="fas fa-save mr-2"></i>Enregistrer
@@ -205,73 +191,7 @@
                 </div>
             </div>
             
-            <!-- Préférences -->
-            <div id="preferences" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                <div class="border-b border-gray-100 p-5">
-                    <h5 class="font-bold text-primary-600 flex items-center">
-                        <i class="fas fa-sliders-h mr-2"></i>Préférences
-                    </h5>
-                </div>
-                <div class="p-5">
-                    @if(session('preferences_success'))
-                        <div class="bg-green-50 text-green-800 rounded-lg p-4 mb-6">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-check-circle text-green-600"></i>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm">{{ session('preferences_success') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
-                    <form action="{{ route('profile.preferences') }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        
-                        <div class="mb-4">
-                            <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Langue de l'interface</label>
-                            <select id="language" name="language"
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
-                                <option value="fr" {{ auth()->user()->language == 'fr' ? 'selected' : '' }}>Français</option>
-                                <option value="en" {{ auth()->user()->language == 'en' ? 'selected' : '' }}>English</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <h6 class="font-medium text-gray-700 mb-3">Notifications</h6>
-                            <div class="space-y-3">
-                                <div class="flex items-start">
-                                    <div class="flex items-center h-5">
-                                        <input type="checkbox" id="email_notifications" name="email_notifications" value="1" {{ auth()->user()->email_notifications ? 'checked' : '' }}
-                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                                    </div>
-                                    <div class="ml-3 text-sm">
-                                        <label for="email_notifications" class="font-medium text-gray-700">Recevoir des notifications par e-mail</label>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-start">
-                                    <div class="flex items-center h-5">
-                                        <input type="checkbox" id="browser_notifications" name="browser_notifications" value="1" {{ auth()->user()->browser_notifications ? 'checked' : '' }}
-                                            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                                    </div>
-                                    <div class="ml-3 text-sm">
-                                        <label for="browser_notifications" class="font-medium text-gray-700">Activer les notifications du navigateur</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <button type="submit" class="btn-primary">
-                                <i class="fas fa-save mr-2"></i>Enregistrer
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+      
         </div>
     </div>
 </div>

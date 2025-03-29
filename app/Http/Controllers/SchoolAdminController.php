@@ -111,7 +111,10 @@ class SchoolAdminController extends Controller
             abort(404, 'Cet utilisateur n\'est pas administrateur de cette école');
         }
         
-        return view('schools.admins.edit', compact('school', 'admin'));
+        // Récupérer l'entrée pivot pour obtenir les informations spécifiques à cette relation
+        $schoolAdmin = $school->admins()->where('user_id', $admin->id)->first()->pivot;
+        
+        return view('schools.admins.edit', compact('school', 'admin', 'schoolAdmin'));
     }
     
     /**

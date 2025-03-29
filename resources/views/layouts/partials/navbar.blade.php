@@ -91,9 +91,11 @@
                             <a href="{{ route('profile.index') }}" class="block px-4 py-2 hover:bg-gray-100">
                                 <i class="fas fa-user mr-2"></i>{{ __('Mon profil') }}
                             </a>
-                            <a href="{{ route('settings.index') }}" class="block px-4 py-2 hover:bg-gray-100">
+                            @if(session('current_school'))
+                            <a href="{{ route('schools.settings', session('current_school')) }}" class="block px-4 py-2 hover:bg-gray-100">
                                 <i class="fas fa-cog mr-2"></i>{{ __('Paramètres') }}
                             </a>
+                            @endif
                             <div class="border-t border-gray-100"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -140,9 +142,11 @@
             <a href="{{ route('profile.index') }}" class="block px-4 py-2 hover:bg-primary-600">
                 <i class="fas fa-user mr-1"></i>{{ __('Mon profil') }}
             </a>
-            <a href="{{ route('settings.index') }}" class="block px-4 py-2 hover:bg-primary-600">
+            @if(session('current_school'))
+            <a href="{{ route('schools.settings', session('current_school')) }}" class="block px-4 py-2 hover:bg-primary-600">
                 <i class="fas fa-cog mr-1"></i>{{ __('Paramètres') }}
             </a>
+            @endif
             <form method="POST" action="{{ route('logout') }}" class="block px-4 py-2">
                 @csrf
                 <button type="submit" class="w-full text-left hover:bg-primary-600">

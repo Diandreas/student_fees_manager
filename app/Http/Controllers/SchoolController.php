@@ -190,6 +190,18 @@ class SchoolController extends Controller
         // Vérifier si l'utilisateur a le droit de supprimer cette école
         $this->authorize('delete', $school);
         
+        // Vérifier si l'école a des campus
+        if ($school->campuses()->count() > 0) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Impossible de supprimer cette école car elle contient des campus. Vous devez d\'abord supprimer tous les campus associés.');
+        }
+        
+        // Vérifier si l'école a des administrateurs
+        if ($school->admins()->count() > 1) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Impossible de supprimer cette école car elle a plusieurs administrateurs. Vous devez d\'abord retirer tous les administrateurs sauf un.');
+        }
+        
         // Supprimer le logo si nécessaire
         if ($school->logo) {
             Storage::disk('public')->delete($school->logo);

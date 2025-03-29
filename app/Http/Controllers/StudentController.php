@@ -379,6 +379,13 @@ class StudentController extends Controller
                 ->with('error', 'Cet étudiant n\'appartient pas à l\'école actuelle.');
         }
         
+        // Vérifier si l'étudiant a des paiements
+        if ($student->payments()->count() > 0) {
+            $studentTerm = $school->term('student', 'Étudiant');
+            return redirect()->route('students.index')
+                ->with('error', 'Impossible de supprimer ce ' . $studentTerm . ' car il a effectué des paiements. Vous devez d\'abord annuler tous ses paiements.');
+        }
+        
         // Supprimer la photo de l'étudiant si elle existe
         if ($student->photo) {
             $this->imageService->deleteStudentPhoto($student->photo);

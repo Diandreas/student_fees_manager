@@ -56,7 +56,7 @@
         @include('layouts.partials.navbar')
         
         <div class="flex flex-1">
-            @include('layouts.partials.sidebar')
+            {{-- @include('layouts.partials.sidebar') --}}
             
             <main class="flex-1 px-4 py-8 overflow-y-auto">
                 @if(session('success'))
@@ -93,5 +93,6 @@
     </div>
     
     @stack('scripts')
+    
 </body>
 </html>

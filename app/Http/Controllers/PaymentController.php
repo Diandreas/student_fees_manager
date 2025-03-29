@@ -524,13 +524,23 @@ class PaymentController extends Controller
         $school = session('current_school');
         
         if (!$school) {
-            return redirect()->route('schools.select')->with('error', 'Veuillez sélectionner une école');
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour modifier un paiement.');
         }
         
-        // Vérifier que le paiement appartient à un étudiant de l'école actuelle
-        if ($payment->student->field->campus->school_id != $school->id) {
+        // Vérifier que le paiement appartient à l'école actuelle
+        if ($payment->school_id != $school->id) {
             return redirect()->route('payments.index')
-                ->with('error', 'Vous n\'avez pas accès à ce paiement');
+                ->with('error', 'Ce paiement n\'appartient pas à l\'école actuelle.');
+        }
+        
+        // Vérifier si le paiement a été effectué il y a plus de 7 jours
+        $paymentDate = Carbon::parse($payment->payment_date);
+        $daysElapsed = $paymentDate->diffInDays(Carbon::now());
+        
+        if ($daysElapsed > 7) {
+            return redirect()->route('payments.show', $payment)
+                ->with('error', 'Ce paiement ne peut plus être modifié car il a été effectué il y a plus de 7 jours. Contactez l\'administrateur du système pour toute assistance nécessaire.');
         }
         
         $payment->load('student.field');
@@ -562,7 +572,7 @@ class PaymentController extends Controller
     }
     
     /**
-     * Met à jour un paiement dans la base de données
+     * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Payment  $payment
@@ -573,72 +583,75 @@ class PaymentController extends Controller
         $school = session('current_school');
         
         if (!$school) {
-            return redirect()->route('schools.select')->with('error', 'Veuillez sélectionner une école');
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour modifier un paiement.');
         }
         
-        // Vérifier que le paiement appartient à un étudiant de l'école actuelle
-        if ($payment->student->field->campus->school_id != $school->id) {
+        // Vérifier que le paiement appartient à l'école actuelle
+        if ($payment->school_id != $school->id) {
             return redirect()->route('payments.index')
-                ->with('error', 'Vous n\'avez pas accès à ce paiement');
+                ->with('error', 'Ce paiement n\'appartient pas à l\'école actuelle.');
         }
         
-        // Récupérer les campus de cette école
-        $campusIds = $school->campuses()->pluck('id')->toArray();
+        // Vérifier si le paiement a été effectué il y a plus de 7 jours
+        $paymentDate = Carbon::parse($payment->payment_date);
+        $daysElapsed = $paymentDate->diffInDays(Carbon::now());
         
-        // Récupérer les filières de ces campuses
-        $fieldIds = Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
-        
-        // Récupérer les IDs des étudiants disponibles pour cette école
-        $availableStudentIds = Student::whereIn('field_id', $fieldIds)->pluck('id')->toArray();
-        
-        // Vérifier que l'étudiant sélectionné appartient à cette école
-        if (!in_array($request->student_id, $availableStudentIds)) {
-            return redirect()->route('payments.edit', $payment)
-                ->with('error', 'L\'étudiant sélectionné n\'appartient pas à l\'école actuelle');
+        if ($daysElapsed > 7) {
+            return redirect()->route('payments.show', $payment)
+                ->with('error', 'Ce paiement ne peut plus être modifié car il a été effectué il y a plus de 7 jours. Contactez l\'administrateur du système pour toute assistance nécessaire.');
         }
         
-        $paymentInfo = $this->getStudentPaymentInfo($request->student_id);
+        $paymentInfo = $this->getStudentPaymentInfo($payment->student_id);
+        $currentAmount = $payment->amount;
         
-        // Si on change l'étudiant, on ne doit pas tenir compte du paiement actuel
-        $currentPaymentAmount = ($payment->student_id == $request->student_id) ? $payment->amount : 0;
-        $actualRemainingAmount = $paymentInfo['remainingAmount'] + $currentPaymentAmount;
-
         $validated = $request->validate([
-            'student_id' => [
-                'required',
-                'exists:students,id',
-                function ($attribute, $value, $fail) use ($availableStudentIds) {
-                    if (!in_array($value, $availableStudentIds)) {
-                        $fail('L\'étudiant sélectionné n\'appartient pas à l\'école actuelle');
-                    }
-                }
-            ],
             'amount' => [
                 'required',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($actualRemainingAmount, $paymentInfo) {
-                    if ($value > $actualRemainingAmount && $paymentInfo['remainingAmount'] > 0) {
-                        $fail("Le montant du paiement ($value) ne peut pas dépasser le montant restant à payer ($actualRemainingAmount)");
+                function ($attribute, $value, $fail) use ($paymentInfo, $currentAmount) {
+                    // Calculer le montant restant à payer en excluant le paiement actuel
+                    $adjustedRemainingAmount = $paymentInfo['remainingAmount'] + $currentAmount;
+                    
+                    if ($value > $adjustedRemainingAmount && $adjustedRemainingAmount > 0) {
+                        $fail("Le montant du paiement ($value) ne peut pas dépasser le montant restant à payer ({$adjustedRemainingAmount})");
                     }
                 }
             ],
             'description' => 'required|string',
-            'payment_date' => 'required|date',
-            'payment_method' => 'nullable|string|max:255',
-            'notes' => 'nullable|string'
+            'payment_date' => 'required|date'
         ]);
-
-        $payment->student_id = $validated['student_id'];
+        
+        // Historique de modification
+        $originalData = $payment->toArray();
+        $changes = [
+            'amount' => [
+                'from' => $payment->amount,
+                'to' => $validated['amount']
+            ],
+            'description' => [
+                'from' => $payment->description,
+                'to' => $validated['description']
+            ],
+            'payment_date' => [
+                'from' => $payment->payment_date,
+                'to' => $validated['payment_date']
+            ],
+        ];
+        
+        // Mettre à jour le paiement
         $payment->amount = $validated['amount'];
         $payment->description = $validated['description'];
         $payment->payment_date = $validated['payment_date'];
-        $payment->payment_method = $request->payment_method;
-        $payment->notes = $request->notes;
+        $payment->updated_at = now();
         $payment->save();
-
-        return redirect()->route('payments.index')
-            ->with('success', $school->term('payment', 'Paiement') . ' mis à jour avec succès.');
+        
+        // Enregistrer l'historique des modifications si nécessaire
+        // Vous pourriez avoir une table payment_changes pour suivre ces modifications
+        
+        return redirect()->route('payments.show', $payment)
+            ->with('success', 'Paiement modifié avec succès.');
     }
 
     /**

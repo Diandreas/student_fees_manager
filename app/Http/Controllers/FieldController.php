@@ -118,9 +118,31 @@ class FieldController extends Controller
 
     public function destroy(Field $field)
     {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour supprimer une filière.');
+        }
+        
+        // Vérifier que la filière appartient à l'école actuelle
+        if ($field->school_id != $school->id) {
+            return redirect()->route('fields.index')
+                ->with('error', 'Cette filière n\'appartient pas à l\'école actuelle.');
+        }
+        
+        // Vérifier si la filière a des étudiants
+        if ($field->students()->count() > 0) {
+            $fieldTerm = $school->term('field', 'Filière');
+            $studentTerm = $school->term('students', 'Étudiants');
+            return redirect()->route('fields.index')
+                ->with('error', 'Impossible de supprimer cette ' . $fieldTerm . ' car elle contient des ' . $studentTerm . '. Vous devez d\'abord transférer ou supprimer tous les ' . $studentTerm . ' associés.');
+        }
+        
         $field->delete();
+        $fieldTerm = $school->term('field', 'Filière');
         return redirect()->route('fields.index')
-            ->with('success', 'Field deleted successfully');
+            ->with('success', $fieldTerm . ' supprimée avec succès');
     }
 
     /**

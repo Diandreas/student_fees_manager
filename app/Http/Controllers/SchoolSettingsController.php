@@ -54,6 +54,13 @@ class SchoolSettingsController extends Controller
             'text_color' => 'required|string|max:7',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'remove_logo' => 'nullable|boolean',
+            'report_settings' => 'nullable|array',
+            'report_settings.header_title' => 'nullable|string|max:255',
+            'report_settings.header_subtitle' => 'nullable|string|max:255',
+            'report_settings.header_email' => 'nullable|email|max:255',
+            'report_settings.header_phone' => 'nullable|string|max:45',
+            'report_settings.header_address' => 'nullable|string',
+            'report_settings.header_footer' => 'nullable|string',
         ]);
         
         // Gérer le téléchargement du logo
@@ -78,6 +85,13 @@ class SchoolSettingsController extends Controller
         
         // Supprimer remove_logo qui n'est pas une colonne de la table
         unset($validated['remove_logo']);
+        
+        // Gérer les paramètres de rapport
+        if (isset($validated['report_settings'])) {
+            // Fusionner avec les paramètres existants pour ne pas écraser les autres valeurs
+            $currentSettings = $school->report_settings ?? [];
+            $validated['report_settings'] = array_merge($currentSettings, $validated['report_settings']);
+        }
         
         $school->update($validated);
         

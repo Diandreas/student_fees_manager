@@ -1,134 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapport des paiements - {{ $school->name }}</title>
     <style>
         body {
-            font-family: "DejaVu Sans", Arial, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            color: #333;
             font-size: 12px;
+            line-height: 1.5;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
             border-bottom: 1px solid #ddd;
-            padding-bottom: 20px;
-        }
-        .logo {
-            max-width: 150px;
-            max-height: 100px;
-            margin-bottom: 10px;
-        }
-        h1 {
-            color: {{ $school->theme_color ?? '#1a56db' }};
-            font-size: 24px;
-            margin: 0 0 5px 0;
-        }
-        h2 {
-            color: {{ $school->theme_color ?? '#1a56db' }};
-            font-size: 18px;
-            margin: 0 0 20px 0;
-            font-weight: normal;
-        }
-        .info-block {
+            padding-bottom: 10px;
             margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 5px solid {{ $school->theme_color ?? '#1a56db' }};
         }
-        .info-block h3 {
-            margin-top: 0;
-            color: {{ $school->theme_color ?? '#1a56db' }};
+        .school-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
         }
-        table {
+        .report-title {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #666;
+        }
+        .school-info {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
-        table.summary {
-            margin-bottom: 30px;
-        }
-        table.summary th {
-            background-color: {{ $school->theme_color ?? '#1a56db' }};
-            color: #fff;
-            padding: 10px;
-            text-align: left;
-        }
-        table.summary td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .section-title {
-            font-size: 16px;
-            color: {{ $school->theme_color ?? '#1a56db' }};
-            margin: 30px 0 15px 0;
-            padding-bottom: 5px;
-            border-bottom: 1px solid {{ $school->theme_color ?? '#1a56db' }};
-        }
-        .payments-table {
-            font-size: 11px;
-        }
-        .payments-table th {
-            background-color: {{ $school->theme_color ?? '#1a56db' }};
-            color: #fff;
+        .table th, .table td {
+            border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-        .payments-table td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        .amount {
-            text-align: right;
+        .table th {
+            background-color: #f2f2f2;
             font-weight: bold;
-        }
-        .date {
-            text-align: center;
-        }
-        .footer {
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
         }
         .stats-container {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
-        .stats-box {
-            width: 48%;
-            margin-bottom: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 5px solid {{ $school->theme_color ?? '#1a56db' }};
+        .stat-box {
+            width: 30%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
         }
-        .stats-box h4 {
-            margin-top: 0;
-            color: {{ $school->theme_color ?? '#1a56db' }};
-        }
-        .stats-value {
-            font-size: 18px;
+        .stat-title {
             font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+        }
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        @if($school->logo)
-        <img src="{{ public_path('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="logo">
+        <h1 class="school-name">{{ $school->report_settings['header_title'] ?? $school->name }}</h1>
+        @if(isset($school->report_settings['header_subtitle']) && !empty($school->report_settings['header_subtitle']))
+            <p class="school-subtitle">{{ $school->report_settings['header_subtitle'] }}</p>
         @endif
-        <h1>{{ $school->name }}</h1>
-        <h2>Rapport des paiements</h2>
-        <p>{{ $school->address }} | {{ $school->phone }} | {{ $school->email }}</p>
+        <p class="school-info">
+            {{ $school->report_settings['header_address'] ?? $school->address }}<br>
+            Email: {{ $school->report_settings['header_email'] ?? $school->contact_email ?? $school->email }} | 
+            Tél: {{ $school->report_settings['header_phone'] ?? $school->contact_phone ?? $school->phone }}
+        </p>
+        <h2 class="report-title">Rapport des paiements</h2>
+        <p>Période: {{ date('d/m/Y') }}</p>
     </div>
     
     <div class="info-block">
@@ -221,8 +184,10 @@
     </table>
     
     <div class="footer">
-        <p>Document généré automatiquement le {{ $generatedAt }}</p>
-        <p>{{ $school->name }} - Tous droits réservés &copy; {{ date('Y') }}</p>
+        @if(isset($school->report_settings['header_footer']) && !empty($school->report_settings['header_footer']))
+            <p>{{ $school->report_settings['header_footer'] }}</p>
+        @endif
+        <p>{{ $school->name }} - Rapport généré le {{ $generatedAt }}</p>
     </div>
 </body>
 </html> 

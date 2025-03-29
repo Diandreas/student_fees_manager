@@ -20,7 +20,7 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-blue-700">
-                                    Vous pouvez ajouter un utilisateur existant comme administrateur ou créer un nouveau compte.
+                                    Vous pouvez ajouter un utilisateur existant comme administrateur ou créer un nouveau compte. Tous les administrateurs ont un accès complet à la gestion de l'école.
                                 </p>
                             </div>
                         </div>
@@ -100,19 +100,8 @@
                     </div>
                 </div>
                 
-                <!-- Section commune -->
-                <div class="mb-4">
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
-                    <select name="role" id="role" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('role') border-red-500 @enderror">
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrateur</option>
-                        <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Gestionnaire</option>
-                        <option value="finance" {{ old('role') == 'finance' ? 'selected' : '' }}>Finance</option>
-                        <option value="secretary" {{ old('role') == 'secretary' ? 'selected' : '' }}>Secrétariat</option>
-                    </select>
-                    @error('role')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                <!-- Champ caché pour définir un rôle par défaut -->
+                <input type="hidden" name="role" value="admin">
                 
                 <div class="flex justify-end space-x-3 mt-6">
                     <a href="{{ route('schools.show', $school) }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Annuler</a>

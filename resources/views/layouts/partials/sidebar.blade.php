@@ -87,12 +87,14 @@
                 </div>
             </a>
             
-            <a href="{{ route('settings.index') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('settings.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+            @if(session('current_school'))
+            <a href="{{ route('schools.settings', session('current_school')) }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('schools.settings') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                 <div class="flex items-center">
                     <i class="fas fa-cog w-6"></i>
                     <span>{{ __('Paramètres') }}</span>
                 </div>
             </a>
+            @endif
         </nav>
     </div>
 </aside> 
