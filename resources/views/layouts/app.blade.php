@@ -26,26 +26,6 @@
     <!-- Vite CSS -->
     @vite(['resources/css/app.css'])
     
-    @if(session('current_school'))
-    <style>
-        :root {
-            --color-primary: {{ str_replace('#', '', session('current_school')->primary_color ?? '26 86 219') }};
-            --color-primary-light: {{ str_replace('#', '', session('current_school')->primary_color ?? '65 105 225') }};
-            --color-primary-dark: {{ str_replace('#', '', session('current_school')->header_color ?? '25 25 112') }};
-            --color-accent: {{ str_replace('#', '', session('current_school')->secondary_color ?? '37 99 235') }};
-        }
-    </style>
-    @else
-    <style>
-        :root {
-            --color-primary: 26 86 219;
-            --color-primary-light: 65 105 225;
-            --color-primary-dark: 25 25 112;
-            --color-accent: 37 99 235;
-        }
-    </style>
-    @endif
-    
     <!-- Scripts -->
     @vite(['resources/js/app.js'])
     
