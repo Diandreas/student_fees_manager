@@ -7,6 +7,8 @@ use App\Models\Field;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\School;
+use App\Models\ActivityLog;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -180,6 +182,17 @@ class DashboardController extends Controller
         // Récupérer les statistiques par étudiant pour les calculs de recouvrement
         $studentsCount = $totalStudents; // Pour les calculs de pourcentage
 
+        // Dernières activités de l'école
+        $recentActivities = ActivityLog::where(function($query) use ($school) {
+            $query->whereHasMorph('model', [Student::class, Payment::class, Invoice::class], function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            });
+        })
+        ->with(['user', 'model'])
+        ->latest()
+        ->take(5)
+        ->get();
+
         return view('dashboard', compact(
             'user',
             'school',
@@ -196,7 +209,8 @@ class DashboardController extends Controller
             'chartData',
             'totalExpectedFees',
             'studentsCount',
-            'paymentsCount'
+            'paymentsCount',
+            'recentActivities'
         ));
     }
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ActivityLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -148,5 +149,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{invoice}/print', 'print')->name('print');
             Route::get('/{invoice}/send', 'send')->name('send');
         });
+
+        // Routes pour le journal des activités
+        Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show', 'destroy']);
     });
 });

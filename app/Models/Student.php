@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class Student extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'fullName', 'email', 'address', 'phone',
         'parent_tel', 'field_id', 'user_id', 'photo',

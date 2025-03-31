@@ -40,25 +40,25 @@
             
             <main class="flex-1 px-4 py-8 overflow-y-auto">
                 @if(session('success'))
-                    <div class="mb-4 bg-green-100 border-l-4 border-green-600 text-green-800 p-4 rounded shadow-sm" role="alert">
+                    <div class="mb-4 bg-primary-100 border-l-4 border-primary-600 text-primary-800 p-4 rounded shadow-sm" role="alert">
                         <p class="font-medium">{{ session('success') }}</p>
                     </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-4 bg-red-100 border-l-4 border-red-600 text-red-800 p-4 rounded shadow-sm" role="alert">
+                    <div class="mb-4 bg-primary-100 border-l-4 border-primary-800 text-primary-800 p-4 rounded shadow-sm" role="alert">
                         <p class="font-medium">{{ session('error') }}</p>
                     </div>
                 @endif
 
                 @if(session('info'))
-                    <div class="mb-4 bg-blue-100 border-l-4 border-blue-600 text-blue-800 p-4 rounded shadow-sm" role="alert">
+                    <div class="mb-4 bg-primary-100 border-l-4 border-primary-600 text-primary-800 p-4 rounded shadow-sm" role="alert">
                         <p class="font-medium">{{ session('info') }}</p>
                     </div>
                 @endif
 
                 @if(session('warning'))
-                    <div class="mb-4 bg-yellow-100 border-l-4 border-yellow-600 text-yellow-800 p-4 rounded shadow-sm" role="alert">
+                    <div class="mb-4 bg-primary-100 border-l-4 border-primary-400 text-primary-800 p-4 rounded shadow-sm" role="alert">
                         <p class="font-medium">{{ session('warning') }}</p>
                     </div>
                 @endif
