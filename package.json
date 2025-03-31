@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "alpinejs": "^3.14.9",
+        "intro.js": "^7.2.0",
         "tippy.js": "^6.3.7"
     }
 }

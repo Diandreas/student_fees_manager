@@ -3,91 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ isset($student) ? 'Paiements de ' . $student->full_name : 'Liste des paiements' }}</title>
+    <title>{{ isset($student) ? 'Paiements de ' . $student->fullName : 'Liste des paiements' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
-            font-size: 14px;
+            padding: 10px;
+            font-size: 12px;
             color: #374151;
             background-color: #f9fafb;
-            line-height: 1.5;
+            line-height: 1.4;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
-            padding: 30px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 6px;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
         .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid {{ $currentSchool->theme_color ?? '#0d47a1' }};
-            padding-bottom: 20px;
-        }
-        .school-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid {{ $currentSchool->primary_color ?? '#0d47a1' }};
+            padding-bottom: 10px;
+        }
+        .school-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         .logo {
-            max-width: 100px;
-            max-height: 100px;
-            border-radius: 8px;
-        }
-        .school-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: {{ $currentSchool->theme_color ?? '#0d47a1' }};
-            margin: 0;
+            max-width: 60px;
+            max-height: 60px;
+            border-radius: 6px;
         }
         .school-details {
-            color: #6B7280;
-            font-size: 13px;
+            flex: 1;
         }
-        .title {
-            font-size: 22px;
+        .school-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: {{ $currentSchool->primary_color ?? '#0d47a1' }};
+            margin: 0 0 3px 0;
+        }
+        .contact-info {
+            color: #6B7280;
+            font-size: 11px;
+            margin: 0;
+        }
+        .document-title {
+            text-align: right;
+            font-size: 16px;
             font-weight: 600;
-            margin: 20px 0;
-            color: {{ $currentSchool->theme_color ?? '#0d47a1' }};
+            color: {{ $currentSchool->primary_color ?? '#0d47a1' }};
             text-transform: uppercase;
+            margin: 0;
         }
         .student-info {
             background-color: #f3f4f6;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid {{ $currentSchool->theme_color ?? '#0d47a1' }};
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid {{ $currentSchool->primary_color ?? '#0d47a1' }};
+            display: flex;
+            justify-content: space-between;
         }
         .student-info h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: {{ $currentSchool->theme_color ?? '#0d47a1' }};
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 600;
+            color: {{ $currentSchool->primary_color ?? '#0d47a1' }};
+            margin: 0 0 8px 0;
         }
-        .student-info p {
-            margin: 8px 0;
-            color: #4B5563;
+        .student-details, .field-details {
+            flex: 1;
+        }
+        .student-details p, .field-details p {
+            margin: 4px 0;
+            font-size: 12px;
         }
         .payment-summary {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
-            gap: 15px;
+            margin-bottom: 15px;
+            gap: 10px;
         }
         .summary-box {
             flex: 1;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 6px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .total-fees {
             background-color: #EFF6FF;
@@ -102,14 +112,13 @@
             border: 1px solid #FDE68A;
         }
         .summary-box h4 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 16px;
+            margin: 0 0 5px 0;
+            font-size: 12px;
             font-weight: 500;
             color: #4B5563;
         }
         .summary-box p {
-            font-size: 22px;
+            font-size: 16px;
             font-weight: 700;
             margin: 0;
         }
@@ -125,21 +134,20 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            font-size: 11px;
         }
         th, td {
             border: 1px solid #E5E7EB;
-            padding: 12px 16px;
+            padding: 6px 8px;
             text-align: left;
         }
         th {
-            background-color: {{ $currentSchool->theme_color ?? '#0d47a1' }};
+            background-color: {{ $currentSchool->primary_color ?? '#0d47a1' }};
             color: white;
             font-weight: 600;
             white-space: nowrap;
+            font-size: 11px;
         }
         tr:nth-child(even) {
             background-color: #F9FAFB;
@@ -158,41 +166,41 @@
         .receipt-number {
             font-family: monospace;
             background-color: #F3F4F6;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 10px;
         }
         .footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: 15px;
+            padding-top: 10px;
             border-top: 1px solid #E5E7EB;
-            font-size: 12px;
+            font-size: 10px;
             color: #6B7280;
         }
         .timestamp {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            font-size: 9px;
             color: #9CA3AF;
-            margin-top: 15px;
+            margin-top: 8px;
         }
         .no-print {
-            margin-top: 30px;
+            margin-top: 20px;
             text-align: center;
         }
         .print-btn {
             display: inline-flex;
             align-items: center;
-            padding: 10px 20px;
-            background-color: {{ $currentSchool->theme_color ?? '#0d47a1' }};
+            padding: 8px 16px;
+            background-color: {{ $currentSchool->primary_color ?? '#0d47a1' }};
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             transition: background-color 0.2s;
         }
         .print-btn:hover {
@@ -201,14 +209,14 @@
         .close-btn {
             display: inline-flex;
             align-items: center;
-            padding: 10px 20px;
+            padding: 8px 16px;
             background-color: #6B7280;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             margin-left: 10px;
             transition: background-color 0.2s;
         }
@@ -228,7 +236,7 @@
             .container {
                 box-shadow: none;
                 max-width: 100%;
-                padding: 15px;
+                padding: 10px;
             }
             .no-print {
                 display: none;
@@ -240,18 +248,20 @@
     <div class="container">
         <div class="header">
             <div class="school-info">
-                <div>
-                    <h1 class="school-name">{{ $currentSchool->name ?? 'École' }}</h1>
-                    <p class="school-details">{{ $currentSchool->address ?? '' }}<br>
-                        <i class="fas fa-envelope"></i> {{ $currentSchool->contact_email ?? '' }} | <i class="fas fa-phone"></i> {{ $currentSchool->contact_phone ?? '' }}</p>
-                </div>
-                @if(isset($currentSchool) && $currentSchool->getLogoUrlAttribute())
-                <img src="{{ $currentSchool->getLogoUrlAttribute() }}" alt="{{ $currentSchool->name }}" class="logo">
+                @if(isset($currentSchool) && $currentSchool->logo)
+                <img src="{{ $currentSchool->logo_url }}" alt="{{ $currentSchool->name }}" class="logo">
                 @endif
+                <div class="school-details">
+                    <h1 class="school-name">{{ $currentSchool->name ?? 'École' }}</h1>
+                    <p class="contact-info">
+                        {{ $currentSchool->address ?? '' }} <br>
+                        <i class="fas fa-envelope"></i> {{ $currentSchool->contact_email ?? '' }} | <i class="fas fa-phone"></i> {{ $currentSchool->contact_phone ?? '' }}
+                    </p>
+                </div>
             </div>
-            <h2 class="title">
+            <h2 class="document-title">
                 @if(isset($student))
-                    <i class="fas fa-file-invoice-dollar"></i> Paiements de {{ $student->full_name }}
+                    <i class="fas fa-file-invoice-dollar"></i> Paiements<br>{{ $student->fullName }}
                 @else
                     <i class="fas fa-file-invoice-dollar"></i> Liste des paiements
                 @endif
@@ -260,16 +270,15 @@
 
         @if(isset($student))
             <div class="student-info">
-                <h3><i class="fas fa-user-graduate"></i> Informations sur l'étudiant</h3>
-                <div style="display: flex; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px; margin-right: 20px;">
-                        <p><strong>Nom :</strong> {{ $student->full_name }}</p>
-                        <p><strong>Identifiant :</strong> {{ $student->student_id ?? 'N/A' }}</p>
-                    </div>
-                    <div style="flex: 1; min-width: 200px;">
-                        <p><strong>Filière :</strong> {{ $student->field->name ?? 'N/A' }}</p>
-                        <p><strong>Campus :</strong> {{ $student->field->campus->name ?? 'N/A' }}</p>
-                    </div>
+                <div class="student-details">
+                    <h3><i class="fas fa-user-graduate"></i> Informations étudiant</h3>
+                    <p><strong>Nom:</strong> {{ $student->fullName }}</p>
+                    <p><strong>ID:</strong> {{ $student->student_id ?? 'N/A' }}</p>
+                </div>
+                <div class="field-details">
+                    <h3><i class="fas fa-graduation-cap"></i> Formation</h3>
+                    <p><strong>Filière:</strong> {{ $student->field->name ?? 'N/A' }}</p>
+                    <p><strong>Campus:</strong> {{ $student->field->campus->name ?? 'N/A' }}</p>
                 </div>
             </div>
 
@@ -310,7 +319,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td><span class="receipt-number">{{ $payment->receipt_number ?? 'N/A' }}</span></td>
                         @if(!isset($student))
-                        <td>{{ $payment->student->full_name ?? 'N/A' }}</td>
+                        <td>{{ $payment->student->fullName ?? 'N/A' }}</td>
                         <td>{{ $payment->student->field->name ?? 'N/A' }}</td>
                         @endif
                         <td>{{ $payment->description }}</td>
@@ -318,34 +327,32 @@
                         <td class="amount">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
                     </tr>
                     @endforeach
-                @else
-                    <tr>
-                        <td colspan="{{ isset($student) ? 5 : 7 }}" style="text-align: center; padding: 30px;">
-                            <i class="fas fa-exclamation-circle" style="font-size: 24px; color: #9CA3AF; margin-bottom: 10px;"></i>
-                            <p style="margin: 0; color: #6B7280;">Aucun paiement trouvé</p>
-                        </td>
-                    </tr>
-                @endif
-                @if($payments->count() > 0)
                     <tr>
                         <td colspan="{{ isset($student) ? 6 : 6 }}" style="text-align: right; font-weight: bold; background-color: #F3F4F6;">Total</td>
-                        <td class="amount" style="background-color: #F3F4F6;">{{ number_format($payments->sum('amount'), 0, ',', ' ') }} FCFA</td>
+                        <td class="amount" style="background-color: #F3F4F6; color: #047857;">{{ number_format($payments->sum('amount'), 0, ',', ' ') }} FCFA</td>
+                    </tr>
+                @else
+                    <tr>
+                        <td colspan="{{ isset($student) ? 5 : 7 }}" style="text-align: center; padding: 20px;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 18px; color: #9CA3AF; margin-bottom: 8px;"></i>
+                            <p style="margin: 0; color: #6B7280;">Aucun paiement trouvé</p>
+                        </td>
                     </tr>
                 @endif
             </tbody>
         </table>
 
         <div class="footer">
+            <p>{{ $currentSchool->name ?? 'École' }} - Tous droits réservés &copy; {{ date('Y') }}</p>
             <div class="timestamp">
                 <span><i class="fas fa-calendar-alt"></i> Document généré le {{ now()->format('d/m/Y à H:i') }}</span>
                 <span>Page 1/1</span>
             </div>
-            <p>{{ $currentSchool->name ?? 'École' }} - Tous droits réservés &copy; {{ date('Y') }}</p>
         </div>
 
         <div class="no-print">
             <button onclick="window.print()" class="print-btn">
-                <i class="fas fa-print btn-icon"></i> Imprimer ce document
+                <i class="fas fa-print btn-icon"></i> Imprimer
             </button>
             <button onclick="window.close()" class="close-btn">
                 <i class="fas fa-times btn-icon"></i> Fermer

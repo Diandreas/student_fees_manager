@@ -21,6 +21,10 @@
         @apply bg-primary-900 hover:bg-primary-800 text-white font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out shadow-sm;
     }
 
+    .btn-success {
+        @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out shadow-sm;
+    }
+
     /* Badges */
     .badge {
         @apply px-2.5 py-0.5 rounded-full text-xs font-medium;

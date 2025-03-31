@@ -45,10 +45,17 @@
                 </div>
             </a>
             
-            <a href="{{ route('payments.index') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('payments.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+            <a href="{{ route('payments.index') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('payments.index') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                 <div class="flex items-center">
                     <i class="fas fa-money-bill-wave w-6"></i>
                     <span>{{ $term('payments') }}</span>
+                </div>
+            </a>
+            
+            <a href="{{ route('payments.quick') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('payments.quick') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                <div class="flex items-center">
+                    <i class="fas fa-bolt w-6"></i>
+                    <span>{{ __('Paiement rapide') }}</span>
                 </div>
             </a>
             

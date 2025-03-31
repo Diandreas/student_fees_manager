@@ -13,6 +13,9 @@
                     <a href="{{ route('payments.create') }}" class="btn-primary text-sm">
                         <i class="fas fa-plus-circle mr-1"></i> {{ session('current_school')->term('new_payment', 'Nouveau paiement') }}
                     </a>
+                    <a href="{{ route('payments.quick') }}" class="btn-success text-sm">
+                        <i class="fas fa-bolt mr-1"></i> {{ __('Paiement rapide') }}
+                    </a>
                     <a href="{{ route('payments.export') }}" class="btn-outline text-sm">
                         <i class="fas fa-file-excel mr-1"></i> {{ session('current_school')->term('export', 'Exporter tout') }}
                     </a>
@@ -71,6 +74,47 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="mb-6">
+                    <form action="{{ route('payments.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('search', 'Recherche') }}</label>
+                                <input type="text" name="search" id="search" value="{{ request()->search }}" 
+                                    class="form-input w-full" placeholder="{{ session('current_school')->term('search_placeholder', 'Reçu, nom, description...') }}">
+                            </div>
+                            <div>
+                                <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('date_from', 'Date début') }}</label>
+                                <input type="date" name="date_from" id="date_from" value="{{ request()->date_from }}" class="form-input w-full">
+                            </div>
+                            <div>
+                                <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('date_to', 'Date fin') }}</label>
+                                <input type="date" name="date_to" id="date_to" value="{{ request()->date_to }}" class="form-input w-full">
+                            </div>
+                            <div>
+                                <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('student', 'Étudiant') }}</label>
+                                <select name="student_id" id="student_id" class="form-select w-full">
+                                    <option value="">{{ session('current_school')->term('all_students', 'Tous les étudiants') }}</option>
+                                    @foreach($students as $student)
+                                        <option value="{{ $student->id }}" {{ request()->student_id == $student->id ? 'selected' : '' }}>
+                                            {{ $student->fullName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-4">
+                            @if(request()->has('search') || request()->has('date_from') || request()->has('date_to') || request()->has('student_id'))
+                                <a href="{{ route('payments.index') }}" class="btn-outline mr-2">
+                                    <i class="fas fa-times mr-1"></i> {{ session('current_school')->term('reset', 'Réinitialiser') }}
+                                </a>
+                            @endif
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-search mr-1"></i> {{ session('current_school')->term('search', 'Rechercher') }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -167,6 +211,11 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-6">
+                    {{ $payments->links() }}
                 </div>
             </div>
         </div>

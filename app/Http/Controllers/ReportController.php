@@ -10,6 +10,7 @@ use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -431,5 +432,175 @@ class ReportController extends Controller
         
         return redirect()->route('reports.finances')
             ->with('success', 'Export des finances en cours de développement.');
+    }
+
+    /**
+     * Génère un PDF du rapport des étudiants
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function studentsPdf(Request $request)
+    {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour accéder aux rapports.');
+        }
+        
+        // Obtenir les campus de l'école actuelle
+        $campusIds = $school->campuses()->pluck('id')->toArray();
+        
+        // Obtenir les filières de ces campus
+        $fields = Field::whereIn('campus_id', $campusIds)->get();
+        $fieldIds = $fields->pluck('id')->toArray();
+        
+        // Filtrer par filière si spécifié
+        $query = Student::with(['field', 'payments'])
+                        ->whereIn('field_id', $fieldIds);
+                        
+        if ($request->has('field_id') && $request->field_id) {
+            $query->where('field_id', $request->field_id);
+        }
+        
+        // Filtrer par statut de paiement si spécifié
+        if ($request->has('status') && $request->status) {
+            switch ($request->status) {
+                case 'paid':
+                    $query->whereHas('payments', function ($q) {
+                        $q->havingRaw('SUM(amount) >= fields.fees');
+                    });
+                    break;
+                case 'partial':
+                    $query->whereHas('payments', function ($q) {
+                        $q->havingRaw('SUM(amount) < fields.fees AND SUM(amount) > 0');
+                    });
+                    break;
+                case 'unpaid':
+                    $query->whereDoesntHave('payments');
+                    break;
+            }
+        }
+        
+        $students = $query->get();
+        
+        // Génération du PDF avec DomPDF
+        $pdf = Pdf::loadView('reports.pdf.students', compact('students', 'school'));
+        
+        return $pdf->download('rapport-etudiants-' . date('Y-m-d') . '.pdf');
+    }
+    
+    /**
+     * Génère un PDF du rapport des paiements
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function paymentsPdf(Request $request)
+    {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour accéder aux rapports.');
+        }
+        
+        // Obtenir les campus de l'école actuelle
+        $campusIds = $school->campuses()->pluck('id')->toArray();
+        
+        // Obtenir les filières de ces campus
+        $fieldIds = Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
+        
+        // Obtenir les étudiants associés à ces filières
+        $studentIds = Student::whereIn('field_id', $fieldIds)->pluck('id')->toArray();
+        
+        // Obtenir les paiements
+        $query = Payment::with(['student.field'])
+                         ->whereIn('student_id', $studentIds);
+                         
+        // Filtrer par période si spécifiée
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('payment_date', [$request->start_date, $request->end_date]);
+        }
+        
+        $payments = $query->orderBy('payment_date', 'desc')->get();
+        
+        // Génération du PDF avec DomPDF
+        $pdf = Pdf::loadView('reports.pdf.payments', compact('payments', 'school'));
+        
+        return $pdf->download('rapport-paiements-' . date('Y-m-d') . '.pdf');
+    }
+    
+    /**
+     * Génère un PDF du rapport financier
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function financesPdf(Request $request)
+    {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour accéder aux rapports.');
+        }
+        
+        // Obtenir les campus de l'école actuelle
+        $campusIds = $school->campuses()->pluck('id')->toArray();
+        
+        // Obtenir les filières de ces campus
+        $fieldIds = Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
+        
+        // Obtenir les étudiants associés à ces filières
+        $studentIds = Student::whereIn('field_id', $fieldIds)->pluck('id')->toArray();
+        
+        // Statistiques financières
+        $totalFees = Field::whereIn('id', $fieldIds)
+                          ->join('students', 'fields.id', '=', 'students.field_id')
+                          ->sum('fields.fees');
+                          
+        $totalPaid = Payment::whereIn('student_id', $studentIds)->sum('amount');
+        $remainingAmount = max(0, $totalFees - $totalPaid);
+        $recoveryRate = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
+        
+        // Statistiques par filière
+        $statsByField = Field::whereIn('id', $fieldIds)
+                            ->select('fields.id', 'fields.name', 'fields.fees')
+                            ->withCount('students')
+                            ->get()
+                            ->map(function ($field) {
+                                $paidAmount = Payment::whereHas('student', function ($query) use ($field) {
+                                                $query->where('field_id', $field->id);
+                                             })->sum('amount');
+                                             
+                                $expectedAmount = $field->fees * $field->students_count;
+                                $remainingAmount = max(0, $expectedAmount - $paidAmount);
+                                $recoveryRate = $expectedAmount > 0 ? round(($paidAmount / $expectedAmount) * 100) : 0;
+                                
+                                return [
+                                    'id' => $field->id,
+                                    'name' => $field->name,
+                                    'students_count' => $field->students_count,
+                                    'fees' => $field->fees,
+                                    'expected_amount' => $expectedAmount,
+                                    'paid_amount' => $paidAmount,
+                                    'remaining_amount' => $remainingAmount,
+                                    'recovery_rate' => $recoveryRate
+                                ];
+                            });
+        
+        // Génération du PDF avec DomPDF
+        $pdf = Pdf::loadView('reports.pdf.finances', compact(
+            'totalFees', 
+            'totalPaid', 
+            'remainingAmount', 
+            'recoveryRate', 
+            'statsByField',
+            'school'
+        ));
+        
+        return $pdf->download('rapport-financier-' . date('Y-m-d') . '.pdf');
     }
 } 

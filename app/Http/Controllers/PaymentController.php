@@ -56,6 +56,12 @@ class PaymentController extends Controller
         
         $paymentInfo = $this->getStudentPaymentInfo($request->student_id);
 
+        // Vérifier si la pension est déjà soldée
+        if ($paymentInfo['remainingAmount'] <= 0) {
+            return redirect()->route('payments.create')
+                ->with('error', 'Impossible d\'enregistrer un paiement. La pension de cet étudiant est déjà soldée.');
+        }
+
         $validated = $request->validate([
             'student_id' => [
                 'required',
@@ -207,7 +213,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $school = session('current_school');
         
@@ -216,19 +222,61 @@ class PaymentController extends Controller
         }
 
         // Filtrer directement par l'école actuelle
-        $payments = Payment::with(['student.field.campus'])
-                        ->where('school_id', $school->id)
-                        ->latest('payment_date')
-                        ->get();
+        $query = Payment::with(['student.field.campus'])
+                        ->where('school_id', $school->id);
 
-        $totalAmount = $payments->sum('amount');
+        // Recherche par description, référence ou nom d'étudiant
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('description', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('receipt_number', 'LIKE', "%{$searchTerm}%")
+                  ->orWhereHas('student', function($sq) use ($searchTerm) {
+                      $sq->where('fullName', 'LIKE', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        // Filtrer par date
+        if ($request->has('date_from') && !empty($request->date_from)) {
+            $query->whereDate('payment_date', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && !empty($request->date_to)) {
+            $query->whereDate('payment_date', '<=', $request->date_to);
+        }
+
+        // Filtrer par étudiant
+        if ($request->has('student_id') && !empty($request->student_id)) {
+            $query->where('student_id', $request->student_id);
+        }
+
+        $payments = $query->latest('payment_date')
+                        ->paginate(15);
+
+        // Conserver les paramètres de recherche dans la pagination
+        if ($request->has('search')) {
+            $payments->appends(['search' => $request->search]);
+        }
+        if ($request->has('date_from')) {
+            $payments->appends(['date_from' => $request->date_from]);
+        }
+        if ($request->has('date_to')) {
+            $payments->appends(['date_to' => $request->date_to]);
+        }
+        if ($request->has('student_id')) {
+            $payments->appends(['student_id' => $request->student_id]);
+        }
+
+        // Calculer le montant total en utilisant la même requête mais sans pagination
+        $totalAmount = $query->sum('amount');
         
-        // Récupérer tous les étudiants de l'école actuelle
+        // Récupérer tous les étudiants de l'école actuelle pour le filtre
         $students = Student::where('school_id', $school->id)->get();
         
         $studentTotals = [];
         foreach ($students as $student) {
-            $studentPayments = $payments->where('student_id', $student->id);
+            $studentPayments = Payment::where('student_id', $student->id)->get();
             $studentTotals[$student->id] = $studentPayments->sum('amount');
         }
 
@@ -373,7 +421,7 @@ class PaymentController extends Controller
                 'totalFees' => $paymentInfo['totalFees'],
                 'totalPaid' => $paymentInfo['totalPaid'],
                 'remainingAmount' => $paymentInfo['remainingAmount'],
-                'school' => $school
+                'currentSchool' => $school
             ];
             
             $pdf = PDF::loadView('payments.print-list', $data);
@@ -389,7 +437,7 @@ class PaymentController extends Controller
                 
             $data = [
                 'payments' => $payments,
-                'school' => $school
+                'currentSchool' => $school
             ];
             
             $pdf = PDF::loadView('payments.print-list', $data);

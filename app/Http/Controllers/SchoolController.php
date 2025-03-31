@@ -25,15 +25,37 @@ class SchoolController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Si l'utilisateur est super-admin, on montre toutes les écoles
-        // Sinon, on montre uniquement les écoles où il est admin
         $user = Auth::user();
-        $schools = $user->is_superadmin 
-            ? School::all() 
-            : $user->schools;
-            
+        
+        // Requête de base
+        $query = School::withCount(['users', 'campuses', 'fields', 'students', 'payments']);
+        
+        // Filtre par propriétaire si l'utilisateur n'est pas admin
+        if (!$user->is_superadmin) {
+            $query->where('owner_id', $user->id);
+        }
+        
+        // Recherche
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('address', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+        
+        // Pagination
+        $schools = $query->latest()->paginate(10);
+        
+        // Conserver les paramètres de recherche dans la pagination
+        if ($request->has('search')) {
+            $schools->appends(['search' => $request->search]);
+        }
+        
         return view('schools.index', compact('schools'));
     }
 

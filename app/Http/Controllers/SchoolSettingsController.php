@@ -252,7 +252,7 @@ class SchoolSettingsController extends Controller
             'is_active' => true,
         ]);
         
-        return redirect()->route('school.settings.widgets')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Widget ajouté avec succès');
     }
     
@@ -307,7 +307,7 @@ class SchoolSettingsController extends Controller
         $widget = $school->widgets()->findOrFail($widgetId);
         $widget->delete();
         
-        return redirect()->route('school.settings.widgets')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Widget supprimé avec succès');
     }
 
@@ -378,7 +378,7 @@ class SchoolSettingsController extends Controller
             'report_settings' => $reportSettings
         ]);
         
-        return redirect()->route('school.settings.reports.index')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Les paramètres des rapports ont été mis à jour');
     }
     
@@ -447,7 +447,7 @@ class SchoolSettingsController extends Controller
         // Mettre à jour la session
         session(['current_school' => $school]);
         
-        return redirect()->route('school.settings.appearance')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Les paramètres d\'apparence ont été mis à jour');
     }
     
@@ -533,7 +533,7 @@ class SchoolSettingsController extends Controller
             'notification_templates' => $validated['notification_templates'] ?? $school->notification_templates ?? [],
         ]);
         
-        return redirect()->route('school.settings.notifications')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Les paramètres de notifications ont été mis à jour');
     }
     
@@ -586,7 +586,7 @@ class SchoolSettingsController extends Controller
             'document_type' => $validated['document_type'],
         ]);
         
-        return redirect()->route('school.settings.documents')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Le modèle de document a été ajouté');
     }
     
@@ -610,7 +610,7 @@ class SchoolSettingsController extends Controller
         
         $document->delete();
         
-        return redirect()->route('school.settings.documents')
+        return redirect()->route('schools.settings', $school)
             ->with('success', 'Le modèle de document a été supprimé');
     }
 }

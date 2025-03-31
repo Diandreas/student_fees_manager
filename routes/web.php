@@ -16,8 +16,11 @@ use App\Http\Controllers\EducationLevelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\InvoiceController;
+// use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\QuickPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,6 +129,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/export/students', [ReportController::class, 'exportStudents'])->name('reports.export.students');
             Route::get('/export/payments', [ReportController::class, 'exportPayments'])->name('reports.export.payments');
             Route::get('/export/finances', [ReportController::class, 'exportFinances'])->name('reports.export.finances');
+
+            // Routes pour les PDF
+            Route::get('/pdf/students', [ReportController::class, 'studentsPdf'])->name('reports.students.pdf');
+            Route::get('/pdf/payments', [ReportController::class, 'paymentsPdf'])->name('reports.payments.pdf');
+            Route::get('/pdf/finances', [ReportController::class, 'financesPdf'])->name('reports.finances.pdf');
         });
 
         // Routes pour le profil utilisateur
@@ -138,7 +146,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
 
         // Gestion des factures
-        Route::controller(InvoiceController::class)->prefix('invoices')->name('invoices.')->group(function () {
+        /* Route::controller(InvoiceController::class)->prefix('invoices')->name('invoices.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
@@ -148,9 +156,32 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{invoice}', 'destroy')->name('destroy');
             Route::get('/{invoice}/print', 'print')->name('print');
             Route::get('/{invoice}/send', 'send')->name('send');
-        });
+        }); */
 
         // Routes pour le journal des activités
         Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show', 'destroy']);
+
+        // Routes pour les statistiques pluriannuelles
+        Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+        Route::get('/statistics/year/{year}', [StatisticsController::class, 'yearDetails'])->name('statistics.year');
+        Route::get('/statistics/compare', [StatisticsController::class, 'compare'])->name('statistics.compare');
     });
+
+    // Archives routes
+    Route::get('/archives', [ArchiveController::class, 'index'])->name('archives.index');
+    Route::get('/archives/create', [ArchiveController::class, 'create'])->name('archives.create');
+    Route::post('/archives', [ArchiveController::class, 'store'])->name('archives.store');
+    Route::get('/archives/{archive}', [ArchiveController::class, 'show'])->name('archives.show');
+    Route::get('/archives/{archive}/download', [ArchiveController::class, 'download'])->name('archives.download');
+    Route::post('/archives/{archive}/cleanup', [ArchiveController::class, 'cleanup'])->name('archives.cleanup');
+    Route::delete('/archives/{archive}', [ArchiveController::class, 'destroy'])->name('archives.destroy');
+
+    // Routes pour les paiements rapides
+    Route::get('/payments/quick', [QuickPaymentController::class, 'index'])->name('payments.quick');
+});
+
+// Routes d'API pour les fonctionnalités mobiles
+Route::prefix('api')->middleware(['auth'])->group(function () {
+    Route::get('/students/search', [QuickPaymentController::class, 'searchStudents']);
+    Route::post('/payments/sync', [QuickPaymentController::class, 'syncOfflinePayments']);
 });

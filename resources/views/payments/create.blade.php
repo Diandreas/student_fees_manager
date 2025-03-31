@@ -194,9 +194,29 @@
                             // Mettre à jour le montant maximum
                             updateAmountMax(data.remainingAmount);
                             
+                            // Désactiver le bouton de soumission si la pension est déjà soldée
+                            const submitButton = document.querySelector('button[type="submit"]');
+                            if (data.remainingAmount <= 0) {
+                                submitButton.disabled = true;
+                                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+                                document.getElementById('paymentInfo').innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>La pension de cet étudiant est déjà soldée. Impossible d\'effectuer un paiement.';
+                                document.getElementById('paymentInfo').classList.remove('hidden', 'bg-blue-100', 'text-blue-800');
+                                document.getElementById('paymentInfo').classList.add('bg-red-100', 'text-red-800');
+                                document.getElementById('amount').disabled = true;
+                            } else {
+                                submitButton.disabled = false;
+                                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                                document.getElementById('paymentInfo').innerHTML = `<i class="fas fa-info-circle mr-2"></i>Reste à payer : ${formatNumber(data.remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}`;
+                                document.getElementById('paymentInfo').classList.remove('hidden', 'bg-red-100', 'text-red-800');
+                                document.getElementById('paymentInfo').classList.add('bg-blue-100', 'text-blue-800');
+                                document.getElementById('amount').disabled = false;
+                            }
+                            
                             // Afficher le message d'information de paiement
                             const paymentInfo = document.getElementById('paymentInfo');
-                            paymentInfo.innerHTML = `<i class="fas fa-info-circle mr-2"></i>Reste à payer : ${formatNumber(data.remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}`;
+                            if (data.remainingAmount > 0) {
+                                paymentInfo.innerHTML = `<i class="fas fa-info-circle mr-2"></i>Reste à payer : ${formatNumber(data.remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}`;
+                            }
                             paymentInfo.classList.remove('hidden');
                         })
                         .catch(error => {

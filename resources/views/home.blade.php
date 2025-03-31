@@ -183,7 +183,7 @@
                                         </a>
                                     </div>
                                     <div class="col-6 mb-3">
-                                        <a href="{{ route('reports.student') }}" class="quick-link d-flex align-items-center p-3 rounded bg-light text-decoration-none">
+                                        <a href="{{ route('reports.students') }}" class="quick-link d-flex align-items-center p-3 rounded bg-light text-decoration-none">
                                             <div class="icon-box bg-primary-custom bg-opacity-10 p-2 rounded-circle me-3">
                                                 <i class="fas fa-file-alt text-primary-custom"></i>
                                             </div>
@@ -191,7 +191,7 @@
                                         </a>
                                     </div>
                                     <div class="col-6 mb-3">
-                                        <a href="{{ route('school.settings.appearance') }}" class="quick-link d-flex align-items-center p-3 rounded bg-light text-decoration-none">
+                                        <a href="{{ route('schools.settings', session('current_school')) }}" class="quick-link d-flex align-items-center p-3 rounded bg-light text-decoration-none">
                                             <div class="icon-box bg-primary-custom bg-opacity-10 p-2 rounded-circle me-3">
                                                 <i class="fas fa-palette text-primary-custom"></i>
                                             </div>

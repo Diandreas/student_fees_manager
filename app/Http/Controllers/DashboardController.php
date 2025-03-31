@@ -8,7 +8,6 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Models\School;
 use App\Models\ActivityLog;
-use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -184,7 +183,7 @@ class DashboardController extends Controller
 
         // Dernières activités de l'école
         $recentActivities = ActivityLog::where(function($query) use ($school) {
-            $query->whereHasMorph('model', [Student::class, Payment::class, Invoice::class], function($q) use ($school) {
+            $query->whereHasMorph('model', [Student::class, Payment::class], function($q) use ($school) {
                 $q->where('school_id', $school->id);
             });
         })

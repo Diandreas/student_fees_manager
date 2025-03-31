@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Student;
 use App\Models\Payment;
-use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +15,7 @@ class ActivityLogController extends Controller
         $school = Auth::user()->currentSchool;
         
         $activities = ActivityLog::where(function($query) use ($school) {
-            $query->whereHasMorph('model', [Student::class, Payment::class, Invoice::class], function($q) use ($school) {
+            $query->whereHasMorph('model', [Student::class, Payment::class], function($q) use ($school) {
                 $q->where('school_id', $school->id);
             });
         })
