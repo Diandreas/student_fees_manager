@@ -246,9 +246,14 @@ class PaymentController extends Controller
             $query->whereDate('payment_date', '<=', $request->date_to);
         }
 
-        // Filtrer par étudiant
-        if ($request->has('student_id') && !empty($request->student_id)) {
-            $query->where('student_id', $request->student_id);
+        // Filtrer par montant minimum
+        if ($request->has('amount_min') && !empty($request->amount_min)) {
+            $query->where('amount', '>=', $request->amount_min);
+        }
+
+        // Filtrer par montant maximum
+        if ($request->has('amount_max') && !empty($request->amount_max)) {
+            $query->where('amount', '<=', $request->amount_max);
         }
 
         $payments = $query->latest('payment_date')
@@ -264,27 +269,20 @@ class PaymentController extends Controller
         if ($request->has('date_to')) {
             $payments->appends(['date_to' => $request->date_to]);
         }
-        if ($request->has('student_id')) {
-            $payments->appends(['student_id' => $request->student_id]);
+        if ($request->has('amount_min')) {
+            $payments->appends(['amount_min' => $request->amount_min]);
+        }
+        if ($request->has('amount_max')) {
+            $payments->appends(['amount_max' => $request->amount_max]);
         }
 
         // Calculer le montant total en utilisant la même requête mais sans pagination
         $totalAmount = $query->sum('amount');
-        
-        // Récupérer tous les étudiants de l'école actuelle pour le filtre
-        $students = Student::where('school_id', $school->id)->get();
-        
-        $studentTotals = [];
-        foreach ($students as $student) {
-            $studentPayments = Payment::where('student_id', $student->id)->get();
-            $studentTotals[$student->id] = $studentPayments->sum('amount');
-        }
 
         return view('payments.index', [
             'payments' => $payments,
             'totalAmount' => $totalAmount,
-            'studentTotals' => $studentTotals,
-            'students' => $students
+            'students' => Student::where('school_id', $school->id)->get()
         ]);
     }
 

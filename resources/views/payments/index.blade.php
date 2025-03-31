@@ -93,19 +93,16 @@
                                 <input type="date" name="date_to" id="date_to" value="{{ request()->date_to }}" class="form-input w-full">
                             </div>
                             <div>
-                                <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('student', 'Étudiant') }}</label>
-                                <select name="student_id" id="student_id" class="form-select w-full">
-                                    <option value="">{{ session('current_school')->term('all_students', 'Tous les étudiants') }}</option>
-                                    @foreach($students as $student)
-                                        <option value="{{ $student->id }}" {{ request()->student_id == $student->id ? 'selected' : '' }}>
-                                            {{ $student->fullName }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <label for="amount_min" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('amount_min', 'Montant min') }}</label>
+                                <input type="number" name="amount_min" id="amount_min" value="{{ request()->amount_min }}" class="form-input w-full" min="0">
+                            </div>
+                            <div>
+                                <label for="amount_max" class="block text-sm font-medium text-gray-700 mb-1">{{ session('current_school')->term('amount_max', 'Montant max') }}</label>
+                                <input type="number" name="amount_max" id="amount_max" value="{{ request()->amount_max }}" class="form-input w-full" min="0">
                             </div>
                         </div>
                         <div class="flex justify-end mt-4">
-                            @if(request()->has('search') || request()->has('date_from') || request()->has('date_to') || request()->has('student_id'))
+                            @if(request()->has('search') || request()->has('date_from') || request()->has('date_to') || request()->has('amount_min') || request()->has('amount_max'))
                                 <a href="{{ route('payments.index') }}" class="btn-outline mr-2">
                                     <i class="fas fa-times mr-1"></i> {{ session('current_school')->term('reset', 'Réinitialiser') }}
                                 </a>

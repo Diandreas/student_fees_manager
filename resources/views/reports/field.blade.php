@@ -9,10 +9,33 @@
             font-size: 12px;
             line-height: 1.4;
             color: #333;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 40%;
+            background-image: url("{{ isset($field->school) && $field->school->logo_url ? $field->school->logo_url : '' }}");
+            background-attachment: fixed;
+            background-color: #fff;
+            position: relative;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 40%;
+            background-image: url("{{ isset($field->school) && $field->school->logo_url ? $field->school->logo_url : '' }}");
+            opacity: 0.05;
+            z-index: -1;
         }
         .container {
             width: 100%;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
         .header {
             text-align: center;

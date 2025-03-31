@@ -24,19 +24,55 @@ class QuickPaymentController extends Controller
     public function searchStudents(Request $request)
     {
         $query = $request->input('q');
+        $school = session('current_school');
         
         if (strlen($query) < 2) {
             return response()->json([]);
         }
         
-        $students = Student::with('field')
+        // Récupérer les campus de l'école actuelle
+        $campusIds = $school->campuses()->pluck('id')->toArray();
+        
+        // Obtenir les filières de ces campus
+        $fieldIds = \App\Models\Field::whereIn('campus_id', $campusIds)->pluck('id')->toArray();
+        
+        $students = Student::with(['field.campus', 'payments'])
+            ->whereIn('field_id', $fieldIds)
             ->where(function($q) use ($query) {
                 $q->where('fullName', 'LIKE', "%{$query}%")
                   ->orWhere('student_id', 'LIKE', "%{$query}%");
             })
-            ->where('school_id', Auth::user()->school_id)
-            ->take(10)
-            ->get();
+            ->take(15)
+            ->get()
+            ->map(function ($student) use ($school) {
+                // Calcul des informations de paiement
+                $totalFees = $student->field->fees;
+                $totalPaid = $student->payments->sum('amount');
+                $remainingAmount = max(0, $totalFees - $totalPaid);
+                $paymentPercentage = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
+                
+                // Déterminer le statut de paiement
+                $paymentStatus = '';
+                if ($remainingAmount == 0) {
+                    $paymentStatus = 'fully_paid';
+                } elseif ($totalPaid > 0) {
+                    $paymentStatus = 'partially_paid';
+                } else {
+                    $paymentStatus = 'no_payment';
+                }
+                
+                // S'assurer que les propriétés sont correctement nommées pour la vue
+                $student->full_name = $student->fullName ?? ($student->firstName . ' ' . $student->lastName);
+                
+                // Information complémentaire
+                $student->payment_status = $paymentStatus;
+                $student->total_fees = $totalFees;
+                $student->total_paid = $totalPaid;
+                $student->remaining_amount = $remainingAmount;
+                $student->payment_percentage = $paymentPercentage;
+                
+                return $student;
+            });
             
         return response()->json($students);
     }

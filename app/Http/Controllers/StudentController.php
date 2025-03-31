@@ -92,7 +92,7 @@ class StudentController extends Controller
         return view('students.index', compact('students'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $school = session('current_school');
         
@@ -104,6 +104,21 @@ class StudentController extends Controller
         // Obtenir les campus de l'école actuelle
         $campusIds = $school->campuses()->pluck('id')->toArray();
         
+        // Récupérer l'ID de la filière à partir de la requête (s'il existe)
+        $selectedFieldId = $request->query('field_id');
+        $selectedField = null;
+        
+        if ($selectedFieldId) {
+            $selectedField = Field::whereIn('campus_id', $campusIds)
+                            ->where('id', $selectedFieldId)
+                            ->first();
+                            
+            if (!$selectedField) {
+                return redirect()->route('students.create')
+                    ->with('error', 'La filière sélectionnée n\'appartient pas à cette école ou n\'existe pas.');
+            }
+        }
+        
         // Obtenir les filières de ces campus
         $fields = Field::with('campus')
                     ->whereIn('campus_id', $campusIds)
@@ -114,7 +129,7 @@ class StudentController extends Controller
                 ->with('info', 'Veuillez d\'abord créer une filière avant d\'ajouter des étudiants.');
         }
         
-        return view('students.create', compact('fields', 'school'));
+        return view('students.create', compact('fields', 'school', 'selectedField'));
     }
 
     public function store(Request $request)

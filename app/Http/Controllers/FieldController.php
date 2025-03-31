@@ -153,11 +153,14 @@ class FieldController extends Controller
      */
     public function show(Field $field)
     {
-        // Charger le campus, le niveau d'éducation et les étudiants
-        $field->load(['campus', 'educationLevel', 'students']);
+        // Charger le campus, le niveau d'éducation
+        $field->load(['campus', 'educationLevel']);
+        
+        // Récupérer les étudiants avec pagination
+        $students = Student::where('field_id', $field->id)->paginate(10);
         
         // Calculer les statistiques de paiement
-        $totalStudents = $field->students->count();
+        $totalStudents = Student::where('field_id', $field->id)->count();
         $totalFees = $totalStudents * $field->fees;
         
         $studentStats = [
@@ -170,23 +173,35 @@ class FieldController extends Controller
             'remainingAmount' => 0
         ];
         
-        // Obtenir des informations sur le paiement pour chaque étudiant
-        foreach ($field->students as $student) {
+        // Obtenir des informations sur tous les étudiants pour les statistiques
+        $allStudents = Student::with('payments')->where('field_id', $field->id)->get();
+        
+        foreach ($allStudents as $student) {
+            $totalPaid = $student->payments->sum('amount');
+            
+            $studentStats['totalPaid'] += $totalPaid;
+            
+            if ($totalPaid >= $field->fees) {
+                $studentStats['paid']++;
+            } elseif ($totalPaid > 0) {
+                $studentStats['partial']++;
+            } else {
+                $studentStats['unpaid']++;
+            }
+        }
+        
+        // Ajouter les informations de paiement aux étudiants paginés
+        foreach ($students as $student) {
             $student->load('payments');
             $totalPaid = $student->payments->sum('amount');
             $student->paid_amount = $totalPaid;
             $student->remaining_amount = max(0, $field->fees - $totalPaid);
             
-            $studentStats['totalPaid'] += $totalPaid;
-            
             if ($student->remaining_amount === 0) {
-                $studentStats['paid']++;
                 $student->payment_status = 'paid';
             } elseif ($totalPaid > 0) {
-                $studentStats['partial']++;
                 $student->payment_status = 'partial';
             } else {
-                $studentStats['unpaid']++;
                 $student->payment_status = 'unpaid';
             }
         }
@@ -200,7 +215,7 @@ class FieldController extends Controller
             ->where('id', '!=', $field->id)
             ->get();
             
-        return view('fields.show', compact('field', 'studentStats', 'similarFields'));
+        return view('fields.show', compact('field', 'students', 'studentStats', 'similarFields'));
     }
 
     /**
@@ -265,6 +280,92 @@ class FieldController extends Controller
         // Générer le PDF avec les données
         $pdf = Pdf::loadView('reports.field', $data);
         $fileName = 'rapport_' . $field->name . '_' . date('Y-m-d') . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Génère un document PDF listant les étudiants solvables (qui ont intégralement payé)
+     * 
+     * @param  \App\Models\Field  $field
+     * @return \Illuminate\Http\Response
+     */
+    public function downloadSolvableStudents(Field $field)
+    {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour télécharger la liste.');
+        }
+        
+        // Charger la filière avec les relations nécessaires
+        $field->load(['campus', 'educationLevel', 'students.payments']);
+        
+        // Filtrer les étudiants solvables (ceux qui ont intégralement payé)
+        $solvableStudents = $field->students->filter(function($student) use ($field) {
+            $totalPaid = $student->payments->sum('amount');
+            $student->paid_amount = $totalPaid;
+            $student->remaining_amount = max(0, $field->fees - $totalPaid);
+            
+            // Un étudiant est solvable s'il a payé au moins le montant des frais
+            return $totalPaid >= $field->fees;
+        });
+        
+        $data = [
+            'field' => $field,
+            'students' => $solvableStudents,
+            'title' => 'Étudiants solvables',
+            'description' => 'Liste des étudiants ayant intégralement payé leurs frais',
+            'currentSchool' => $school
+        ];
+        
+        // Générer le PDF avec les données
+        $pdf = Pdf::loadView('reports.students_list', $data);
+        $fileName = 'etudiants_solvables_' . $field->name . '_' . date('Y-m-d') . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Génère un document PDF listant les étudiants insolvables (qui n'ont pas intégralement payé)
+     * 
+     * @param  \App\Models\Field  $field
+     * @return \Illuminate\Http\Response
+     */
+    public function downloadInsolvableStudents(Field $field)
+    {
+        $school = session('current_school');
+        
+        if (!$school) {
+            return redirect()->route('schools.index')
+                ->with('error', 'Veuillez sélectionner une école pour télécharger la liste.');
+        }
+        
+        // Charger la filière avec les relations nécessaires
+        $field->load(['campus', 'educationLevel', 'students.payments']);
+        
+        // Filtrer les étudiants insolvables (ceux qui n'ont pas intégralement payé)
+        $insolvableStudents = $field->students->filter(function($student) use ($field) {
+            $totalPaid = $student->payments->sum('amount');
+            $student->paid_amount = $totalPaid;
+            $student->remaining_amount = max(0, $field->fees - $totalPaid);
+            
+            // Un étudiant est insolvable s'il n'a pas payé l'intégralité des frais
+            return $totalPaid < $field->fees;
+        });
+        
+        $data = [
+            'field' => $field,
+            'students' => $insolvableStudents,
+            'title' => 'Étudiants insolvables',
+            'description' => 'Liste des étudiants n\'ayant pas intégralement payé leurs frais',
+            'currentSchool' => $school
+        ];
+        
+        // Générer le PDF avec les données
+        $pdf = Pdf::loadView('reports.students_list', $data);
+        $fileName = 'etudiants_insolvables_' . $field->name . '_' . date('Y-m-d') . '.pdf';
         
         return $pdf->download($fileName);
     }

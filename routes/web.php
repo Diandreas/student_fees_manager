@@ -78,13 +78,23 @@ Route::middleware(['auth'])->group(function () {
         
         // Routes pour les campus
         Route::resource('campuses', CampusController::class);
+        Route::get('/campuses/{campus}/solvable', [CampusController::class, 'downloadSolvableStudents'])->name('campuses.solvable');
+        Route::get('/campuses/{campus}/insolvable', [CampusController::class, 'downloadInsolvableStudents'])->name('campuses.insolvable');
         
         // Routes pour les niveaux d'éducation
         Route::resource('education-levels', EducationLevelController::class);
         
         // Routes pour les filières avec route d'exportation
         Route::get('/fields/{field}/report', [FieldController::class, 'report'])->name('fields.report');
-        Route::resource('fields', FieldController::class);
+        Route::get('/fields', [FieldController::class, 'index'])->name('fields.index');
+        Route::get('/fields/create', [FieldController::class, 'create'])->name('fields.create');
+        Route::post('/fields', [FieldController::class, 'store'])->name('fields.store');
+        Route::get('/fields/{field}', [FieldController::class, 'show'])->name('fields.show');
+        Route::get('/fields/{field}/edit', [FieldController::class, 'edit'])->name('fields.edit');
+        Route::put('/fields/{field}', [FieldController::class, 'update'])->name('fields.update');
+        Route::delete('/fields/{field}', [FieldController::class, 'destroy'])->name('fields.destroy');
+        Route::get('/fields/{field}/solvable', [FieldController::class, 'downloadSolvableStudents'])->name('fields.solvable');
+        Route::get('/fields/{field}/insolvable', [FieldController::class, 'downloadInsolvableStudents'])->name('fields.insolvable');
         
         // Routes pour les étudiants avec route d'exportation
         Route::get('/students/{student}/report', [StudentController::class, 'report'])->name('students.report');
@@ -143,7 +153,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
 
         // Gestion des utilisateurs
-        Route::resource('users', UserController::class)->except(['show']);
+        // Route::resource('users', UserController::class)->except(['show']);
 
         // Gestion des factures
         /* Route::controller(InvoiceController::class)->prefix('invoices')->name('invoices.')->group(function () {

@@ -17,16 +17,29 @@
                 <form action="{{ route('payments.store') }}" method="POST" id="paymentForm">
                     @csrf
                     <div class="mb-4">
-                        <label for="student_id" class="form-label">{{ session('current_school')->term('student', 'Étudiant') }} <span class="text-red-500">*</span></label>
-                        <select id="student_id" name="student_id" class="form-select @error('student_id') border-red-500 @enderror" required>
-                            <option value="">{{ session('current_school')->term('select_student', 'Sélectionner un étudiant') }}</option>
-                            @foreach($students as $student)
-                                <option value="{{ $student->id }}" data-remaining="{{ $student->remainingAmount }}" 
-                                    {{ (old('student_id') == $student->id || (isset($selectedStudent) && $selectedStudent->id == $student->id)) ? 'selected' : '' }}>
-                                    {{ $student->full_name }} ({{ $student->field->name }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label for="student_search" class="form-label">{{ session('current_school')->term('student', 'Étudiant') }} <span class="text-red-500">*</span></label>
+                        <div class="flex space-x-2">
+                            <!-- Champ caché pour l'ID de l'étudiant -->
+                            <input type="hidden" id="student_id" name="student_id" value="{{ old('student_id', isset($selectedStudent) ? $selectedStudent->id : '') }}" required>
+                            
+                            <!-- Champ de recherche avec l'information de l'étudiant sélectionné -->
+                            <div class="relative flex-grow">
+                                <input type="text" 
+                                    class="form-input w-full @error('student_id') border-red-500 @enderror" 
+                                    id="student_search" 
+                                    placeholder="{{ session('current_school')->term('search_student', 'Rechercher un étudiant') }}"
+                                    value="{{ old('student_name', isset($selectedStudent) ? $selectedStudent->full_name . ' (' . $selectedStudent->field->name . ')' : '') }}"
+                                    readonly>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Bouton pour ouvrir le modal de recherche -->
+                            <button type="button" id="openStudentSearch" class="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 focus:outline-none">
+                                <i class="fas fa-search mr-1"></i> {{ session('current_school')->term('search', 'Rechercher') }}
+                            </button>
+                        </div>
                         @error('student_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -139,10 +152,58 @@
     </div>
 </div>
 
+<!-- Modal de recherche d'étudiants -->
+<div id="studentSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800">
+                <i class="fas fa-search mr-2"></i>{{ session('current_school')->term('search_student', 'Rechercher un étudiant') }}
+            </h3>
+            <button type="button" id="closeStudentSearchModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <div class="p-4 border-b">
+            <div class="relative">
+                <input type="text" 
+                    id="modalStudentSearch" 
+                    class="form-input w-full pr-10" 
+                    placeholder="{{ session('current_school')->term('search_by_name_or_field', 'Rechercher par nom, prénom ou filière...') }}"
+                    autocomplete="off">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-y-auto flex-grow">
+            <div id="searchMessage" class="text-center text-gray-500 py-4">
+                {{ session('current_school')->term('start_typing', 'Commencez à taper pour rechercher un étudiant...') }}
+            </div>
+            <div id="studentList" class="divide-y">
+                <!-- Les résultats de recherche seront ajoutés ici dynamiquement -->
+            </div>
+            <div id="loadingIndicator" class="text-center py-4 hidden">
+                <i class="fas fa-spinner fa-spin mr-2"></i> {{ session('current_school')->term('loading', 'Chargement...') }}
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const studentSelect = document.getElementById('student_id');
+            // Éléments du DOM
+            const studentIdInput = document.getElementById('student_id');
+            const studentSearchInput = document.getElementById('student_search');
+            const openStudentSearchButton = document.getElementById('openStudentSearch');
+            const studentSearchModal = document.getElementById('studentSearchModal');
+            const closeStudentSearchModalButton = document.getElementById('closeStudentSearchModal');
+            const modalStudentSearchInput = document.getElementById('modalStudentSearch');
+            const studentList = document.getElementById('studentList');
+            const searchMessage = document.getElementById('searchMessage');
+            const loadingIndicator = document.getElementById('loadingIndicator');
             const studentInfoCard = document.querySelector('.student-info-card');
             
             // Fonction pour formater des nombres avec des séparateurs
@@ -163,76 +224,232 @@
                 }
             }
             
-            // Handler pour le changement d'étudiant
-            studentSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
+            // Fonction pour charger les informations de l'étudiant
+            function loadStudentInfo(studentId) {
+                if (!studentId) return;
                 
-                if (this.value) {
-                    // Récupérer les informations de paiement de l'étudiant
-                    fetch(`{{ url('/payments/student-remaining') }}/${this.value}`)
+                loadingIndicator.classList.remove('hidden');
+                fetch(`{{ url('/payments/student-remaining') }}/${studentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        loadingIndicator.classList.add('hidden');
+                        
+                        // Vérifier que data contient les informations attendues
+                        if (!data || !data.student) {
+                            console.error('Les données de l\'étudiant sont incomplètes:', data);
+                            return;
+                        }
+                        
+                        // Afficher la carte d'information
+                        studentInfoCard.classList.remove('hidden');
+                        
+                        // Vérifier et définir les valeurs avec des valeurs par défaut pour éviter undefined
+                        const studentName = data.student.full_name || data.student.fullName || 'Non disponible';
+                        const fieldName = data.student.field && data.student.field.name ? data.student.field.name : 'Non disponible';
+                        const campusName = data.student.field && data.student.field.campus && data.student.field.campus.name ? data.student.field.campus.name : 'Non disponible';
+                        const totalFees = data.totalFees || 0;
+                        const totalPaid = data.totalPaid || 0;
+                        const remainingAmount = data.remainingAmount || 0;
+                        
+                        // Mettre à jour les informations
+                        document.getElementById('student-name').textContent = studentName;
+                        document.getElementById('student-field').textContent = fieldName;
+                        document.getElementById('student-campus').textContent = campusName;
+                        document.getElementById('student-fees').textContent = formatNumber(totalFees);
+                        document.getElementById('student-paid').textContent = formatNumber(totalPaid);
+                        document.getElementById('student-remaining').textContent = formatNumber(remainingAmount);
+                        
+                        // Mettre à jour la classe pour la couleur du texte
+                        const remainingText = document.getElementById('remaining-amount-text');
+                        if (remainingAmount > 0) {
+                            remainingText.className = 'text-yellow-600 mb-2';
+                        } else {
+                            remainingText.className = 'text-green-600 mb-2';
+                        }
+                        
+                        // Mettre à jour le montant maximum
+                        updateAmountMax(remainingAmount);
+                        
+                        // Désactiver le bouton de soumission si la pension est déjà soldée
+                        const submitButton = document.querySelector('button[type="submit"]');
+                        const paymentInfo = document.getElementById('paymentInfo');
+                        if (remainingAmount <= 0) {
+                            submitButton.disabled = true;
+                            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+                            paymentInfo.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>La pension de cet étudiant est déjà soldée. Impossible d\'effectuer un paiement.';
+                            paymentInfo.classList.remove('hidden', 'bg-blue-100', 'text-blue-800');
+                            paymentInfo.classList.add('bg-red-100', 'text-red-800');
+                            document.getElementById('amount').disabled = true;
+                        } else {
+                            submitButton.disabled = false;
+                            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                            paymentInfo.innerHTML = `<i class="fas fa-info-circle mr-2"></i>Reste à payer : ${formatNumber(remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}`;
+                            paymentInfo.classList.remove('hidden', 'bg-red-100', 'text-red-800');
+                            paymentInfo.classList.add('bg-blue-100', 'text-blue-800');
+                            document.getElementById('amount').disabled = false;
+                        }
+                        
+                        // Afficher le message d'information de paiement
+                        paymentInfo.classList.remove('hidden');
+                    })
+                    .catch(error => {
+                        loadingIndicator.classList.add('hidden');
+                        console.error('Error:', error);
+                    });
+            }
+            
+            // Fonction pour rechercher des étudiants
+            let searchTimeout = null;
+            function searchStudents(query) {
+                // Annuler la recherche précédente si elle existe
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                
+                // Ne rechercher que si la requête a au moins 2 caractères
+                if (query.length < 2) {
+                    searchMessage.textContent = "{{ session('current_school')->term('type_more', 'Tapez au moins 2 caractères pour lancer la recherche...') }}";
+                    searchMessage.classList.remove('hidden');
+                    studentList.innerHTML = '';
+                    return;
+                }
+                
+                // Afficher le chargement
+                loadingIndicator.classList.remove('hidden');
+                searchMessage.classList.add('hidden');
+                
+                // Attendre un peu avant de lancer la recherche pour éviter les requêtes trop fréquentes
+                searchTimeout = setTimeout(() => {
+                    fetch(`{{ url('/api/students/search') }}?q=${encodeURIComponent(query)}`)
                         .then(response => response.json())
                         .then(data => {
-                            // Afficher la carte d'information
-                            document.querySelector('.student-info-card').classList.remove('hidden');
+                            loadingIndicator.classList.add('hidden');
                             
-                            // Mettre à jour les informations
-                            document.getElementById('student-name').textContent = data.student.full_name;
-                            document.getElementById('student-field').textContent = data.student.field.name;
-                            document.getElementById('student-campus').textContent = data.student.field.campus.name;
-                            document.getElementById('student-fees').textContent = formatNumber(data.totalFees);
-                            document.getElementById('student-paid').textContent = formatNumber(data.totalPaid);
-                            document.getElementById('student-remaining').textContent = formatNumber(data.remainingAmount);
-                            
-                            // Mettre à jour la classe pour la couleur du texte
-                            const remainingText = document.getElementById('remaining-amount-text');
-                            if (data.remainingAmount > 0) {
-                                remainingText.className = 'text-yellow-600 mb-2';
-                            } else {
-                                remainingText.className = 'text-green-600 mb-2';
+                            if (!data || data.length === 0) {
+                                searchMessage.textContent = "{{ session('current_school')->term('no_results', 'Aucun résultat trouvé') }}";
+                                searchMessage.classList.remove('hidden');
+                                studentList.innerHTML = '';
+                                return;
                             }
                             
-                            // Mettre à jour le montant maximum
-                            updateAmountMax(data.remainingAmount);
+                            // Afficher les résultats
+                            searchMessage.classList.add('hidden');
+                            studentList.innerHTML = '';
                             
-                            // Désactiver le bouton de soumission si la pension est déjà soldée
-                            const submitButton = document.querySelector('button[type="submit"]');
-                            if (data.remainingAmount <= 0) {
-                                submitButton.disabled = true;
-                                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-                                document.getElementById('paymentInfo').innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>La pension de cet étudiant est déjà soldée. Impossible d\'effectuer un paiement.';
-                                document.getElementById('paymentInfo').classList.remove('hidden', 'bg-blue-100', 'text-blue-800');
-                                document.getElementById('paymentInfo').classList.add('bg-red-100', 'text-red-800');
-                                document.getElementById('amount').disabled = true;
-                            } else {
-                                submitButton.disabled = false;
-                                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                                document.getElementById('paymentInfo').innerHTML = `<i class="fas fa-info-circle mr-2"></i>Reste à payer : ${formatNumber(data.remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}`;
-                                document.getElementById('paymentInfo').classList.remove('hidden', 'bg-red-100', 'text-red-800');
-                                document.getElementById('paymentInfo').classList.add('bg-blue-100', 'text-blue-800');
-                                document.getElementById('amount').disabled = false;
-                            }
-                            
-                            // Afficher le message d'information de paiement
-                            const paymentInfo = document.getElementById('paymentInfo');
-                            if (data.remainingAmount > 0) {
-                                paymentInfo.innerHTML = `<i class="fas fa-info-circle mr-2"></i>Reste à payer : ${formatNumber(data.remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}`;
-                            }
-                            paymentInfo.classList.remove('hidden');
+                            data.forEach(student => {
+                                // Vérification des propriétés pour éviter les problèmes d'undefined
+                                const studentName = student.full_name || student.fullName || 'Nom non disponible';
+                                const fieldName = student.field && student.field.name ? student.field.name : 'Filière non disponible';
+                                const campusName = student.field && student.field.campus && student.field.campus.name ? student.field.campus.name : 'Campus non disponible';
+                                const fees = student.field && student.field.fees ? student.field.fees : 0;
+                                const remainingAmount = student.remaining_amount || 0;
+                                
+                                // Créer l'élément de la liste
+                                const studentItem = document.createElement('div');
+                                studentItem.className = 'p-3 hover:bg-gray-100 cursor-pointer flex items-start';
+                                studentItem.setAttribute('data-student-id', student.id);
+                                studentItem.setAttribute('data-student-name', studentName);
+                                studentItem.setAttribute('data-field-name', fieldName);
+                                
+                                // Statut de paiement (rond coloré)
+                                let statusColor;
+                                if (student.payment_status === 'fully_paid') {
+                                    statusColor = 'bg-green-500';
+                                } else if (student.payment_status === 'partially_paid') {
+                                    statusColor = 'bg-yellow-500';
+                                } else {
+                                    statusColor = 'bg-red-500';
+                                }
+                                
+                                // Contenu HTML
+                                studentItem.innerHTML = `
+                                    <div class="mr-3 mt-1">
+                                        <div class="w-3 h-3 ${statusColor} rounded-full"></div>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-medium">${studentName}</div>
+                                        <div class="text-sm text-gray-600">${fieldName} - ${campusName}</div>
+                                        <div class="mt-1 text-sm">
+                                            <span class="font-semibold">Total:</span> ${formatNumber(fees)} {{ session('current_school')->term('currency', 'FCFA') }} | 
+                                            <span class="font-semibold">Reste:</span> <span class="${remainingAmount > 0 ? 'text-yellow-600' : 'text-green-600'}">${formatNumber(remainingAmount)} {{ session('current_school')->term('currency', 'FCFA') }}</span>
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                // Événement click pour sélectionner l'étudiant
+                                studentItem.addEventListener('click', () => {
+                                    selectStudent(student.id, `${studentName} (${fieldName})`);
+                                    closeModal();
+                                });
+                                
+                                // Ajouter à la liste
+                                studentList.appendChild(studentItem);
+                            });
                         })
                         .catch(error => {
+                            loadingIndicator.classList.add('hidden');
+                            searchMessage.textContent = "{{ session('current_school')->term('error', 'Une erreur est survenue, veuillez réessayer') }}";
+                            searchMessage.classList.remove('hidden');
                             console.error('Error:', error);
                         });
-                } else {
-                    // Masquer la carte d'information
-                    document.querySelector('.student-info-card').classList.add('hidden');
-                    document.getElementById('paymentInfo').classList.add('hidden');
+                }, 300);
+            }
+            
+            // Fonction pour sélectionner un étudiant
+            function selectStudent(id, displayName) {
+                studentIdInput.value = id;
+                studentSearchInput.value = displayName;
+                
+                // Charger les informations de l'étudiant
+                loadStudentInfo(id);
+            }
+            
+            // Fonctions pour le modal
+            function openModal() {
+                studentSearchModal.classList.remove('hidden');
+                modalStudentSearchInput.focus();
+                
+                // Réinitialiser la recherche
+                modalStudentSearchInput.value = '';
+                searchMessage.textContent = "{{ session('current_school')->term('start_typing', 'Commencez à taper pour rechercher un étudiant...') }}";
+                searchMessage.classList.remove('hidden');
+                studentList.innerHTML = '';
+            }
+            
+            function closeModal() {
+                studentSearchModal.classList.add('hidden');
+            }
+            
+            // Événements
+            openStudentSearchButton.addEventListener('click', openModal);
+            closeStudentSearchModalButton.addEventListener('click', closeModal);
+            
+            modalStudentSearchInput.addEventListener('input', function() {
+                searchStudents(this.value.trim());
+            });
+            
+            // Fermer le modal en cliquant en dehors
+            studentSearchModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
                 }
             });
             
-            // Exécuter le changement si un étudiant est déjà sélectionné
-            if (studentSelect.value) {
-                studentSelect.dispatchEvent(new Event('change'));
+            // Ouvrir le modal en cliquant sur le champ de recherche
+            studentSearchInput.addEventListener('click', openModal);
+            
+            // Charger les informations de l'étudiant si déjà sélectionné
+            if (studentIdInput.value) {
+                loadStudentInfo(studentIdInput.value);
             }
+            
+            // Gérer la soumission du formulaire
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
+                if (!studentIdInput.value) {
+                    e.preventDefault();
+                    alert("{{ session('current_school')->term('select_student_first', 'Veuillez sélectionner un étudiant avant de soumettre le formulaire') }}");
+                }
+            });
         });
     </script>
 @endpush

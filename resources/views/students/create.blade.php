@@ -113,15 +113,25 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <i class="fas fa-bookmark text-gray-400"></i>
                                         </div>
-                                        <select class="w-full rounded-lg border-gray-300 pl-10 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('field_id') border-red-500 @enderror" 
-                                                id="field_id" name="field_id" required>
-                                            <option value="">-- Sélectionner une filière --</option>
-                                            @foreach($fields as $field)
-                                                <option value="{{ $field->id }}" {{ old('field_id') == $field->id ? 'selected' : '' }}>
-                                                    {{ $field->name }} ({{ $field->campus->name }})
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        @if ($selectedField)
+                                            <input type="hidden" name="field_id" value="{{ $selectedField->id }}">
+                                            <input type="text" class="w-full rounded-lg border-gray-300 pl-10 shadow-sm bg-gray-100 cursor-not-allowed" 
+                                                value="{{ $selectedField->name }} ({{ $selectedField->campus->name }})" readonly>
+                                            <p class="mt-1 text-sm text-primary-600 flex items-center">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Cette filière est présélectionnée et ne peut pas être modifiée.
+                                            </p>
+                                        @else
+                                            <select class="w-full rounded-lg border-gray-300 pl-10 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 @error('field_id') border-red-500 @enderror" 
+                                                    id="field_id" name="field_id" required>
+                                                <option value="">-- Sélectionner une filière --</option>
+                                                @foreach($fields as $field)
+                                                    <option value="{{ $field->id }}" {{ old('field_id') == $field->id ? 'selected' : '' }}>
+                                                        {{ $field->name }} ({{ $field->campus->name }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @endif
                                     </div>
                                     @error('field_id')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -340,15 +350,22 @@ document.addEventListener('DOMContentLoaded', function() {
         @endforeach
     };
     
-    // Mettre à jour les frais lors du changement de filière
-    fieldSelect.addEventListener('change', function() {
-        const selectedFieldId = this.value;
-        const fees = fieldsData[selectedFieldId] || 0;
-        feesDisplay.value = new Intl.NumberFormat('fr-FR').format(fees);
-    });
-    
-    // Déclencher l'événement change pour afficher les frais initiaux
-    fieldSelect.dispatchEvent(new Event('change'));
+    // Pour une filière présélectionnée
+    @if($selectedField)
+        feesDisplay.value = new Intl.NumberFormat('fr-FR').format({{ $selectedField->fees }});
+    @else
+        // Mettre à jour les frais lors du changement de filière
+        if (fieldSelect) {
+            fieldSelect.addEventListener('change', function() {
+                const selectedFieldId = this.value;
+                const fees = fieldsData[selectedFieldId] || 0;
+                feesDisplay.value = new Intl.NumberFormat('fr-FR').format(fees);
+            });
+            
+            // Déclencher l'événement change pour afficher les frais initiaux
+            fieldSelect.dispatchEvent(new Event('change'));
+        }
+    @endif
     
     // Prévisualisation de la photo
     photoInput.addEventListener('change', function(e) {

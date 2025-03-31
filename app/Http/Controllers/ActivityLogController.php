@@ -14,6 +14,11 @@ class ActivityLogController extends Controller
     {
         $school = Auth::user()->currentSchool;
         
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour accéder aux journaux d\'activité.');
+        }
+        
         $activities = ActivityLog::where(function($query) use ($school) {
             $query->whereHasMorph('model', [Student::class, Payment::class], function($q) use ($school) {
                 $q->where('school_id', $school->id);
@@ -30,6 +35,11 @@ class ActivityLogController extends Controller
     {
         $school = Auth::user()->currentSchool;
         
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour accéder aux journaux d\'activité.');
+        }
+        
         // Vérifier si l'activité appartient à l'école actuelle
         if ($activityLog->model && method_exists($activityLog->model, 'school_id')) {
             if ($activityLog->model->school_id !== $school->id) {
@@ -43,6 +53,11 @@ class ActivityLogController extends Controller
     public function destroy(ActivityLog $activityLog)
     {
         $school = Auth::user()->currentSchool;
+        
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école pour accéder aux journaux d\'activité.');
+        }
         
         // Vérifier si l'activité appartient à l'école actuelle
         if ($activityLog->model && method_exists($activityLog->model, 'school_id')) {
