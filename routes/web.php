@@ -21,6 +21,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\QuickPaymentController;
+use App\Http\Controllers\StudentExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -135,7 +136,8 @@ Route::middleware(['auth'])->group(function () {
         
         // Gestion des étudiants
         Route::get('/students/print', [StudentController::class, 'printList'])->name('students.print');
-        Route::get('/students/export-excel', [StudentController::class, 'exportExcel'])->name('students.export-excel');
+        Route::get('/students/export-excel', [StudentExportController::class, 'exportExcel'])->name('students.export-excel');
+        Route::get('/students/export-csv', [StudentExportController::class, 'exportCsv'])->name('students.export-csv');
         Route::resource('students', StudentController::class);
         Route::prefix('students')->name('students.')->controller(StudentController::class)->group(function () {
             Route::get('/print', 'printList')->name('print');

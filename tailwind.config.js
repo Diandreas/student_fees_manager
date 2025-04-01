@@ -16,85 +16,89 @@ export default {
             },
             colors: {
                 'primary': {
-                    50: '#f0f7ff',
-                    100: '#e0effe',
-                    200: '#bae6fd',
-                    300: '#7dd3fc',
-                    400: '#38bdf8',
-                    500: '#0ea5e9',
-                    600: '#0284c7', /* couleur principale */
-                    700: '#0369a1',
-                    800: '#075985',
-                    900: '#0c4a6e',
-                    950: '#082f49',
+                    50: '#f0fdf4',
+                    100: '#dcfce7',
+                    200: '#bbf7d0',
+                    300: '#86efac',
+                    400: '#4ade80',
+                    500: '#22c55e',
+                    600: '#16a34a', /* couleur principale */
+                    700: '#15803d',
+                    800: '#166534',
+                    900: '#14532d',
+                    950: '#052e16',
                 },
                 'secondary': {
-                    50: '#f0f9ff',
-                    100: '#e0f2fe',
-                    200: '#bae6fd',
-                    300: '#7dd3fc',
-                    400: '#38bdf8',
-                    500: '#0ea5e9',
-                    600: '#0284c7',
-                    700: '#0369a1',
-                    800: '#075985',
-                    900: '#0c4a6e',
-                    950: '#082f49',
+                    50: '#ecfdf5',
+                    100: '#d1fae5',
+                    200: '#a7f3d0',
+                    300: '#6ee7b7',
+                    400: '#34d399',
+                    500: '#10b981',
+                    600: '#059669',
+                    700: '#047857',
+                    800: '#065f46',
+                    900: '#064e3b',
+                    950: '#022c22',
                 },
-                'accent': '#0ea5e9',
-                'success': '#0284c7',
-                'warning': '#38bdf8',
-                'danger': '#0369a1',
-                'info': '#7dd3fc',
+                'accent': '#22c55e',
+                'success': '#16a34a',
+                'warning': '#4ade80',
+                'danger': '#15803d',
+                'info': '#86efac',
 
-                // Remplacer les couleurs sémantiques standards par des nuances de bleu
+                // Remplacer les couleurs sémantiques standards par des nuances de vert
                 'green': {
-                    50: '#f0f9ff',  // bleu très clair
-                    100: '#e0f2fe', // bleu très clair
-                    200: '#bae6fd', // bleu clair
-                    300: '#7dd3fc', // bleu clair
-                    400: '#38bdf8', // bleu moyen
-                    500: '#0ea5e9', // bleu
-                    600: '#0284c7', // bleu foncé
-                    700: '#0369a1', // bleu foncé
-                    800: '#075985', // bleu très foncé
-                    900: '#0c4a6e', // bleu très foncé
+                    50: '#f0fdf4',
+                    100: '#dcfce7',
+                    200: '#bbf7d0',
+                    300: '#86efac',
+                    400: '#4ade80',
+                    500: '#22c55e',
+                    600: '#16a34a',
+                    700: '#15803d',
+                    800: '#166534',
+                    900: '#14532d',
+                    950: '#052e16',
                 },
                 'red': {
-                    50: '#eff6ff',  // bleu très clair 
-                    100: '#dbeafe', // bleu très clair
-                    200: '#bfdbfe', // bleu clair
-                    300: '#93c5fd', // bleu clair
-                    400: '#60a5fa', // bleu moyen
-                    500: '#3b82f6', // bleu
-                    600: '#2563eb', // bleu foncé
-                    700: '#1d4ed8', // bleu foncé
-                    800: '#1e40af', // bleu très foncé
-                    900: '#1e3a8a', // bleu très foncé
+                    50: '#f0fdf4',  // vert très clair 
+                    100: '#dcfce7', // vert très clair
+                    200: '#bbf7d0', // vert clair
+                    300: '#86efac', // vert clair
+                    400: '#4ade80', // vert moyen
+                    500: '#22c55e', // vert
+                    600: '#16a34a', // vert foncé
+                    700: '#15803d', // vert foncé
+                    800: '#166534', // vert très foncé
+                    900: '#14532d', // vert très foncé
+                    950: '#052e16',
                 },
                 'yellow': {
-                    50: '#f0f7ff',  // bleu très clair
-                    100: '#e0effe', // bleu très clair  
-                    200: '#c0ddfd', // bleu clair
-                    300: '#92c5fb', // bleu clair
-                    400: '#5ea6f8', // bleu moyen
-                    500: '#3a86f5', // bleu
-                    600: '#1a56db', // bleu foncé
-                    700: '#1a4bbd', // bleu foncé
-                    800: '#1c419a', // bleu très foncé
-                    900: '#1c3879', // bleu très foncé
+                    50: '#f0fdf5',  // vert très clair
+                    100: '#dcfce8', // vert très clair  
+                    200: '#bbf7d1', // vert clair
+                    300: '#86efad', // vert clair
+                    400: '#4ade81', // vert moyen
+                    500: '#22c55f', // vert
+                    600: '#16a34b', // vert foncé
+                    700: '#15803e', // vert foncé
+                    800: '#166535', // vert très foncé
+                    900: '#14532e', // vert très foncé
+                    950: '#052e17',
                 },
                 'amber': {
-                    50: '#f0f7ff',  // bleu très clair
-                    100: '#e0effe', // bleu très clair
-                    200: '#c0ddfd', // bleu clair
-                    300: '#92c5fb', // bleu clair
-                    400: '#5ea6f8', // bleu moyen
-                    500: '#3a86f5', // bleu
-                    600: '#1a56db', // bleu foncé
-                    700: '#1a4bbd', // bleu foncé
-                    800: '#1c419a', // bleu très foncé
-                    900: '#1c3879', // bleu très foncé
+                    50: '#ecfdf5',  // vert très clair
+                    100: '#d1fae5', // vert très clair
+                    200: '#a7f3d0', // vert clair
+                    300: '#6ee7b7', // vert clair
+                    400: '#34d399', // vert moyen
+                    500: '#10b981', // vert
+                    600: '#059669', // vert foncé
+                    700: '#047857', // vert foncé
+                    800: '#065f46', // vert très foncé
+                    900: '#064e3b', // vert très foncé
+                    950: '#022c22',
                 },
             },
             borderRadius: {
