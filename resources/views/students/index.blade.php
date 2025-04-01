@@ -228,6 +228,32 @@
             @endif
         </div>
     </div>
+
+    <div class="mt-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="border-b border-gray-100 p-5">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-3 md:space-y-0">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-list mr-2"></i>Actions
+                    </h5>
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <a href="{{ route('students.print', request()->query()) }}" target="_blank" class="py-2 px-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg flex items-center">
+                            <i class="fas fa-print mr-2"></i> Imprimer
+                        </a>
+                        <a href="{{ route('students.export-excel', request()->query()) }}" class="py-2 px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center">
+                            <i class="fas fa-file-excel mr-2"></i> Excel
+                        </a>
+                        <a href="{{ route('students.export-csv', request()->query()) }}" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center">
+                            <i class="fas fa-file-csv mr-2"></i> CSV
+                        </a>
+                        <a href="{{ route('students.generate-pdf', request()->query()) }}" target="_blank" class="py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center">
+                            <i class="fas fa-file-pdf mr-2"></i> PDF Groupé
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('styles')

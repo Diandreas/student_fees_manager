@@ -597,8 +597,7 @@ class StudentController extends Controller
             
             // Utiliser l'ancien template qui fonctionnait
             $pdf = Pdf::loadView('students.print', $data);
-            
-            return $pdf->stream($school->name . '_' . Str::slug($title) . '_' . Carbon::now()->format('Y-m-d') . '.pdf');
+            return $pdf->download($school->name . '_' . Str::slug($title) . '_' . Carbon::now()->format('Y-m-d') . '.pdf');
             
         } catch (\Exception $e) {
             return response()->json([

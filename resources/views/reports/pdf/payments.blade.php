@@ -1,85 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapport des paiements</title>
     <style>
-        @page {
-            margin: 1.5cm;
-        }
         body {
             font-family: Arial, sans-serif;
+            font-size: 12px;
             line-height: 1.4;
-            margin: 0;
-            padding: 20px;
             color: #333;
-            position: relative;
-        }
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.04;
-            z-index: -1;
-            width: 70%;
-            max-height: 70%;
-            pointer-events: none;
-        }
-        .document-border {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            z-index: -1;
-        }
-        .document-container {
-            position: relative;
-            padding: 10px;
-        }
-        .official-stamp {
-            position: absolute;
-            top: 40%;
-            right: 5%;
-            transform: rotate(30deg);
-            font-size: 24px;
-            color: rgba(0, 0, 0, 0.06);
-            font-weight: bold;
-            text-transform: uppercase;
-            border: 3px solid rgba(0, 0, 0, 0.06);
-            padding: 10px 20px;
-            z-index: -1;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #0d47a1;
-            padding-bottom: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
         }
-        .school-logo {
-            max-width: 80px;
-            max-height: 80px;
-            margin-bottom: 10px;
+        .header h1 {
+            color: #4F46E5;
+            font-size: 18px;
+            margin-bottom: 5px;
         }
-        .school-name {
+        .header .school-info {
+            margin-bottom: 5px;
+        }
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            flex: 1;
+            background-color: #f9fafb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .stat-box .stat-value {
             font-size: 22px;
             font-weight: bold;
+            color: #4F46E5;
             margin-bottom: 5px;
-            color: #0d47a1;
         }
-        .report-title {
-            font-size: 18px;
-            color: #666;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        .date {
-            font-size: 12px;
-            color: #777;
-            margin-top: 10px;
+        .stat-box .stat-label {
+            font-size: 11px;
+            color: #6B7280;
         }
         table {
             width: 100%;
@@ -87,121 +55,301 @@
             margin-bottom: 20px;
         }
         table, th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #E5E7EB;
         }
         th {
-            background-color: #f5f5f5;
-            padding: 10px;
+            background-color: #f9fafb;
+            padding: 8px;
             text-align: left;
-            font-size: 12px;
+            font-weight: bold;
+            font-size: 11px;
         }
         td {
-            padding: 10px;
+            padding: 8px;
             font-size: 11px;
         }
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f9fafb;
         }
-        .summary {
-            margin-top: 30px;
-            font-size: 12px;
-            background-color: #f9f9f9;
-            padding: 15px;
+        .period-title {
+            background-color: #4F46E5;
+            color: white;
+            padding: 8px;
+            font-size: 14px;
+            margin: 20px 0 10px;
             border-radius: 5px;
-            border-left: 4px solid #0d47a1;
         }
         .footer {
-            margin-top: 40px;
+            text-align: center;
             font-size: 10px;
-            color: #777;
-            text-align: center;
-            border-top: 1px solid #ddd;
+            color: #6B7280;
+            margin-top: 30px;
             padding-top: 10px;
+            border-top: 1px solid #eee;
         }
-        .generated-by {
-            font-size: 9px;
-            color: #999;
+        .page-break {
+            page-break-after: always;
+        }
+        .payment-status {
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .chart-container {
+            margin: 20px 0;
             text-align: center;
-            margin-top: 5px;
+        }
+        .chart-placeholder {
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            padding: 30px;
+            background-color: #f9fafb;
+            color: #6B7280;
+            text-align: center;
             font-style: italic;
         }
         .payment-method {
             padding: 3px 6px;
-            border-radius: 3px;
+            border-radius: 10px;
             font-size: 10px;
             font-weight: bold;
-            background-color: #e3f2fd;
-            color: #1565c0;
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+        .summary-title {
+            color: #4F46E5;
+            font-size: 16px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <!-- Filigrane avec le logo de l'école -->
-    @if(isset($school->logo))
-        <img src="{{ public_path('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="watermark">
-    @endif
-    
-    <div class="document-container">
-        <div class="document-border"></div>
-        <div class="official-stamp">Document Officiel</div>
-        
-        <div class="header">
-            @if(isset($school->logo))
-                <img src="{{ public_path('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="school-logo">
-            @endif
-            <div class="school-name">{{ $school->name }}</div>
-            <div class="report-title">Rapport des Paiements</div>
-            <div class="date">Généré le {{ date('d/m/Y à H:i') }}</div>
+    <div class="header">
+        @if($school->logo)
+            <img src="{{ public_path('storage/' . $school->logo) }}" height="60" alt="{{ $school->name }}">
+        @endif
+        <h1>Rapport des paiements</h1>
+        <div class="school-info">
+            {{ $school->name }} | {{ $school->address ?? 'Adresse non définie' }} | {{ $school->phone ?? 'Téléphone non défini' }}
+        </div>
+        <div>
+            Généré le: {{ now()->format('d/m/Y H:i') }}
+        </div>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-value">{{ number_format($totalPayments, 0, ',', ' ') }}</div>
+            <div class="stat-label">Total des paiements</div>
         </div>
         
-        <table>
-            <thead>
+        <div class="stat-box">
+            <div class="stat-value">{{ number_format($totalStudents, 0, ',', ' ') }}</div>
+            <div class="stat-label">Nombre d'étudiants</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-value">{{ number_format($studentsWithPayments, 0, ',', ' ') }}</div>
+            <div class="stat-label">Étudiants ayant payé</div>
+        </div>
+        
+        <div class="stat-box">
+            <div class="stat-value">{{ number_format($paymentRate, 1, ',', ' ') }}%</div>
+            <div class="stat-label">Taux de paiement</div>
+        </div>
+    </div>
+
+    <!-- Graphiques (représentation visuelle) -->
+    <div class="chart-container">
+        <div class="chart-placeholder">
+            [Graphique: Évolution des paiements mensuels]
+            <br><small>Ce graphique est disponible dans la version web du rapport.</small>
+        </div>
+    </div>
+
+    <!-- Tableau récapitulatif par mois -->
+    <div class="summary-title">Récapitulatif des paiements mensuels</div>
+    <table>
+        <thead>
+            <tr>
+                <th width="20%">Mois</th>
+                <th width="40%" style="text-align: right;">Montant</th>
+                <th width="40%" style="text-align: right;">Pourcentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $totalAmount = array_sum($paymentData); @endphp
+            @foreach($monthLabels as $index => $month)
                 <tr>
-                    <th>N° Reçu</th>
-                    <th>Étudiant</th>
-                    <th>Filière</th>
-                    <th>Montant</th>
-                    <th>Date</th>
-                    <th>Méthode</th>
-                    <th>Description</th>
+                    <td>{{ $month }}</td>
+                    <td style="text-align: right;">{{ number_format($paymentData[$index] ?? 0, 0, ',', ' ') }}</td>
+                    <td style="text-align: right;">
+                        @if($totalAmount > 0)
+                            {{ number_format((($paymentData[$index] ?? 0) / $totalAmount) * 100, 1, ',', ' ') }}%
+                        @else
+                            0,0%
+                        @endif
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach($payments as $payment)
-                    <tr>
-                        <td>{{ $payment->receipt_number }}</td>
-                        <td>{{ $payment->student->fullName }}</td>
-                        <td>{{ $payment->student->field->name }}</td>
-                        <td>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
-                        <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
-                        <td>
-                            <span class="payment-method">
-                                @if($payment->payment_method == 'cash')
-                                    Espèces
-                                @elseif($payment->payment_method == 'bank')
-                                    Banque
-                                @elseif($payment->payment_method == 'mobile')
-                                    Mobile
-                                @else
-                                    {{ ucfirst($payment->payment_method) }}
-                                @endif
-                            </span>
-                        </td>
-                        <td>{{ $payment->description }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        
-        <div class="summary">
-            <p><strong>Nombre total de paiements:</strong> {{ count($payments) }}</p>
-            <p><strong>Montant total:</strong> {{ number_format($payments->sum('amount'), 0, ',', ' ') }} FCFA</p>
-        </div>
-        
-        <div class="footer">
-            <p>{{ $school->name }} - Rapport généré le {{ date('d/m/Y à H:i') }}</p>
-            <div class="generated-by">Généré par ScolarPay</div>
-        </div>
+            @endforeach
+            <tr style="font-weight: bold; background-color: #f1f5f9;">
+                <td>Total</td>
+                <td style="text-align: right;">{{ number_format($totalAmount, 0, ',', ' ') }}</td>
+                <td style="text-align: right;">100,0%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Tableau des paiements récents -->
+    <div class="summary-title">Détail des paiements récents</div>
+    <table>
+        <thead>
+            <tr>
+                <th width="5%">#</th>
+                <th width="15%">Date</th>
+                <th width="30%">Étudiant</th>
+                <th width="15%">Montant</th>
+                <th width="20%">Méthode</th>
+                <th width="15%">Référence</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($payments as $payment)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $payment->created_at->format('d/m/Y') }}</td>
+                    <td>
+                        <strong>{{ $payment->student->fullName }}</strong>
+                        <br>
+                        <small>{{ $payment->student->field->name ?? 'Non assigné' }}</small>
+                    </td>
+                    <td style="text-align: right;">{{ number_format($payment->amount, 0, ',', ' ') }}</td>
+                    <td>
+                        <span class="payment-method">{{ $payment->payment_method }}</span>
+                    </td>
+                    <td>{{ $payment->reference_number ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" style="text-align: center;">Aucun paiement trouvé</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <!-- Analyse par campus -->
+    <div class="summary-title">Paiements par campus</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Campus</th>
+                <th style="text-align: right;">Nombre de paiements</th>
+                <th style="text-align: right;">Montant total</th>
+                <th style="text-align: right;">Montant moyen</th>
+                <th style="text-align: right;">% du total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $campusPayments = [];
+                foreach ($payments as $payment) {
+                    if (!$payment->student->field || !$payment->student->field->campus) continue;
+                    
+                    $campusName = $payment->student->field->campus->name;
+                    if (!isset($campusPayments[$campusName])) {
+                        $campusPayments[$campusName] = [
+                            'count' => 0,
+                            'total' => 0
+                        ];
+                    }
+                    
+                    $campusPayments[$campusName]['count']++;
+                    $campusPayments[$campusName]['total'] += $payment->amount;
+                }
+
+                $totalPaymentAmount = array_sum(array_column($campusPayments, 'total'));
+            @endphp
+            
+            @foreach($campusPayments as $campusName => $stats)
+                <tr>
+                    <td>{{ $campusName }}</td>
+                    <td style="text-align: right;">{{ number_format($stats['count'], 0, ',', ' ') }}</td>
+                    <td style="text-align: right;">{{ number_format($stats['total'], 0, ',', ' ') }}</td>
+                    <td style="text-align: right;">{{ number_format($stats['count'] > 0 ? $stats['total'] / $stats['count'] : 0, 0, ',', ' ') }}</td>
+                    <td style="text-align: right;">
+                        @if($totalPaymentAmount > 0)
+                            {{ number_format(($stats['total'] / $totalPaymentAmount) * 100, 1, ',', ' ') }}%
+                        @else
+                            0,0%
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <!-- Analyse par méthode de paiement -->
+    <div class="summary-title">Paiements par méthode</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Méthode</th>
+                <th style="text-align: right;">Nombre</th>
+                <th style="text-align: right;">Montant total</th>
+                <th style="text-align: right;">% du total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $methodStats = [];
+                foreach ($payments as $payment) {
+                    $method = $payment->payment_method ?? 'Non spécifié';
+                    
+                    if (!isset($methodStats[$method])) {
+                        $methodStats[$method] = [
+                            'count' => 0,
+                            'total' => 0
+                        ];
+                    }
+                    
+                    $methodStats[$method]['count']++;
+                    $methodStats[$method]['total'] += $payment->amount;
+                }
+
+                $totalAmount = array_sum(array_column($methodStats, 'total'));
+            @endphp
+            
+            @foreach($methodStats as $method => $stats)
+                <tr>
+                    <td>{{ $method }}</td>
+                    <td style="text-align: right;">{{ number_format($stats['count'], 0, ',', ' ') }}</td>
+                    <td style="text-align: right;">{{ number_format($stats['total'], 0, ',', ' ') }}</td>
+                    <td style="text-align: right;">
+                        @if($totalAmount > 0)
+                            {{ number_format(($stats['total'] / $totalAmount) * 100, 1, ',', ' ') }}%
+                        @else
+                            0,0%
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+            
+            <tr style="font-weight: bold; background-color: #f1f5f9;">
+                <td>Total</td>
+                <td style="text-align: right;">{{ count($payments) }}</td>
+                <td style="text-align: right;">{{ number_format($totalAmount, 0, ',', ' ') }}</td>
+                <td style="text-align: right;">100,0%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        {{ $school->name }} - {{ date('Y') }} | Tous droits réservés<br>
+        Rapport généré le {{ now()->format('d/m/Y') }} à {{ now()->format('H:i') }}
     </div>
 </body>
 </html> 

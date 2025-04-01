@@ -8,6 +8,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 use App\Models\Field;
 use App\Models\Student;
+use App\Models\Campus;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentExportController extends Controller
 {
@@ -50,6 +52,163 @@ class StudentExportController extends Controller
 
             $filename .= date('Y-m-d') . '.xlsx';
             return Excel::download(new StudentsExport($fieldId, null, $paymentStatus), $filename);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+    }
+
+    /**
+     * Génère un PDF des étudiants groupés par campus et filière
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function generatePdf(Request $request)
+    {
+        try {
+            $school = session('current_school');
+            
+            if (!$school) {
+                return redirect()->route('schools.index')
+                    ->with('error', 'Veuillez sélectionner une école pour générer le PDF des étudiants.');
+            }
+            
+            $paymentStatus = $request->query('payment_status');
+            $fieldId = $request->query('field_id');
+            $title = 'Liste des étudiants';
+            
+            // Filtrer directement par l'école actuelle
+            $query = Student::with(['field.campus', 'payments'])
+                            ->where('school_id', $school->id);
+            
+            // Filtre par filière
+            if ($fieldId) {
+                $query->where('field_id', $fieldId);
+                $field = Field::find($fieldId);
+                if ($field) {
+                    $title .= ' - ' . $field->name;
+                }
+            }
+            
+            // Récupérer tous les étudiants
+            $students = $query->get();
+            
+            // Filtrer par statut de paiement si nécessaire
+            if ($paymentStatus) {
+                $students = $students->filter(function($student) use ($paymentStatus) {
+                    if (!$student->field) {
+                        return false;
+                    }
+                    
+                    $totalFees = $student->field->fees;
+                    $totalPaid = $student->payments->sum('amount');
+                    
+                    if ($paymentStatus === 'fully_paid') {
+                        $title = 'Liste des étudiants en règle';
+                        return $totalPaid >= $totalFees && $totalFees > 0;
+                    } elseif ($paymentStatus === 'partially_paid') {
+                        $title = 'Liste des étudiants partiellement en règle';
+                        return $totalPaid > 0 && $totalPaid < $totalFees;
+                    } elseif ($paymentStatus === 'not_paid') {
+                        $title = 'Liste des étudiants pas en règle';
+                        return $totalPaid == 0;
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            // Grouper les étudiants par campus
+            $campusGroups = $students->groupBy(function($student) {
+                return $student->field && $student->field->campus ? $student->field->campus->id : 'Sans campus';
+            });
+            
+            // Préparer les données pour le PDF
+            $campusData = [];
+            
+            foreach ($campusGroups as $campusId => $campusStudents) {
+                $campusName = 'Sans campus';
+                
+                if ($campusId !== 'Sans campus') {
+                    $campus = Campus::find($campusId);
+                    if ($campus) {
+                        $campusName = $campus->name;
+                    }
+                }
+                
+                // Grouper par filière
+                $fieldGroups = $campusStudents->groupBy(function($student) {
+                    return $student->field ? $student->field->id : 'Sans filière';
+                });
+                
+                $fieldsData = [];
+                
+                foreach ($fieldGroups as $fieldId => $fieldStudents) {
+                    $fieldName = 'Sans filière';
+                    
+                    if ($fieldId !== 'Sans filière') {
+                        $field = Field::find($fieldId);
+                        if ($field) {
+                            $fieldName = $field->name;
+                        }
+                    }
+                    
+                    // Ajouter des informations de paiement à chaque étudiant
+                    $studentsData = [];
+                    foreach ($fieldStudents as $student) {
+                        if (!$student->field) {
+                            continue;
+                        }
+                        
+                        $totalFees = $student->field->fees;
+                        $totalPaid = $student->payments->sum('amount');
+                        $remainingAmount = max(0, $totalFees - $totalPaid);
+                        
+                        // Déterminer le statut de paiement
+                        if ($remainingAmount == 0) {
+                            $paymentStatusText = $school->term('fully_paid', 'Payé intégralement');
+                        } elseif ($totalPaid > 0) {
+                            $paymentStatusText = $school->term('partially_paid', 'Partiellement payé');
+                        } else {
+                            $paymentStatusText = $school->term('no_payment', 'Aucun paiement');
+                        }
+                        
+                        $studentsData[] = [
+                            'student' => $student,
+                            'totalFees' => $totalFees,
+                            'totalPaid' => $totalPaid,
+                            'remainingAmount' => $remainingAmount,
+                            'paymentStatus' => $paymentStatusText
+                        ];
+                    }
+                    
+                    $fieldsData[] = [
+                        'name' => $fieldName,
+                        'students' => $studentsData
+                    ];
+                }
+                
+                $campusData[] = [
+                    'name' => $campusName,
+                    'fields' => $fieldsData
+                ];
+            }
+            
+            $data = [
+                'title' => $title,
+                'school' => $school,
+                'campusData' => $campusData,
+                'generatedAt' => now()->format('d/m/Y H:i')
+            ];
+            
+            $pdf = PDF::loadView('students.pdf-grouped', $data);
+            return $pdf->download($school->name . '_' . Str::slug($title) . '_' . date('Y-m-d') . '.pdf');
+            
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,

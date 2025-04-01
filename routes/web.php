@@ -138,6 +138,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/students/print', [StudentController::class, 'printList'])->name('students.print');
         Route::get('/students/export-excel', [StudentExportController::class, 'exportExcel'])->name('students.export-excel');
         Route::get('/students/export-csv', [StudentExportController::class, 'exportCsv'])->name('students.export-csv');
+        Route::get('/students/generate-pdf', [StudentExportController::class, 'generatePdf'])->name('students.generate-pdf');
         Route::resource('students', StudentController::class);
         Route::prefix('students')->name('students.')->controller(StudentController::class)->group(function () {
             Route::get('/print', 'printList')->name('print');
@@ -191,6 +192,18 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/payments', 'paymentsPdf')->name('payments');
                 Route::get('/finances', 'financesPdf')->name('finances');
             });
+        });
+
+        // Paiements - Export
+        Route::get('/payments/print-list', [PaymentController::class, 'printList'])->name('payments.print-list');
+        Route::get('/payments/export-excel/{student_id?}', [PaymentController::class, 'exportExcel'])->name('payments.export-excel');
+        
+        // Rapports PDF
+        Route::prefix('reports/pdf')->name('reports.pdf.')->controller(ReportController::class)->group(function () {
+            Route::get('/payments', 'paymentsPdf')->name('payments');
+            Route::get('/students', 'studentsPdf')->name('students');
+            Route::get('/finances', 'financesPdf')->name('finances');
+            Route::get('/performance', 'performancePdf')->name('performance');
         });
     });
 });

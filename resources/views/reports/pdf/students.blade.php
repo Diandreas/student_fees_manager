@@ -1,351 +1,347 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapport des étudiants</title>
     <style>
-        @page {
-            margin: 1.5cm;
-        }
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
             line-height: 1.4;
-            margin: 0;
-            padding: 20px;
             color: #333;
-            position: relative;
-        }
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.04;
-            z-index: -1;
-            width: 70%;
-            max-height: 70%;
-            pointer-events: none;
-        }
-        .document-border {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            z-index: -1;
-        }
-        .document-container {
-            position: relative;
-            padding: 10px;
-        }
-        .official-stamp {
-            position: absolute;
-            top: 40%;
-            right: 5%;
-            transform: rotate(30deg);
-            font-size: 24px;
-            color: rgba(0, 0, 0, 0.06);
-            font-weight: bold;
-            text-transform: uppercase;
-            border: 3px solid rgba(0, 0, 0, 0.06);
-            padding: 10px 20px;
-            z-index: -1;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #0d47a1;
-            padding-bottom: 20px;
-        }
-        .school-logo {
-            max-width: 80px;
-            max-height: 80px;
-            margin-bottom: 10px;
-        }
-        .school-name {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #0d47a1;
-        }
-        .report-title {
-            font-size: 18px;
-            color: #666;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        .date {
-            font-size: 12px;
-            color: #777;
-            margin-top: 10px;
-        }
-        .school-info {
-            font-size: 12px;
-            color: #666;
-            margin: 5px 0;
-        }
-        .summary-section {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
             margin-bottom: 20px;
-            border-left: 4px solid #0d47a1;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
         }
-        .summary-title {
+        .header h1 {
+            color: #4F46E5;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .header .school-info {
+            margin-bottom: 5px;
+        }
+        .campus-title {
+            background-color: #4F46E5;
+            color: white;
+            padding: 8px;
             font-size: 14px;
-            font-weight: bold;
-            margin-top: 0;
-            color: #0d47a1;
-            margin-bottom: 10px;
+            margin: 20px 0 10px;
+            border-radius: 5px;
         }
-        .summary-stats {
+        .field-title {
+            background-color: #E5E7EB;
+            padding: 6px;
+            font-size: 13px;
+            margin: 15px 0 5px;
+            border-radius: 3px;
+        }
+        .stats-container {
             display: flex;
-            justify-content: space-between;
             flex-wrap: wrap;
-            gap: 10px;
+            margin-bottom: 20px;
         }
         .stat-box {
             flex: 1;
-            min-width: 150px;
-            padding: 10px;
-            border: 1px solid #ddd;
+            background-color: #f9fafb;
             border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
             text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .stat-value {
-            font-size: 18px;
+        .stat-box .stat-value {
+            font-size: 22px;
             font-weight: bold;
-            color: #0d47a1;
+            color: #4F46E5;
+            margin-bottom: 5px;
         }
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 20px 0 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #0d47a1;
-            color: #0d47a1;
+        .stat-box .stat-label {
+            font-size: 11px;
+            color: #6B7280;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         table, th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #E5E7EB;
         }
         th {
-            background-color: #0d47a1;
-            color: white;
-            padding: 10px;
+            background-color: #f9fafb;
+            padding: 8px;
             text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        td {
-            padding: 10px;
+            font-weight: bold;
             font-size: 11px;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .status {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .status-fully-paid {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        .status-partially-paid {
-            background-color: #fef9c3;
-            color: #854d0e;
-        }
-        .status-not-paid {
-            background-color: #fee2e2;
-            color: #b91c1c;
-        }
-        .amount {
-            text-align: right;
-            font-family: monospace;
+        td {
+            padding: 8px;
+            font-size: 11px;
         }
         .footer {
-            margin-top: 40px;
+            text-align: center;
             font-size: 10px;
-            color: #777;
-            text-align: center;
-            border-top: 1px solid #ddd;
+            color: #6B7280;
+            margin-top: 30px;
             padding-top: 10px;
-        }
-        .generated-by {
-            font-size: 9px;
-            color: #999;
-            text-align: center;
-            margin-top: 5px;
-            font-style: italic;
+            border-top: 1px solid #eee;
         }
         .page-break {
             page-break-after: always;
         }
+        .payment-status {
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .status-paid {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-partial {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        .status-unpaid {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .summary-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .summary-table th {
+            background-color: #f1f5f9;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <!-- Filigrane avec le logo de l'école -->
-    @if(isset($school->logo))
-        <img src="{{ public_path('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="watermark">
-    @endif
-    
-    <div class="document-container">
-        <div class="document-border"></div>
-        <div class="official-stamp">Document Officiel</div>
-        
-        <div class="header">
-            @if(isset($school->logo))
-                <img src="{{ public_path('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="school-logo">
-            @endif
-            <div class="school-name">{{ $school->name }}</div>
-            <div class="school-info">
-                {{ $school->address }}<br>
-                Email: {{ $school->contact_email ?? $school->email }} | 
-                Tél: {{ $school->contact_phone ?? $school->phone }}
-            </div>
-            <div class="report-title">Rapport des Étudiants</div>
-            <div class="date">Généré le {{ date('d/m/Y à H:i') }}</div>
+    <div class="header">
+        @if($school->logo)
+            <img src="{{ public_path('storage/' . $school->logo) }}" height="60" alt="{{ $school->name }}">
+        @endif
+        <h1>Rapport des étudiants</h1>
+        <div class="school-info">
+            {{ $school->name }} | {{ $school->address ?? 'Adresse non définie' }} | {{ $school->phone ?? 'Téléphone non défini' }}
+        </div>
+        <div>
+            Généré le: {{ now()->format('d/m/Y H:i') }}
+        </div>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-value">{{ count($students) }}</div>
+            <div class="stat-label">Total des étudiants</div>
         </div>
         
-        <div class="summary-section">
-            <h3 class="summary-title">Résumé</h3>
-            <div class="summary-stats">
-                <div class="stat-box">
-                    <div class="stat-value">{{ $students->count() }}</div>
-                    <div class="stat-label">Total étudiants</div>
-                </div>
+        @php
+            $totalFees = 0;
+            $totalPaid = 0;
+            $paidCount = 0;
+            $partialCount = 0;
+            $unpaidCount = 0;
+            
+            foreach ($students as $student) {
+                if (!$student->field) continue;
                 
-                @php
-                    $paidCount = $students->filter(function($student) {
-                        return $student->payment_status === 'fully-paid' || 
-                               ($student->field && $student->payments->sum('amount') >= $student->field->fees);
-                    })->count();
-                    
-                    $partialCount = $students->filter(function($student) {
-                        return $student->payment_status === 'partially-paid' || 
-                               ($student->field && $student->payments->sum('amount') > 0 && $student->payments->sum('amount') < $student->field->fees);
-                    })->count();
-                    
-                    $unpaidCount = $students->filter(function($student) {
-                        return $student->payment_status === 'not-paid' || 
-                               ($student->field && $student->payments->sum('amount') == 0);
-                    })->count();
-                    
-                    $totalFees = $students->sum(function($student) {
-                        return $student->field ? $student->field->fees : 0;
-                    });
-                    
-                    $totalPaid = $students->sum(function($student) {
-                        return $student->payments ? $student->payments->sum('amount') : 0;
-                    });
-                    
-                    $paymentPercentage = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
-                @endphp
+                $fees = $student->field->fees;
+                $paid = $student->payments->sum('amount');
+                $totalFees += $fees;
+                $totalPaid += $paid;
                 
-                <div class="stat-box">
-                    <div class="stat-value">{{ $paidCount }}</div>
-                    <div class="stat-label">Payé intégralement</div>
-                </div>
-                
-                <div class="stat-box">
-                    <div class="stat-value">{{ $partialCount }}</div>
-                    <div class="stat-label">Payé partiellement</div>
-                </div>
-                
-                <div class="stat-box">
-                    <div class="stat-value">{{ $paymentPercentage }}%</div>
-                    <div class="stat-label">Taux de recouvrement</div>
-                </div>
-            </div>
+                if ($paid >= $fees && $fees > 0) {
+                    $paidCount++;
+                } elseif ($paid > 0) {
+                    $partialCount++;
+                } else {
+                    $unpaidCount++;
+                }
+            }
+            
+            $recoveryRate = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
+        @endphp
+        
+        <div class="stat-box">
+            <div class="stat-value">{{ $paidCount }}</div>
+            <div class="stat-label">Étudiants en règle</div>
         </div>
-        
-        <div class="section-title">Liste des étudiants</div>
-        
-        <table>
-            <thead>
+        <div class="stat-box">
+            <div class="stat-value">{{ $partialCount }}</div>
+            <div class="stat-label">Paiements partiels</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{{ $unpaidCount }}</div>
+            <div class="stat-label">Non payés</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{{ $recoveryRate }}%</div>
+            <div class="stat-label">Taux de recouvrement</div>
+        </div>
+    </div>
+
+    <!-- Tableau récapitulatif par campus -->
+    <h2 style="color: #4F46E5; font-size: 14px; margin-top: 25px;">Récapitulatif par campus</h2>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Campus</th>
+                <th>Nombre d'étudiants</th>
+                <th>Frais attendus</th>
+                <th>Montants payés</th>
+                <th>Taux</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $campusStats = [];
+                foreach ($students as $student) {
+                    if (!$student->field || !$student->field->campus) continue;
+                    
+                    $campusName = $student->field->campus->name;
+                    if (!isset($campusStats[$campusName])) {
+                        $campusStats[$campusName] = [
+                            'count' => 0,
+                            'fees' => 0,
+                            'paid' => 0
+                        ];
+                    }
+                    
+                    $campusStats[$campusName]['count']++;
+                    $campusStats[$campusName]['fees'] += $student->field->fees;
+                    $campusStats[$campusName]['paid'] += $student->payments->sum('amount');
+                }
+            @endphp
+            
+            @foreach($campusStats as $campusName => $stats)
                 <tr>
-                    <th width="5%">#</th>
-                    <th width="25%">Étudiant</th>
-                    <th width="20%">Filière</th>
-                    <th width="10%">Campus</th>
-                    <th width="10%">Frais</th>
-                    <th width="10%">Payé</th>
-                    <th width="10%">Reste</th>
-                    <th width="10%">Statut</th>
+                    <td>{{ $campusName }}</td>
+                    <td style="text-align:center;">{{ $stats['count'] }}</td>
+                    <td style="text-align:right;">{{ number_format($stats['fees'], 0, ',', ' ') }}</td>
+                    <td style="text-align:right;">{{ number_format($stats['paid'], 0, ',', ' ') }}</td>
+                    <td style="text-align:center;">{{ $stats['fees'] > 0 ? round(($stats['paid'] / $stats['fees']) * 100) : 0 }}%</td>
                 </tr>
-            </thead>
-            <tbody>
-                @forelse($students as $student)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            <strong>{{ $student->fullName }}</strong>
-                            @if($student->email)
-                                <br><small>{{ $student->email }}</small>
-                            @endif
-                            @if($student->phone)
-                                <br><small>{{ $student->phone }}</small>
-                            @endif
-                        </td>
-                        <td>{{ $student->field->name ?? 'Non assigné' }}</td>
-                        <td>{{ $student->field->campus->name ?? 'Non assigné' }}</td>
-                        <td class="amount">{{ number_format($student->field->fees ?? 0, 0, ',', ' ') }} FCFA</td>
-                        <td class="amount">{{ number_format($student->payments->sum('amount'), 0, ',', ' ') }} FCFA</td>
-                        <td class="amount">{{ number_format(($student->field->fees ?? 0) - $student->payments->sum('amount'), 0, ',', ' ') }} FCFA</td>
-                        <td>
-                            @php
-                                $status = 'not-paid';
-                                $statusText = 'Non payé';
-                                
-                                if ($student->field && $student->payments->sum('amount') >= $student->field->fees) {
-                                    $status = 'fully-paid';
-                                    $statusText = 'Payé';
-                                } elseif ($student->field && $student->payments->sum('amount') > 0) {
-                                    $status = 'partially-paid';
-                                    $statusText = 'Partiel';
-                                }
-                            @endphp
-                            <span class="status status-{{ $status }}">{{ $statusText }}</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" style="text-align: center;">Aucun étudiant trouvé</td>
-                    </tr>
-                @endforelse
-                
-                @if($students->count() > 0)
-                    <tr style="background-color: #f5f5f5; font-weight: bold;">
-                        <td colspan="4" style="text-align: right;">Total</td>
-                        <td class="amount">{{ number_format($totalFees, 0, ',', ' ') }} FCFA</td>
-                        <td class="amount">{{ number_format($totalPaid, 0, ',', ' ') }} FCFA</td>
-                        <td class="amount">{{ number_format($totalFees - $totalPaid, 0, ',', ' ') }} FCFA</td>
-                        <td></td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
-        
-        <div class="footer">
-            <p>{{ $school->name }} - Rapport généré le {{ date('d/m/Y à H:i') }}</p>
-            <div class="generated-by">Généré par ScolarPay</div>
+            @endforeach
+            
+            <tr style="font-weight: bold;">
+                <td>Total</td>
+                <td style="text-align:center;">{{ count($students) }}</td>
+                <td style="text-align:right;">{{ number_format($totalFees, 0, ',', ' ') }}</td>
+                <td style="text-align:right;">{{ number_format($totalPaid, 0, ',', ' ') }}</td>
+                <td style="text-align:center;">{{ $recoveryRate }}%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Regroupement des étudiants par campus et filière -->
+    @php
+        $campusGroups = $students->groupBy(function($student) {
+            return $student->field && $student->field->campus ? $student->field->campus->id : 'Sans campus';
+        });
+    @endphp
+
+    @foreach($campusGroups as $campusId => $campusStudents)
+        @php
+            $campusName = 'Sans campus';
+            if ($campusId !== 'Sans campus') {
+                $campus = \App\Models\Campus::find($campusId);
+                if ($campus) {
+                    $campusName = $campus->name;
+                }
+            }
+            
+            // Grouper par filière
+            $fieldGroups = $campusStudents->groupBy(function($student) {
+                return $student->field ? $student->field->id : 'Sans filière';
+            });
+        @endphp
+
+        <div class="campus-title">
+            CAMPUS: {{ $campusName }}
         </div>
+
+        @foreach($fieldGroups as $fieldId => $fieldStudents)
+            @php
+                $fieldName = 'Sans filière';
+                $fieldFees = 0;
+                
+                if ($fieldId !== 'Sans filière') {
+                    $field = \App\Models\Field::find($fieldId);
+                    if ($field) {
+                        $fieldName = $field->name;
+                        $fieldFees = $field->fees;
+                    }
+                }
+            @endphp
+
+            <div class="field-title">
+                FILIÈRE: {{ $fieldName }} - Frais: {{ number_format($fieldFees, 0, ',', ' ') }}
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th width="5%">ID</th>
+                        <th width="20%">Nom complet</th>
+                        <th width="20%">Email</th>
+                        <th width="10%">Téléphone</th>
+                        <th width="15%">Frais</th>
+                        <th width="15%">Payé</th>
+                        <th width="15%">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($fieldStudents as $student)
+                        @php
+                            if (!$student->field) continue;
+                            
+                            $totalFees = $student->field->fees;
+                            $totalPaid = $student->payments->sum('amount');
+                            $remainingAmount = max(0, $totalFees - $totalPaid);
+                            
+                            // Déterminer le statut de paiement
+                            $statusClass = 'status-unpaid';
+                            if ($remainingAmount == 0 && $totalFees > 0) {
+                                $paymentStatus = 'Payé intégralement';
+                                $statusClass = 'status-paid';
+                            } elseif ($totalPaid > 0) {
+                                $paymentStatus = 'Partiellement payé';
+                                $statusClass = 'status-partial';
+                            } else {
+                                $paymentStatus = 'Aucun paiement';
+                                $statusClass = 'status-unpaid';
+                            }
+                        @endphp
+                        <tr>
+                            <td>{{ $student->id }}</td>
+                            <td>{{ $student->fullName }}</td>
+                            <td>{{ $student->email }}</td>
+                            <td>{{ $student->phone ?: 'Non spécifié' }}</td>
+                            <td style="text-align:right;">{{ number_format($totalFees, 0, ',', ' ') }}</td>
+                            <td style="text-align:right;">{{ number_format($totalPaid, 0, ',', ' ') }}</td>
+                            <td><span class="payment-status {{ $statusClass }}">{{ $paymentStatus }}</span></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endforeach
+
+        @if(!$loop->last)
+            <div class="page-break"></div>
+        @endif
+    @endforeach
+
+    <div class="footer">
+        {{ $school->name }} - {{ date('Y') }} | Tous droits réservés<br>
+        Rapport généré le {{ now()->format('d/m/Y') }} à {{ now()->format('H:i') }}
     </div>
 </body>
 </html> 
