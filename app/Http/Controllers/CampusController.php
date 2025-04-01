@@ -174,7 +174,119 @@ class CampusController extends Controller
         // Regrouper les filières par type/niveau pour gérer les doublons
         $groupedFields = $campus->fields->groupBy('name');
         
-        return view('campuses.show', compact('campus', 'groupedFields', 'school'));
+        // Calcul des statistiques supplémentaires
+        $totalFields = $campus->fields->count();
+        $totalStudents = $campus->fields->sum('students_count');
+        
+        // Statistiques de paiement
+        $fieldIds = $campus->fields->pluck('id')->toArray();
+        
+        // Total des frais attendus
+        $totalExpectedFees = 0;
+        foreach ($campus->fields as $field) {
+            $totalExpectedFees += $field->fees * $field->students_count;
+        }
+        
+        // Total des paiements reçus
+        $totalPayments = \App\Models\Payment::whereHas('student', function($query) use ($fieldIds) {
+                $query->whereIn('field_id', $fieldIds);
+            })->sum('amount');
+        
+        // Reste à payer
+        $outstandingFees = max(0, $totalExpectedFees - $totalPayments);
+        
+        // Taux de recouvrement
+        $recoveryRate = $totalExpectedFees > 0 ? round(($totalPayments / $totalExpectedFees) * 100, 2) : 0;
+        
+        // Statistiques des étudiants par statut de paiement
+        $studentsPaymentStatus = $this->getStudentPaymentStatus($fieldIds);
+        
+        // Top 3 des filières par nombre d'étudiants
+        $topFields = $campus->fields->sortByDesc('students_count')->take(3);
+        
+        // Calculer les statistiques par niveau d'éducation si applicable
+        $educationLevelStats = $this->getEducationLevelStats($fieldIds);
+        
+        return view('campuses.show', compact(
+            'campus', 
+            'groupedFields', 
+            'school',
+            'totalFields',
+            'totalStudents',
+            'totalExpectedFees',
+            'totalPayments',
+            'outstandingFees',
+            'recoveryRate',
+            'studentsPaymentStatus',
+            'topFields',
+            'educationLevelStats'
+        ));
+    }
+    
+    /**
+     * Get student payment status statistics for the given field IDs
+     */
+    private function getStudentPaymentStatus($fieldIds)
+    {
+        $students = Student::whereIn('field_id', $fieldIds)->get();
+        
+        $fullyPaid = 0;
+        $partialPaid = 0;
+        $noPaid = 0;
+        
+        foreach ($students as $student) {
+            $field = Field::find($student->field_id);
+            $totalFees = $field ? $field->fees : 0;
+            
+            $paidAmount = \App\Models\Payment::where('student_id', $student->id)->sum('amount');
+            
+            if ($paidAmount >= $totalFees) {
+                $fullyPaid++;
+            } elseif ($paidAmount > 0) {
+                $partialPaid++;
+            } else {
+                $noPaid++;
+            }
+        }
+        
+        return [
+            'fully_paid' => $fullyPaid,
+            'partial_paid' => $partialPaid,
+            'no_payment' => $noPaid
+        ];
+    }
+
+    /**
+     * Get education level statistics for the given field IDs
+     */
+    private function getEducationLevelStats($fieldIds)
+    {
+        $fields = Field::whereIn('id', $fieldIds)
+            ->with(['educationLevel', 'students'])
+            ->get();
+        
+        $levelStats = collect();
+        $levelsArray = [];
+        
+        foreach ($fields as $field) {
+            $levelName = $field->educationLevel ? $field->educationLevel->name : 'Non défini';
+            $studentsCount = $field->students->count();
+            
+            if (!isset($levelsArray[$levelName])) {
+                $levelsArray[$levelName] = 0;
+            }
+            
+            $levelsArray[$levelName] += $studentsCount;
+        }
+        
+        foreach ($levelsArray as $name => $count) {
+            $levelStats->push([
+                'name' => $name,
+                'count' => $count
+            ]);
+        }
+        
+        return $levelStats->sortByDesc('count')->values();
     }
 
     /**

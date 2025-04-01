@@ -223,8 +223,8 @@
         const data = [];
         
         @foreach($monthlyPayments as $payment)
-            months.push("{{ $payment->month }}/{{ $payment->year }}");
-            data.push({{ $payment->total }});
+            months.push("{{ $payment['month'] }}");
+            data.push({{ $payment['amount'] }});
         @endforeach
         
         const paymentChart = new Chart(ctx, {

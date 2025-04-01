@@ -42,6 +42,7 @@ class School extends Model
         'card_style',
         'button_style',
         'layout',
+        'currency',
     ];
 
     protected $casts = [

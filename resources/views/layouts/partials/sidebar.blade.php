@@ -52,13 +52,6 @@
                 </div>
             </a>
             
-            <a href="{{ route('payments.quick') }}" class="block py-2.5 px-4 rounded transition-colors {{ request()->routeIs('payments.quick') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
-                <div class="flex items-center">
-                    <i class="fas fa-bolt w-6"></i>
-                    <span>{{ __('Paiement rapide') }}</span>
-                </div>
-            </a>
-            
             <div class="my-3 border-t border-gray-700"></div>
             
             <div class="mb-2 text-xs uppercase text-gray-400 font-semibold tracking-wider">

@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use App\Models\YearlyStat;
 use App\Models\Campus;
 use App\Models\Field;
+use Illuminate\Support\Facades\Auth;
 
 class ArchiveController extends Controller
 {
@@ -33,18 +34,16 @@ class ArchiveController extends Controller
         }
 
         // Filtrer par école actuelle
-        $query = Archive::with(['student', 'user'])
+        $query = Archive::with(['creator'])
                       ->where('school_id', $school->id);
         
-        // Recherche par nom d'étudiant, action ou détails
+        // Recherche par action ou détails
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('details', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('action', 'LIKE', "%{$searchTerm}%")
-                  ->orWhereHas('student', function($sq) use ($searchTerm) {
-                      $sq->where('fullName', 'LIKE', "%{$searchTerm}%");
-                  });
+                  ->orWhere('academic_year', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('notes', 'LIKE', "%{$searchTerm}%");
             });
         }
 
@@ -79,12 +78,7 @@ class ArchiveController extends Controller
             $archives->appends(['date_to' => $request->date_to]);
         }
 
-        // Obtenir la liste des types d'actions pour le filtre
-        $actionTypes = Archive::where('school_id', $school->id)
-                          ->distinct()
-                          ->pluck('action');
-
-        return view('archives.index', compact('archives', 'actionTypes', 'school'));
+        return view('archives.index', compact('archives', 'school'));
     }
 
     /**
@@ -94,7 +88,12 @@ class ArchiveController extends Controller
      */
     public function create()
     {
-        $school = auth()->user()->school;
+        $school = session('current_school');
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école.');
+        }
+        
         $currentYear = Carbon::now()->year;
 
         // Déterminer les années académiques disponibles
@@ -106,7 +105,7 @@ class ArchiveController extends Controller
             $years[$academicYear] = $academicYear;
         }
 
-        return view('archives.create', compact('years'));
+        return view('archives.create', compact('years', 'school'));
     }
 
     /**
@@ -122,7 +121,12 @@ class ArchiveController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $school = auth()->user()->school;
+        $school = session('current_school');
+        if (!$school) {
+            return redirect()->route('schools.select')
+                ->with('error', 'Veuillez sélectionner une école.');
+        }
+        
         $academicYear = $request->academic_year;
 
         // Vérifier si une archive existe déjà pour cette année
@@ -163,7 +167,7 @@ class ArchiveController extends Controller
                 'total_invoiced' => $totalInvoiced,
                 'total_paid' => $totalPaid,
                 'total_remaining' => $totalRemaining,
-                'created_by' => auth()->id(),
+                'created_by' => Auth::check() ? Auth::id() : null,
                 'notes' => $request->notes,
             ]);
 
@@ -190,8 +194,10 @@ class ArchiveController extends Controller
     public function show(Archive $archive)
     {
         // Vérifier que l'utilisateur a accès à cette archive
-        if ($archive->school_id !== auth()->user()->school->id) {
-            abort(403, "Vous n'avez pas accès à cette archive.");
+        $school = session('current_school');
+        if (!$school || $archive->school_id !== $school->id) {
+            return redirect()->route('schools.select')
+                ->with('error', "Vous n'avez pas accès à cette archive.");
         }
 
         return view('archives.show', compact('archive'));
@@ -206,11 +212,13 @@ class ArchiveController extends Controller
     public function download(Archive $archive)
     {
         // Vérifier que l'utilisateur a accès à cette archive
-        if ($archive->school_id !== auth()->user()->school->id) {
-            abort(403, "Vous n'avez pas accès à cette archive.");
+        $school = session('current_school');
+        if (!$school || $archive->school_id !== $school->id) {
+            return redirect()->route('schools.select')
+                ->with('error', "Vous n'avez pas accès à cette archive.");
         }
 
-        return Storage::disk('public')->download($archive->file_path, $archive->file_name);
+        return response()->download(storage_path('app/public/' . $archive->file_path), $archive->file_name);
     }
 
     /**
@@ -222,11 +230,6 @@ class ArchiveController extends Controller
      */
     public function cleanup(Request $request, Archive $archive)
     {
-        // Vérifier que l'utilisateur a accès à cette archive
-        if ($archive->school_id !== auth()->user()->school->id) {
-            abort(403, "Vous n'avez pas accès à cette archive.");
-        }
-
         // Vérifier la confirmation
         $request->validate([
             'confirmation' => 'required|in:CONFIRMER',
@@ -238,7 +241,7 @@ class ArchiveController extends Controller
         try {
             DB::beginTransaction();
 
-            $school = auth()->user()->school;
+            $school = session('current_school');
             $academicYear = $archive->academic_year;
 
             // Supprimer les paiements détaillés tout en conservant les totaux pour les statistiques
@@ -248,15 +251,14 @@ class ArchiveController extends Controller
             // Supprimer les paiements
             $paymentsDeleted = Payment::where('school_id', $school->id)->delete();
             
-            // Pour les factures, on pourrait les supprimer aussi
+            // Supprimer les factures
             $invoicesDeleted = Invoice::where('school_id', $school->id)->delete();
-
-            // On ne supprime pas les étudiants car on veut garder leurs données générales
-
+            
             DB::commit();
-
+            
             return redirect()->route('archives.show', $archive)
-                            ->with('success', "Nettoyage des données réussi. $paymentsDeleted paiements et $invoicesDeleted factures ont été archivés.");
+                            ->with('success', "Les données ont été nettoyées avec succès. {$paymentsDeleted} paiements et {$invoicesDeleted} factures ont été supprimés.");
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('archives.show', $archive)
@@ -273,21 +275,25 @@ class ArchiveController extends Controller
     public function destroy(Archive $archive)
     {
         // Vérifier que l'utilisateur a accès à cette archive
-        if ($archive->school_id !== auth()->user()->school->id) {
-            abort(403, "Vous n'avez pas accès à cette archive.");
+        $school = session('current_school');
+        if (!$school || $archive->school_id !== $school->id) {
+            return redirect()->route('schools.select')
+                ->with('error', "Vous n'avez pas accès à cette archive.");
         }
 
         try {
-            // Supprimer le fichier
-            Storage::disk('public')->delete($archive->file_path);
+            // Supprimer le fichier d'archive
+            if (Storage::disk('public')->exists($archive->file_path)) {
+                Storage::disk('public')->delete($archive->file_path);
+            }
             
-            // Supprimer l'enregistrement
+            // Supprimer l'enregistrement d'archive et les statistiques associées
             $archive->delete();
-
+            
             return redirect()->route('archives.index')
                             ->with('success', "L'archive a été supprimée avec succès.");
         } catch (\Exception $e) {
-            return redirect()->route('archives.index')
+            return redirect()->route('archives.show', $archive)
                             ->with('error', "Une erreur s'est produite lors de la suppression de l'archive: " . $e->getMessage());
         }
     }

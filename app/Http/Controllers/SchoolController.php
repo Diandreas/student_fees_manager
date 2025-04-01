@@ -73,6 +73,39 @@ class SchoolController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    public function updateLogo(Request $request, School $school)
+{
+    $this->authorize('update', $school);
+    
+    // Déboguer la requête
+    \Log::info('Requête de mise à jour du logo reçue', [
+        'school_id' => $school->id,
+        'has_file' => $request->hasFile('logo'),
+        'files' => $request->allFiles()
+    ]);
+    
+    $validated = $request->validate([
+        'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+    
+    // Supprimer l'ancien logo s'il existe
+    if ($school->logo && Storage::exists('public/' . $school->logo)) {
+        Storage::delete('public/' . $school->logo);
+    }
+    
+    // Enregistrer le nouveau logo
+    $logoPath = $request->file('logo')->store('logos', 'public');
+    
+    // Déboguer le chemin du fichier
+    \Log::info('Logo enregistré', ['path' => $logoPath]);
+    
+    $school->update([
+        'logo' => $logoPath
+    ]);
+    
+    return redirect()->route('schools.settings', $school)
+        ->with('success', 'Le logo a été mis à jour avec succès');
+}
     public function store(Request $request)
     {
         // Vérifier si l'utilisateur est super-admin

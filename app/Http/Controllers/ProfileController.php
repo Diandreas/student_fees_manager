@@ -21,6 +21,17 @@ class ProfileController extends Controller
     }
 
     /**
+     * Affiche le formulaire d'édition du profil de l'utilisateur.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function edit()
+    {
+        $user = Auth::user();
+        return view('profile.edit', compact('user'));
+    }
+
+    /**
      * Met à jour les informations personnelles de l'utilisateur.
      *
      * @param  \Illuminate\Http\Request  $request

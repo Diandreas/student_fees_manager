@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Models\School;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\PaymentStatistics;
 
 class PaymentController extends Controller
 {
@@ -154,6 +155,21 @@ class PaymentController extends Controller
     public function getStudentRemainingAmount($student_id)
     {
         $paymentInfo = $this->getStudentPaymentInfo($student_id);
+        
+        // Assurez-vous que l'étudiant a bien un full_name pour l'affichage
+        if ($paymentInfo['student']) {
+            // Si fullName existe mais pas full_name, créer full_name
+            if (!isset($paymentInfo['student']->full_name) && isset($paymentInfo['student']->fullName)) {
+                $paymentInfo['student']->full_name = $paymentInfo['student']->fullName;
+            }
+            // Si on n'a ni full_name ni fullName, essayer de le construire
+            if (!isset($paymentInfo['student']->full_name) && !isset($paymentInfo['student']->fullName)) {
+                $firstName = $paymentInfo['student']->firstName ?? '';
+                $lastName = $paymentInfo['student']->lastName ?? '';
+                $paymentInfo['student']->full_name = trim($firstName . ' ' . $lastName);
+            }
+        }
+        
         return response()->json($paymentInfo);
     }
 
@@ -509,13 +525,35 @@ class PaymentController extends Controller
                                     ->count('student_id');
         
         // Statistiques mensuelles
-        $monthlyPayments = Payment::whereIn('student_id', $studentIds)
-                                ->selectRaw("SUM(amount) as total, strftime('%m', payment_date) as month, strftime('%Y', payment_date) as year")
-                                ->whereRaw("strftime('%Y', payment_date) = ?", [date('Y')])
-                                ->groupBy('year', 'month')
-                                ->orderBy('year')
-                                ->orderBy('month')
-                                ->get();
+        $currentYear = date('Y');
+        $startDate = "{$currentYear}-01-01"; // Début de l'année en cours
+        
+        $monthlyPayments = \App\Services\PaymentStatistics::getPaymentStatsSince($school->id, $startDate);
+        
+        // Convertir les données pour l'affichage
+        $monthsLabels = [
+            '01' => 'Jan',
+            '02' => 'Fév',
+            '03' => 'Mar',
+            '04' => 'Avr',
+            '05' => 'Mai',
+            '06' => 'Juin',
+            '07' => 'Juil',
+            '08' => 'Août',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Déc'
+        ];
+        
+        $formattedMonthlyPayments = [];
+        foreach ($monthlyPayments as $payment) {
+            $formattedMonthlyPayments[] = [
+                'month' => $monthsLabels[$payment->month] ?? $payment->month,
+                'amount' => $payment->total
+            ];
+        }
+        $monthlyPayments = $formattedMonthlyPayments;
         
         // Statistiques par filière
         $paymentsByField = DB::table('payments')

@@ -8,6 +8,8 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Models\School;
 use App\Models\ActivityLog;
+use App\Models\EducationLevel;
+use App\Services\PaymentStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -79,48 +81,32 @@ class DashboardController extends Controller
             $query->whereIn('field_id', $fieldIds);
         })->count();
         
+        // Nombre total de filières et de campus - Correction du comptage
         $totalFields = Field::whereIn('campus_id', $campusIds)->count();
-        $totalCampuses = count($campusIds);
-
-        // Calcul des statistiques de paiement par étudiant
-        $studentPaymentStats = DB::table('students')
-            ->join('fields', 'students.field_id', '=', 'fields.id')
-            ->join('campuses', 'fields.campus_id', '=', 'campuses.id')
-            ->leftJoin('payments', 'students.id', '=', 'payments.student_id')
-            ->where('campuses.school_id', $schoolId)
-            ->select(
-                'students.id as student_id',
-                'fields.fees as total_fees',
-                DB::raw('COALESCE(SUM(payments.amount), 0) as paid_amount')
-            )
-            ->groupBy('students.id', 'fields.fees')
-            ->get();
-
-        // Calcul des différentes statistiques
-        $paymentStatus = [
-            'fully_paid' => 0,
-            'partial_paid' => 0,
-            'no_payment' => 0
-        ];
-
-        $outstandingFees = 0;
+        $totalCampuses = Campus::where('school_id', $schoolId)->count();
+        
+        // Calculer les montants attendus (frais de scolarité total)
         $totalExpectedFees = 0;
-
-        foreach ($studentPaymentStats as $stat) {
-            $totalExpectedFees += $stat->total_fees;
-            $remaining = $stat->total_fees - $stat->paid_amount;
-            $outstandingFees += max(0, $remaining);
-
-            if ($stat->paid_amount >= $stat->total_fees) {
-                $paymentStatus['fully_paid']++;
-            } elseif ($stat->paid_amount > 0) {
-                $paymentStatus['partial_paid']++;
-            } else {
-                $paymentStatus['no_payment']++;
-            }
+        
+        $fields = Field::whereIn('id', $fieldIds)->with('students')->get();
+        foreach ($fields as $field) {
+            $totalExpectedFees += $field->fees * $field->students->count();
         }
-
-        // Calcul du taux de recouvrement
+        
+        // Montant restant à recouvrer
+        $outstandingFees = max(0, $totalExpectedFees - $totalPayments);
+        
+        // Statistiques des étudiants par statut de paiement
+        $studentPaymentStatus = $this->getStudentPaymentStatus($fieldIds);
+        
+        // Statut de paiement pour les graphiques
+        $paymentStatus = [
+            'fully_paid' => $studentPaymentStatus['fully_paid'],
+            'partial_paid' => $studentPaymentStatus['partial_paid'],
+            'no_payment' => $studentPaymentStatus['no_payment'],
+        ];
+        
+        // Taux de recouvrement
         $recoveryRate = $totalExpectedFees > 0
             ? round(($totalPayments / $totalExpectedFees) * 100, 2)
             : 0;
@@ -157,6 +143,12 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Obtenir les étudiants insolvables (avec des paiements incomplets)
+        $insolvableStudents = $this->getInsolvableStudents($fieldIds);
+
+        // Tendance des paiements par jour du mois
+        $paymentTrends = $this->getPaymentTrendsByDay($fieldIds);
+
         // Préparer les données pour les graphiques
         $chartData = [
             'paymentStatus' => [
@@ -175,6 +167,10 @@ class DashboardController extends Controller
             'campusData' => [
                 'labels' => $paymentsByCampus->pluck('name'),
                 'data' => $paymentsByCampus->pluck('total')
+            ],
+            'paymentTrends' => [
+                'labels' => $paymentTrends->pluck('day'),
+                'data' => $paymentTrends->pluck('count')
             ]
         ];
 
@@ -209,7 +205,8 @@ class DashboardController extends Controller
             'totalExpectedFees',
             'studentsCount',
             'paymentsCount',
-            'recentActivities'
+            'recentActivities',
+            'insolvableStudents'
         ));
     }
 
@@ -218,46 +215,55 @@ class DashboardController extends Controller
      */
     private function getMonthlyStats($schoolId)
     {
-        $months = collect();
-        for ($i = 5; $i >= 0; $i--) {
-            $date = Carbon::now()->subMonths($i);
-            $months->push([
-                'month' => $date->format('F Y'),
-                'value' => 0
-            ]);
+        $today = Carbon::today();
+        $sixMonthsAgo = $today->copy()->subMonths(6);
+        
+        $labels = [];
+        $data = [];
+        
+        // Utiliser notre service pour récupérer les statistiques de paiement
+        $payments = \App\Services\PaymentStatistics::getMonthlyPaymentStats($schoolId, $sixMonthsAgo, $today);
+        
+        $months = [
+            '01' => 'Jan',
+            '02' => 'Fév',
+            '03' => 'Mar',
+            '04' => 'Avr',
+            '05' => 'Mai',
+            '06' => 'Juin',
+            '07' => 'Juil',
+            '08' => 'Août',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Déc'
+        ];
+        
+        // Initialiser tous les mois à 0
+        for ($i = 0; $i < 6; $i++) {
+            $date = $sixMonthsAgo->copy()->addMonths($i);
+            $monthKey = $date->format('m');
+            $yearMonth = $months[$monthKey] . ' ' . $date->year;
+            
+            $labels[] = $yearMonth;
+            $data[] = 0;
         }
-
-        $monthlyPayments = Payment::select(
-            DB::raw('SUM(amount) as total'),
-            DB::raw("strftime('%m', payment_date) as month"),
-            DB::raw("strftime('%Y', payment_date) as year")
-        )
-            ->whereHas('student.field.campus', function($query) use ($schoolId) {
-                $query->where('school_id', $schoolId);
-            })
-            ->whereDate('payment_date', '>=', Carbon::now()->subMonths(6))
-            ->groupBy('year', 'month')
-            ->get();
-
-        $monthlyPayments->each(function ($item) use (&$months) {
-            $date = Carbon::createFromDate($item->year, $item->month, 1);
-            $key = $months->search(function ($m) use ($date) {
-                return $m['month'] === $date->format('F Y');
-            });
-
-            if ($key !== false) {
-                // Créer un nouvel élément avec la valeur mise à jour
-                $updatedItem = $months[$key];
-                $updatedItem['value'] = (float) $item->total;
+        
+        // Remplir avec les données réelles
+        foreach ($payments as $payment) {
+            for ($i = 0; $i < 6; $i++) {
+                $date = $sixMonthsAgo->copy()->addMonths($i);
                 
-                // Remplacer l'élément dans la collection
-                $months = $months->replace([$key => $updatedItem]);
+                if ($payment->year == $date->year && $payment->month == $date->format('m')) {
+                    $data[$i] = $payment->total;
+                    break;
+                }
             }
-        });
-
+        }
+        
         return [
-            'labels' => $months->pluck('month'),
-            'data' => $months->pluck('value')
+            'labels' => $labels,
+            'data' => $data
         ];
     }
 
@@ -285,6 +291,72 @@ class DashboardController extends Controller
             'payments' => $todayPayments,
             'students' => $todayStudents
         ];
+    }
+
+    /**
+     * Get payment status for all students in school
+     */
+    private function getStudentPaymentStatus($fieldIds)
+    {
+        $students = Student::whereIn('field_id', $fieldIds)->get();
+        
+        $fullyPaid = 0;
+        $partialPaid = 0;
+        $noPaid = 0;
+        
+        foreach ($students as $student) {
+            $field = Field::find($student->field_id);
+            $totalFees = $field ? $field->fees : 0;
+            
+            $paidAmount = Payment::where('student_id', $student->id)->sum('amount');
+            
+            if ($paidAmount >= $totalFees) {
+                $fullyPaid++;
+            } elseif ($paidAmount > 0) {
+                $partialPaid++;
+            } else {
+                $noPaid++;
+            }
+        }
+        
+        return [
+            'fully_paid' => $fullyPaid,
+            'partial_paid' => $partialPaid,
+            'no_payment' => $noPaid
+        ];
+    }
+
+    /**
+     * Get insolvable students (with incomplete payments)
+     */
+    private function getInsolvableStudents($fieldIds)
+    {
+        $students = Student::whereIn('field_id', $fieldIds)
+            ->with(['field', 'payments'])
+            ->get()
+            ->filter(function ($student) {
+                $field = $student->field;
+                $totalFees = $field ? $field->fees : 0;
+                $paidAmount = $student->payments->sum('amount');
+                $student->outstanding_fees = max(0, $totalFees - $paidAmount);
+                
+                return $paidAmount < $totalFees && $paidAmount > 0;
+            })
+            ->sortByDesc('outstanding_fees')
+            ->values();
+        
+        return $students;
+    }
+
+    /**
+     * Get payment trends by day of month
+     */
+    private function getPaymentTrendsByDay($fieldIds)
+    {
+        // Utiliser le service pour récupérer les tendances de paiement
+        $paymentTrends = \App\Services\PaymentStatistics::getPaymentTrendsByDay($fieldIds);
+        
+        return $paymentTrends->sortBy('day')->values();
     }
 
     /**

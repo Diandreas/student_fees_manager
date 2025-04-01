@@ -59,4 +59,14 @@ class Student extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+    /**
+     * Accesseur pour obtenir le nom complet au format snake_case
+     * pour assurer la cohérence entre les différentes parties de l'application
+     */
+    public function getFullNameAttribute()
+    {
+        // Utiliser les attributs directement pour éviter les erreurs de propriété non définie
+        return $this->attributes['fullName'] ?? '';
+    }
 }

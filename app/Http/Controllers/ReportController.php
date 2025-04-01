@@ -7,6 +7,7 @@ use App\Models\Field;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\School;
+use App\Services\PaymentStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -157,20 +158,42 @@ class ReportController extends Controller
                                 ->get();
         
         // Paiements mensuels pour l'année en cours
-        $monthlyPayments = [];
         $currentYear = date('Y');
+        $startDate = "{$currentYear}-01-01"; // Début de l'année en cours
         
-        for ($i = 1; $i <= 12; $i++) {
+        $monthlyData = \App\Services\PaymentStatistics::getPaymentStatsSince($school->id, $startDate);
+        
+        // Convertir les données pour l'affichage
+        $monthsLabels = [
+            '01' => 'Jan',
+            '02' => 'Fév',
+            '03' => 'Mar',
+            '04' => 'Avr',
+            '05' => 'Mai',
+            '06' => 'Juin',
+            '07' => 'Juil',
+            '08' => 'Août',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Déc'
+        ];
+        
+        $monthlyPayments = [];
+        foreach (range(1, 12) as $i) {
             $month = str_pad($i, 2, '0', STR_PAD_LEFT);
-            $startDate = "{$currentYear}-{$month}-01";
-            $endDate = date('Y-m-t', strtotime($startDate));
+            $amount = 0;
             
-            $amount = Payment::whereIn('student_id', $studentIds)
-                           ->whereBetween('payment_date', [$startDate, $endDate])
-                           ->sum('amount');
-                           
+            // Chercher les données pour ce mois
+            foreach ($monthlyData as $data) {
+                if ($data->month === $month && $data->year === $currentYear) {
+                    $amount = $data->total;
+                    break;
+                }
+            }
+            
             $monthlyPayments[] = [
-                'month' => date('M', mktime(0, 0, 0, $i, 1)),
+                'month' => $monthsLabels[$month],
                 'amount' => $amount
             ];
         }
@@ -255,20 +278,42 @@ class ReportController extends Controller
         $recoveryRate = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100) : 0;
         
         // Statistiques de paiement par mois
-        $monthlyStats = [];
         $currentYear = date('Y');
+        $startDate = "{$currentYear}-01-01"; // Début de l'année en cours
         
-        for ($i = 1; $i <= 12; $i++) {
+        $monthlyData = \App\Services\PaymentStatistics::getPaymentStatsSince($school->id, $startDate);
+        
+        // Convertir les données pour l'affichage
+        $monthsLabels = [
+            '01' => 'Jan',
+            '02' => 'Fév',
+            '03' => 'Mar',
+            '04' => 'Avr',
+            '05' => 'Mai',
+            '06' => 'Juin',
+            '07' => 'Juil',
+            '08' => 'Août',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Déc'
+        ];
+        
+        $monthlyStats = [];
+        foreach (range(1, 12) as $i) {
             $month = str_pad($i, 2, '0', STR_PAD_LEFT);
-            $startDate = "{$currentYear}-{$month}-01";
-            $endDate = date('Y-m-t', strtotime($startDate));
+            $amount = 0;
             
-            $amount = Payment::whereIn('student_id', $studentIds)
-                           ->whereBetween('payment_date', [$startDate, $endDate])
-                           ->sum('amount');
-                           
+            // Chercher les données pour ce mois
+            foreach ($monthlyData as $data) {
+                if ($data->month === $month && $data->year === $currentYear) {
+                    $amount = $data->total;
+                    break;
+                }
+            }
+            
             $monthlyStats[] = [
-                'month' => date('M', mktime(0, 0, 0, $i, 1)),
+                'month' => $monthsLabels[$month],
                 'amount' => $amount
             ];
         }

@@ -91,14 +91,6 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Blade::directive('term', function ($expression) {
             return "<?php echo \$currentSchool ? \$currentSchool->term($expression) : $expression; ?>";
         });
-
-        // Helper pour récupérer un terme de la terminologie de l'école actuelle
-        if (!function_exists('school_term')) {
-            function school_term($key, $default = null) {
-                $school = session('current_school');
-                return $school ? $school->term($key, $default) : ($default ?? ucfirst($key));
-            }
-        }
     }
     
     /**

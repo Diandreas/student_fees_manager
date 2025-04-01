@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\YearlyStat;
 use App\Models\Archive;
+use App\Models\School;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class StatisticsController extends Controller
 {
@@ -16,7 +19,36 @@ class StatisticsController extends Controller
      */
     public function index()
     {
-        $school = auth()->user()->school;
+        $user = Auth::user();
+        $school = $user->school;
+        
+        // Vérifier si l'utilisateur a une école associée
+        if (!$school) {
+            // Si l'utilisateur n'a pas d'école associée, essayons de récupérer une école dont il est administrateur
+            $schoolId = null;
+            
+            if ($user->is_superadmin) {
+                $school = School::first();
+            } else {
+                $schoolId = DB::table('school_admins')
+                    ->where('user_id', $user->id)
+                    ->value('school_id');
+                
+                if ($schoolId) {
+                    $school = School::find($schoolId);
+                }
+            }
+            
+            if (!$school) {
+                // Si toujours pas d'école, rediriger vers la sélection d'école
+                return redirect()->route('schools.select')
+                    ->with('error', 'Veuillez sélectionner une école pour accéder aux statistiques.');
+            }
+            
+            // Mettre à jour la session avec l'école sélectionnée
+            session(['current_school_id' => $school->id]);
+            session(['current_school' => $school]);
+        }
         
         // Récupérer les statistiques annuelles de l'école
         $yearlyStats = YearlyStat::where('school_id', $school->id)
@@ -31,7 +63,7 @@ class StatisticsController extends Controller
         // Préparer les données pour les graphiques
         $chartData = $this->prepareChartData($yearlyStats);
         
-        return view('statistics.index', compact('yearlyStats', 'archives', 'chartData'));
+        return view('statistics.index', compact('yearlyStats', 'archives', 'chartData', 'school'));
     }
     
     /**
@@ -42,7 +74,18 @@ class StatisticsController extends Controller
      */
     public function yearDetails($year)
     {
-        $school = auth()->user()->school;
+        $user = Auth::user();
+        $school = $user->school;
+        
+        // Vérifier si l'utilisateur a une école associée
+        if (!$school) {
+            // Utiliser l'école de la session
+            $school = session('current_school');
+            
+            if (!$school) {
+                return redirect()->route('statistics.index');
+            }
+        }
         
         // Récupérer les statistiques de l'année spécifiée
         $yearlyStat = YearlyStat::where('school_id', $school->id)
@@ -65,7 +108,8 @@ class StatisticsController extends Controller
             'archive', 
             'monthlyChartData', 
             'campusChartData',
-            'year'
+            'year',
+            'school'
         ));
     }
     
@@ -77,7 +121,18 @@ class StatisticsController extends Controller
      */
     public function compare(Request $request)
     {
-        $school = auth()->user()->school;
+        $user = Auth::user();
+        $school = $user->school;
+        
+        // Vérifier si l'utilisateur a une école associée
+        if (!$school) {
+            // Utiliser l'école de la session
+            $school = session('current_school');
+            
+            if (!$school) {
+                return redirect()->route('statistics.index');
+            }
+        }
         
         // Récupérer toutes les années académiques disponibles
         $availableYears = YearlyStat::where('school_id', $school->id)
@@ -101,7 +156,7 @@ class StatisticsController extends Controller
         // Préparer les données pour les graphiques comparatifs
         $comparisonData = $this->prepareComparisonData($yearlyStats);
         
-        return view('statistics.compare', compact('availableYears', 'selectedYears', 'yearlyStats', 'comparisonData'));
+        return view('statistics.compare', compact('availableYears', 'selectedYears', 'yearlyStats', 'comparisonData', 'school'));
     }
     
     /**

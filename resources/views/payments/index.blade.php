@@ -13,9 +13,6 @@
                     <a href="{{ route('payments.create') }}" class="btn-primary text-sm">
                         <i class="fas fa-plus-circle mr-1"></i> {{ session('current_school')->term('new_payment', 'Nouveau paiement') }}
                     </a>
-                    <a href="{{ route('payments.quick') }}" class="btn-success text-sm">
-                        <i class="fas fa-bolt mr-1"></i> {{ __('Paiement rapide') }}
-                    </a>
                     <a href="{{ route('payments.export') }}" class="btn-outline text-sm">
                         <i class="fas fa-file-excel mr-1"></i> {{ session('current_school')->term('export', 'Exporter tout') }}
                     </a>

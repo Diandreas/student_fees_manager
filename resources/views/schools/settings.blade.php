@@ -15,20 +15,21 @@
         </div>
     </div>
 
-    <form action="{{ route('schools.settings.update', $school) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Colonne gauche - Informations générales -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-info-circle mr-2"></i>Informations générales
-                        </h5>
-                    </div>
-                    <div class="p-5">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Colonne gauche - Informations générales -->
+        <div class="lg:col-span-2">
+            <!-- Informations générales -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>Informations générales
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <form action="{{ route('schools.settings.general', $school) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom de l'établissement <span class="text-red-500">*</span></label>
@@ -75,18 +76,29 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
+                        
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer les informations générales
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Paramètres d'en-tête pour les documents et rapports -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-file-alt mr-2"></i>En-tête des documents
-                        </h5>
-                    </div>
-                    <div class="p-5">
-                        <p class="text-sm text-gray-600 mb-4">Ces informations apparaîtront sur tous les documents et rapports générés par le système (reçus, listes d'étudiants, rapports, etc.)</p>
+            <!-- Paramètres d'en-tête pour les documents et rapports -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-file-alt mr-2"></i>En-tête des documents
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <p class="text-sm text-gray-600 mb-4">Ces informations apparaîtront sur tous les documents et rapports générés par le système (reçus, listes d'étudiants, rapports, etc.)</p>
+                    
+                    <form action="{{ route('schools.settings.header', $school) }}" method="POST">
+                        @csrf
+                        @method('PUT')
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -127,17 +139,28 @@
                                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">{{ old('report_settings.header_footer', $school->report_settings['header_footer'] ?? '') }}</textarea>
                             <p class="mt-1 text-xs text-gray-500">Par exemple: "Merci de votre confiance" ou informations légales</p>
                         </div>
-                    </div>
+                        
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer l'en-tête des documents
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Paramètres de facturation -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-file-invoice-dollar mr-2"></i>Facturation
-                        </h5>
-                    </div>
-                    <div class="p-5">
+            <!-- Paramètres de facturation -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>Facturation
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <form action="{{ route('schools.settings.billing', $school) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
                         <div>
                             <label for="currency" class="block text-sm font-medium text-gray-700 mb-1">Devise <span class="text-red-500">*</span></label>
                             <select id="currency" name="currency" required
@@ -150,49 +173,69 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
+                        
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer les paramètres de facturation
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            <!-- Colonne droite -->
-            <div>
-                <!-- Logo -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-image mr-2"></i>Logo
-                        </h5>
+        <!-- Colonne droite -->
+        <div>
+            <!-- Logo -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-image mr-2"></i>Logo
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-center mb-4">
+                        @if($school->logo)
+                            <img src="{{ Storage::url($school->logo) }}" alt="Logo" class="h-32 w-32 object-contain border rounded-md">
+                        @else
+                            <div class="h-32 w-32 flex items-center justify-center bg-gray-100 rounded-md">
+                                <i class="fas fa-school text-3xl text-gray-400"></i>
+                            </div>
+                        @endif
                     </div>
-                    <div class="p-5">
-                        <div class="flex justify-center mb-4">
-                            @if($school->logo)
-                                <img src="{{ Storage::url($school->logo) }}" alt="Logo" class="h-32 w-32 object-contain border rounded-md">
-                            @else
-                                <div class="h-32 w-32 flex items-center justify-center bg-gray-100 rounded-md">
-                                    <i class="fas fa-school text-3xl text-gray-400"></i>
-                                </div>
-                            @endif
-                        </div>
-                        <div>
+                    <form action="{{ route('schools.settings.logo', $school) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="mb-4">
                             <label for="logo" class="block text-sm font-medium text-gray-700 mb-1">Changer le logo</label>
-                            <input type="file" id="logo" name="logo" accept="image/*"
+                            <input type="file" id="logo" name="logo" accept="image/*" required
                                 class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm @error('logo') border-red-500 @enderror">
                             @error('logo')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                             <p class="mt-1 text-sm text-gray-500">PNG ou JPG, 512x512px maximum</p>
                         </div>
-                    </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-upload mr-2"></i>Mettre à jour le logo
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Fonctionnalités à venir -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-clock mr-2"></i>Fonctionnalités à venir
-                        </h5>
-                    </div>
-                    <div class="p-5">
+            <!-- Fonctionnalités à venir -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-clock mr-2"></i>Fonctionnalités à venir
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <form action="{{ route('schools.settings.update', $school) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
                         <div class="space-y-4">
                             <div class="flex items-start opacity-60">
                                 <div class="flex items-center h-5">
@@ -227,17 +270,22 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Statut de l'établissement -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-toggle-on mr-2"></i>Statut
-                        </h5>
-                    </div>
-                    <div class="p-5">
+            <!-- Statut de l'établissement -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-toggle-on mr-2"></i>Statut
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <form action="{{ route('schools.settings.status', $school) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
                                 <input type="checkbox" id="is_active" name="is_active" {{ old('is_active', $school->is_active) ? 'checked' : '' }}
@@ -248,65 +296,61 @@
                                 <p class="text-gray-500">Activer/désactiver cet établissement</p>
                             </div>
                         </div>
-                    </div>
+                        
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Enregistrer le statut
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                
-                <!-- Administrateurs de l'établissement -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-100 p-5">
-                        <h5 class="font-bold text-primary-600 flex items-center">
-                            <i class="fas fa-users-cog mr-2"></i>Administrateurs
-                        </h5>
+            </div>
+            
+            <!-- Administrateurs de l'établissement -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="border-b border-gray-100 p-5">
+                    <h5 class="font-bold text-primary-600 flex items-center">
+                        <i class="fas fa-users-cog mr-2"></i>Administrateurs
+                    </h5>
+                </div>
+                <div class="p-5">
+                    <div class="mb-4 flex justify-between items-center">
+                        <p class="text-sm text-gray-600">Personnes ayant accès à cet établissement</p>
+                        <a href="{{ route('schools.admins.create', $school) }}" class="btn-sm btn-primary">
+                            <i class="fas fa-user-plus mr-1"></i>Ajouter
+                        </a>
                     </div>
-                    <div class="p-5">
-                        <div class="mb-4 flex justify-between items-center">
-                            <p class="text-sm text-gray-600">Personnes ayant accès à cet établissement</p>
-                            <a href="{{ route('schools.admins.create', $school) }}" class="btn-sm btn-primary">
-                                <i class="fas fa-user-plus mr-1"></i>Ajouter
-                            </a>
+                    
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="bg-gray-50 px-4 py-2 border-b">
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="text-xs font-medium text-gray-500 uppercase">Nom</div>
+                                <div class="text-xs font-medium text-gray-500 uppercase">Email</div>
+                                <div class="text-xs font-medium text-gray-500 uppercase text-right">Actions</div>
+                            </div>
                         </div>
                         
-                        <div class="border rounded-lg overflow-hidden">
-                            <div class="bg-gray-50 px-4 py-2 border-b">
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div class="text-xs font-medium text-gray-500 uppercase">Nom</div>
-                                    <div class="text-xs font-medium text-gray-500 uppercase">Email</div>
-                                    <div class="text-xs font-medium text-gray-500 uppercase text-right">Actions</div>
+                        <div class="divide-y">
+                            @forelse($school->admins as $admin)
+                                <div class="px-4 py-3 grid grid-cols-3 gap-2 items-center">
+                                    <div class="text-sm font-medium">{{ $admin->name }}</div>
+                                    <div class="text-sm text-gray-600">{{ $admin->email }}</div>
+                                    <div class="text-right">
+                                        <a href="{{ route('schools.admins.edit', [$school, $admin]) }}" class="text-primary-600 hover:text-primary-800">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="divide-y">
-                                @forelse($school->admins as $admin)
-                                    <div class="px-4 py-3 grid grid-cols-3 gap-2 items-center">
-                                        <div class="text-sm font-medium">{{ $admin->name }}</div>
-                                        <div class="text-sm text-gray-600">{{ $admin->email }}</div>
-                                        <div class="text-right">
-                                            <a href="{{ route('schools.admins.edit', [$school, $admin]) }}" class="text-primary-600 hover:text-primary-800">
-                                                <i class="fas fa-pencil-alt"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="px-4 py-3 text-sm text-gray-500 text-center">
-                                        Aucun administrateur trouvé
-                                    </div>
-                                @endforelse
-                            </div>
+                            @empty
+                                <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                                    Aucun administrateur trouvé
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Boutons d'action -->
-        <div class="flex justify-end mt-6">
-            <button type="reset" class="btn-secondary mr-3">
-                <i class="fas fa-undo mr-2"></i>Annuler
-            </button>
-            <button type="submit" class="btn-primary">
-                <i class="fas fa-save mr-2"></i>Enregistrer
-            </button>
-        </div>
-    </form>
+    </div>
 </div>
-@endsection 
+@endsection

@@ -40,6 +40,11 @@ class Archive extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
     // Helpers
     public function getFormattedFileSizeAttribute()
     {

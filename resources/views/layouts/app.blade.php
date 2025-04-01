@@ -97,6 +97,14 @@
                         </div>
                         <span x-show="open" class="ml-2.5">Paiements</span>
                     </a>
+                     @if(session('current_school'))
+                            <a href="{{ route('schools.settings.index', session('current_school')) }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('schools.settings.index') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                                <div class="p-1.5 {{ request()->routeIs('schools.settings.index') ? 'bg-primary-600 text-white rounded-full' : 'text-gray-500 group-hover:bg-primary-600 group-hover:text-white group-hover:rounded-full' }}">
+                                    <i class="fas fa-cog text-sm"></i>
+                                </div>
+                                <span x-show="open" class="ml-2.5">{{ __('Paramètres') }}</span>
+                            </a>
+                            @endif
                     
                     {{-- <a href="{{ route('invoices.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('invoices.*') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
                         <div class="p-1.5 {{ request()->routeIs('invoices.*') ? 'bg-primary-600 text-white rounded-full' : 'text-gray-500 group-hover:bg-primary-600 group-hover:text-white group-hover:rounded-full' }}">
@@ -127,12 +135,43 @@
                     </a>
 
                     <a href="{{ route('statistics.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('statistics.*') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <div class="p-1.5 {{ request()->routeIs('statistics.*') ? 'bg-primary-600 text-white rounded-full' : 'text-gray-500 group-hover:bg-primary-600 group-hover:text-white group-hover:rounded-full' }}">
+                        <div class="p-1.5 {{ request()->routeIs('statistics.*') ? 'bg-primary-600 text-white rounded-full' : 'text-gray-500' }}">
                             <i class="fas fa-chart-bar text-sm"></i>
                         </div>
                         <span x-show="open" class="ml-2.5">Statistiques</span>
                     </a>
                 </nav>
+
+                <!-- Section Actions Rapides -->
+                <div x-show="open" class="px-4 py-3 mt-2 border-t border-gray-100">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Actions rapides</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="{{ route('students.create') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                            <div class="p-2 bg-green-100 text-green-600 rounded-full mb-1">
+                                <i class="fas fa-user-plus text-sm"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Nouvel étudiant</span>
+                        </a>
+                        <a href="{{ route('payments.create') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                            <div class="p-2 bg-blue-100 text-blue-600 rounded-full mb-1">
+                                <i class="fas fa-hand-holding-usd text-sm"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Paiement</span>
+                        </a>
+                        <a href="{{ route('fields.create') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                            <div class="p-2 bg-purple-100 text-purple-600 rounded-full mb-1">
+                                <i class="fas fa-graduation-cap text-sm"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Nouvelle filière</span>
+                        </a>
+                        <a href="{{ route('reports.index') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                            <div class="p-2 bg-yellow-100 text-yellow-600 rounded-full mb-1">
+                                <i class="fas fa-file-export text-sm"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Rapports</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- User Menu -->
                 <div class="mt-auto border-t border-gray-100">
@@ -168,7 +207,7 @@
                         </div>
                     </div>
                     @else
-                    <a href="{{ route('login') }}" class="flex items-center px-3 py-3 text-sm text-gray-700 hover:bg-gray-100">
+                    <a href="{{ route('login') }}" class="flex items-center px-3 py-3 text-gray-700 hover:bg-gray-100">
                         <div class="flex-shrink-0">
                             <div class="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center">
                                 <i class="fas fa-user text-gray-500"></i>
@@ -209,16 +248,14 @@
                 @auth
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center focus:outline-none">
-                        <img class="h-8 w-8 rounded-full object-cover border border-gray-200" 
-                             src="{{ Auth::user()->profile_photo_url ?? asset('images/default-avatar.png') }}" 
-                             alt="{{ Auth::user()->name }}">
+                        <i class="fas fa-user text-gray-500"></i>
                     </button>
                     
                     <div x-show="open" @click.away="open = false" 
                          class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
-                        {{-- <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             Profil
-                        </a> --}}
+                        </a>
                         <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-mobile-header').submit();" 
                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             Déconnexion
@@ -317,6 +354,7 @@
                                 </div>
                                 <span class="ml-2.5">Rapports</span>
                             </a>
+                           
 
                             <a href="{{ route('activity-logs.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('activity-logs.*') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
                                 <div class="p-1.5 {{ request()->routeIs('activity-logs.*') ? 'bg-primary-600 text-white rounded-full' : 'text-gray-500' }}">
@@ -340,15 +378,44 @@
                             </a>
                         </nav>
 
+                        <!-- Section Actions Rapides (Mobile) -->
+                        <div class="px-4 py-3 mt-2 border-t border-gray-100">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Actions rapides</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="{{ route('students.create') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                                    <div class="p-2 bg-green-100 text-green-600 rounded-full mb-1">
+                                        <i class="fas fa-user-plus text-sm"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700">Nouvel étudiant</span>
+                                </a>
+                                <a href="{{ route('payments.create') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                                    <div class="p-2 bg-blue-100 text-blue-600 rounded-full mb-1">
+                                        <i class="fas fa-hand-holding-usd text-sm"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700">Paiement</span>
+                                </a>
+                                <a href="{{ route('fields.create') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                                    <div class="p-2 bg-purple-100 text-purple-600 rounded-full mb-1">
+                                        <i class="fas fa-graduation-cap text-sm"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700">Nouvelle filière</span>
+                                </a>
+                                <a href="{{ route('reports.index') }}" class="flex flex-col items-center px-2 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-center">
+                                    <div class="p-2 bg-yellow-100 text-yellow-600 rounded-full mb-1">
+                                        <i class="fas fa-file-export text-sm"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700">Rapports</span>
+                                </a>
+                            </div>
+                        </div>
+
                         <!-- User Menu -->
                         <div class="mt-auto border-t border-gray-100">
                             @auth
                             <div class="px-3 py-3">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
-                                        <img class="h-9 w-9 rounded-full object-cover border border-gray-200" 
-                                             src="{{ Auth::user()->profile_photo_url ?? asset('images/default-avatar.png') }}" 
-                                             alt="{{ Auth::user()->name }}">
+                                        <i class="fas fa-user text-gray-500"></i>
                                     </div>
                                     <div class="ml-3">
                                         <p class="font-medium text-gray-800">{{ Auth::user()->name }}</p>
