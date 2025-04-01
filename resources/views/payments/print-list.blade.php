@@ -15,6 +15,19 @@
             color: #374151;
             background-color: #f9fafb;
             line-height: 1.4;
+            position: relative;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.04;
+            pointer-events: none;
+            width: 60%;
+            max-width: 500px;
+            height: auto;
+            z-index: 0;
         }
         .container {
             max-width: 1000px;
@@ -23,6 +36,20 @@
             padding: 15px;
             border-radius: 6px;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        .document-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid {{ $currentSchool->primary_color ?? '#0d47a1' }};
+            opacity: 0.2;
+            pointer-events: none;
+            border-radius: 6px;
+            z-index: 0;
         }
         .header {
             display: flex;
@@ -178,6 +205,13 @@
             font-size: 10px;
             color: #6B7280;
         }
+        .generated-by {
+            text-align: center;
+            font-size: 9px;
+            font-style: italic;
+            color: #9CA3AF;
+            margin-top: 5px;
+        }
         .timestamp {
             display: flex;
             justify-content: space-between;
@@ -226,6 +260,19 @@
         .btn-icon {
             margin-right: 6px;
         }
+        .official-document {
+            position: absolute;
+            top: 40%;
+            right: 3%;
+            transform: rotate(45deg);
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: rgba(107, 114, 128, 0.1);
+            border: 3px solid rgba(107, 114, 128, 0.1);
+            padding: 5px 10px;
+            pointer-events: none;
+        }
         @media print {
             body {
                 padding: 0;
@@ -241,11 +288,28 @@
             .no-print {
                 display: none;
             }
+            .watermark {
+                opacity: 0.03;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .official-document {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Filigrane avec le logo de l'école -->
+    @if(isset($currentSchool) && $currentSchool->logo)
+        <img src="{{ asset('storage/' . $currentSchool->logo) }}" alt="{{ $currentSchool->name ?? 'Logo' }}" class="watermark">
+    @endif
+
     <div class="container">
+        <div class="document-border"></div>
+        <div class="official-document">Document officiel</div>
+        
         <div class="header">
             <div class="school-info">
                 @if(isset($currentSchool) && $currentSchool->logo)
@@ -343,11 +407,8 @@
         </table>
 
         <div class="footer">
-            <p>{{ $currentSchool->name ?? 'École' }} - Tous droits réservés &copy; {{ date('Y') }}</p>
-            <div class="timestamp">
-                <span><i class="fas fa-calendar-alt"></i> Document généré le {{ now()->format('d/m/Y à H:i') }}</span>
-                <span>Page 1/1</span>
-            </div>
+            <p>{{ isset($currentSchool) ? $currentSchool->name : 'École' }} - Document généré le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }}</p>
+            <div class="generated-by">Généré par ScolarPay</div>
         </div>
 
         <div class="no-print">

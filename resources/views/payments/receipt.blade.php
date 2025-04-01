@@ -15,6 +15,7 @@
             color: #374151;
             background-color: #f9fafb;
             line-height: 1.5;
+            position: relative;
         }
         .container {
             width: 100%;
@@ -24,6 +25,20 @@
             background-color: #ffffff;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            opacity: 0.04;
+            pointer-events: none;
+            width: 60%;
+            max-width: 500px;
+            height: auto;
         }
         .header {
             border-bottom: 2px solid {{ $school->theme_color }};
@@ -124,8 +139,15 @@
             padding-top: 20px;
             border-top: 1px solid #e5e7eb;
         }
+        .generated-by {
+            font-size: 11px;
+            color: #9CA3AF;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
         .signature {
-            margin-top: 60px;
+            margin-top: 50px;
             display: flex;
             justify-content: space-between;
         }
@@ -172,6 +194,17 @@
             pointer-events: none;
             z-index: 10;
         }
+        .document-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid {{ $school->theme_color }};
+            opacity: 0.3;
+            pointer-events: none;
+            border-radius: 8px;
+        }
         @media print {
             body {
                 print-color-adjust: exact;
@@ -185,11 +218,22 @@
             .no-print {
                 display: none;
             }
+            .watermark {
+                opacity: 0.03;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Filigrane avec le logo de l'école -->
+    @if($school->logo)
+        <img src="{{ asset('storage/' . $school->logo) }}" alt="{{ $school->name }}" class="watermark">
+    @endif
+
     <div class="container">
+        <div class="document-border"></div>
         <div class="status-paid">{{ $school->term('paid', 'Payé') }}</div>
         
         <div class="header">
@@ -316,8 +360,8 @@
             @if(isset($school->report_settings['header_footer']) && !empty($school->report_settings['header_footer']))
                 <p>{{ $school->report_settings['header_footer'] }}</p>
             @endif
-            <p>{{ $school->name }} - {{ $school->term('receipt', 'Reçu de Paiement') }} #{{ $payment->receipt_number }}</p>
-            <p>{{ date('d/m/Y H:i') }}</p>
+            <p>Document officiel - {{ $school->name }}</p>
+            <div class="generated-by">Généré par ScolarPay - {{ date('d/m/Y à H:i:s') }}</div>
         </div>
     </div>
 

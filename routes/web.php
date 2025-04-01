@@ -134,6 +134,8 @@ Route::middleware(['auth'])->group(function () {
         });
         
         // Gestion des étudiants
+        Route::get('/students/print', [StudentController::class, 'printList'])->name('students.print');
+        Route::get('/students/export-excel', [StudentController::class, 'exportExcel'])->name('students.export-excel');
         Route::resource('students', StudentController::class);
         Route::prefix('students')->name('students.')->controller(StudentController::class)->group(function () {
             Route::get('/print', 'printList')->name('print');
@@ -154,6 +156,11 @@ Route::middleware(['auth'])->group(function () {
         // Journal des activités
         Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show', 'destroy']);
         
+        // Routes pour les statistiques pluriannuelles
+        Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+        Route::get('/statistics/year/{year}', [StatisticsController::class, 'yearDetails'])->name('statistics.year');
+        Route::get('/statistics/compare', [StatisticsController::class, 'compare'])->name('statistics.compare');
+
         // Rapports et tableaux de bord
         Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -161,6 +168,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/payments', 'payments')->name('payments');
             Route::get('/finances', 'finances')->name('finances');
             Route::get('/performance', 'performance')->name('performance');
+            
+            // Routes supplémentaires pour les rapports
+            Route::get('/payment-summary', 'paymentSummary')->name('payment-summary');
+            Route::get('/campus-performance', 'campusPerformance')->name('campus-performance');
+            Route::get('/field-analysis', 'fieldAnalysis')->name('field-analysis');
+            Route::get('/annual', 'annual')->name('annual');
+            Route::get('/student-distribution', 'studentDistribution')->name('student-distribution');
             
             // Exportations
             Route::prefix('export')->name('export.')->group(function () {
@@ -175,13 +189,6 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/payments', 'paymentsPdf')->name('payments');
                 Route::get('/finances', 'financesPdf')->name('finances');
             });
-        });
-        
-        // Statistiques
-        Route::prefix('statistics')->name('statistics.')->controller(StatisticsController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/year/{year}', 'yearDetails')->name('year');
-            Route::get('/compare', 'compare')->name('compare');
         });
     });
 });

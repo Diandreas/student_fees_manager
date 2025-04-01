@@ -200,4 +200,14 @@ class School extends Model
     {
         return $this->hasMany(SchoolDocument::class);
     }
+
+    /**
+     * Get all users associated with the school
+     */
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'school_admins')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
 }

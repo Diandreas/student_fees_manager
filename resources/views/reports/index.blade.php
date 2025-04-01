@@ -71,8 +71,8 @@
         
         // Obtenir les données pour les graphiques
         $paymentsByMonth = \App\Models\Payment::whereIn('student_id', $studentIds)
-            ->selectRaw('MONTH(payment_date) as month, SUM(amount) as total')
-            ->whereYear('payment_date', date('Y'))
+            ->selectRaw("strftime('%m', payment_date) as month, SUM(amount) as total")
+            ->whereRaw("strftime('%Y', payment_date) = ?", [date('Y')])
             ->groupBy('month')
             ->orderBy('month')
             ->get()

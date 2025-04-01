@@ -209,7 +209,7 @@
                                 <i class="fas fa-file-export mr-2"></i> Exporter <i class="fas fa-chevron-down ml-2"></i>
                             </button>
                             
-                            <div class="dropdown-menu absolute right-0 hidden mt-2 w-64 bg-white shadow-lg rounded-md z-10">
+                            <div class="dropdown-menu  right-0 hidden mt-2 w-64 bg-white shadow-lg rounded-md z-10">
                                 <a href="{{ route('campuses.solvable', $campus) }}" class="block px-4 py-2 hover:bg-gray-100">
                                     <i class="fas fa-check-circle mr-2 text-green-500"></i> Étudiants solvables
                                 </a>
